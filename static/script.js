@@ -2,9 +2,13 @@
 
 
 function fetchInputStrings() {
+    const simpTradMenu = document.getElementById('simpTradMenu');
+    var simptrad = simpTradMenu.value;
+
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/get_input_strings', true);
+    xhr.open('POST', '/get_input_strings', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function () {
         if (xhr.status === 200) {
             // Parse the JSON response from the server
@@ -13,6 +17,12 @@ function fetchInputStrings() {
 
             // Populate the input strings dropdown with labels
             const inputStringsDropdown = document.getElementById('inputStrings');
+
+            // Clear existing options and event listeners before populating
+            inputStringsDropdown.innerHTML = '';
+            inputStringsDropdown.removeEventListener('change', handleInputChange);
+
+
             inputStrings.forEach((inputString, index) => {
                 const option = document.createElement('option');
                 option.value = index;
@@ -21,17 +31,19 @@ function fetchInputStrings() {
             });
 
             // Event listener to handle input string changes
-            inputStringsDropdown.addEventListener('change', () => {
+            inputStringsDropdown.addEventListener('change', handleInputChange);
+
+            function handleInputChange() {
                 const selectedIndex = inputStringsDropdown.value;
                 const selectedInputString = inputStrings[selectedIndex];
                 generateCharacterElements(selectedInputString);
-            });
+            }
 
             // Initialize with the first input string
             generateCharacterElements(inputStrings[0]);
         }
     };
-    xhr.send();
+    xhr.send('simptrad=' + encodeURIComponent(simptrad));
 }
 
 function generateCharacterElements(inputString) {
@@ -131,6 +143,12 @@ function generateCharacterElements(inputString) {
         if (clickedCell) {
             clickedCell.style.backgroundColor = selectedColor;
         }
+    });
+
+
+    const simptradmenu = document.getElementById('simpTradMenu');
+    simptradmenu.addEventListener('change', () => {
+        fetchInputStrings();
     });
 
 

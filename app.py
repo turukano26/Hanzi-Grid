@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from chinese_english_lookup import Dictionary
 from pypinyin.contrib.tone_convert import to_tone
 import json
+from hanziconv import HanziConv
+
 # Create a Flask application
 app = Flask(__name__)
 d = Dictionary()
@@ -28,10 +30,27 @@ def process_click_on_character():
     return jsonify(result=result)
 
 
-@app.route('/get_input_strings')
+@app.route('/get_input_strings', methods=['POST'])
 def get_input_strings():
+    simp_or_trad = request.form['simptrad']
     input_strings = load_input_strings_from_file()
-    return jsonify({"inputStrings": input_strings})
+
+    if simp_or_trad == 'Traditional':
+        new_strings = []
+        for string in input_strings:
+            new_strings.append(
+                {"label": string['label'], "value": HanziConv.toTraditional(string['value'])})
+        return jsonify({"inputStrings": new_strings})
+
+    elif simp_or_trad == 'Simplified':
+        new_strings = []
+        for string in input_strings:
+            new_strings.append(
+                {"label": string['label'], "value": HanziConv.toSimplified(string['value'])})
+        return jsonify({"inputStrings": new_strings})
+
+    else:
+        return jsonify({"inputStrings": input_strings})
 
 
 def load_input_strings_from_file():
