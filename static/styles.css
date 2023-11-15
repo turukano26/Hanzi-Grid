@@ -14,14 +14,6 @@
     text-align: center;
 }
 
-.color-menu {
-    display: flex;
-    flex-direction: column;
-    margin-right: 20px;
-    position: absolute;
-    left: 2%;
-    top: 300px;
-}
 
 .info-box {
     display: flex;
