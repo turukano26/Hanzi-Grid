@@ -1,6 +1,4 @@
 // script.js
-
-
 function fetchInputStrings() {
     const simpTradMenu = document.getElementById('simpTradMenu');
     var simptrad = simpTradMenu.value;
@@ -19,6 +17,11 @@ function fetchInputStrings() {
             const inputStringsDropdown = document.getElementById('inputStrings');
 
             // Clear existing options and event listeners before populating
+            var oldIndex = 0;
+            //if (inputStringsDropdown !== -1) {
+            //    oldIndex = inputStringsDropdown.selectedIndex;
+            //}
+
             inputStringsDropdown.innerHTML = '';
             inputStringsDropdown.removeEventListener('change', handleInputChange);
 
@@ -30,9 +33,10 @@ function fetchInputStrings() {
                 inputStringsDropdown.appendChild(option);
             });
 
+            inputStringsDropdown.selectedIndex = oldIndex;
+
             // Event listener to handle input string changes
             inputStringsDropdown.addEventListener('change', handleInputChange);
-
             function handleInputChange() {
                 const selectedIndex = inputStringsDropdown.value;
                 const selectedInputString = inputStrings[selectedIndex];
@@ -40,7 +44,7 @@ function fetchInputStrings() {
             }
 
             // Initialize with the first input string
-            generateCharacterElements(inputStrings[0]);
+            generateCharacterElements(inputStrings[oldIndex]);
         }
     };
     xhr.send('simptrad=' + encodeURIComponent(simptrad));
@@ -49,7 +53,6 @@ function fetchInputStrings() {
 function generateCharacterElements(inputString) {
     const characterGrid = document.getElementById('characterGrid');
     const largeBox = document.getElementById('largeBox');
-    const infoBox = document.getElementById('infoBox');
     const colorPicker = document.getElementById('colorPicker');
 
     characterGrid.innerHTML = ''; // Clear the existing grid
@@ -70,63 +73,38 @@ function generateCharacterElements(inputString) {
         span.addEventListener('click', () => {
             // Single-click behavior: Display the character in the large box
             largeBox.textContent = character;
-
             // Get the color from the selected cell
             const cellColor = window.getComputedStyle(span).backgroundColor;
-
-            // Save the most recent color selection in localStorage
-            //localStorage.setItem(unicodeKey, cellColor);
-
             // Update the background color of the large box
             largeBox.style.backgroundColor = cellColor;
 
             sendDataToPython(character);
 
+            // If in paint mode, color the cell and update acordingly
             if (document.getElementById('toggleCheckbox').checked) {
 
                 const selectedColor = colorPicker.value;
-
                 // Update the color for the most recent character in localStorage
                 localStorage.setItem(unicodeKey, selectedColor);
-
                 // Update the background color of the large box
                 largeBox.style.backgroundColor = selectedColor;
-
                 // Update the color of the clicked cell
-
                 span.style.backgroundColor = selectedColor;
-
-
             }
             else {
+                // otherwise copy the clicked on cell's color to the color picker
                 colorPicker.value = rgbToHex(cellColor);
             }
-
         });
-
-        function sendDataToPython(character) {
-            // Make an AJAX request to the Flask endpoint
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/process_click_on_character', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    // Parse the JSON response from the server
-                    var response = JSON.parse(xhr.responseText);
-                    var resultFromPython = response.result;
-
-                    // Display the result in the HTML element
-                    infoBox.innerHTML = resultFromPython;
-                }
-            };
-            // Send the clicked character to the server
-            xhr.send('character=' + encodeURIComponent(character));
-        }
     }
+}
 
+
+function createMenu() {
     // Event listener to handle color selection
     colorPicker.addEventListener('change', () => {
         const selectedColor = colorPicker.value;
+        const largeBox = document.getElementById('largeBox');
 
         // Get the current character from the large box
         const currentCharacter = largeBox.textContent;
@@ -145,31 +123,11 @@ function generateCharacterElements(inputString) {
         }
     });
 
-
     const simptradmenu = document.getElementById('simpTradMenu');
     simptradmenu.addEventListener('change', () => {
         fetchInputStrings();
     });
-
-
-    // Load the selected color from localStorage for the most recent character, if available
-    const currentCharacter = largeBox.textContent;
-    const currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
-    const storedColor = localStorage.getItem(currentUnicodeKey);
-    if (storedColor) {
-        // Update the background color of the large box
-        largeBox.style.backgroundColor = storedColor;
-
-        // Update the color of the clicked cell
-        const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
-        if (clickedCell) {
-            clickedCell.style.backgroundColor = storedColor;
-        }
-    }
 }
-
-// Call the function to fetch input strings when the page loads
-fetchInputStrings();
 
 // Helper function to convert RGB to HEX
 function rgbToHex(rgb) {
@@ -183,10 +141,6 @@ function rgbToHex(rgb) {
     return hexValue;
 }
 
-
-
-// List of colors
-var colors = ['#ADD8E6', '#90EE90', '#FB6060', '#FFFFE0'];
 
 // Function to create buttons dynamically
 function createColorButtons() {
@@ -206,6 +160,7 @@ function createColorButtons() {
     });
 }
 
+// Function to update the color of the currently selected character's cell 
 function changeColor(color) {
     // Get the color picker element
     var colorPicker = document.getElementById('colorPicker');
@@ -229,9 +184,35 @@ function changeColor(color) {
     }
 }
 
-createColorButtons();
-
 function toggleCursor() {
     const body = document.body;
     body.classList.toggle('paintbrush-cursor', document.getElementById('toggleCheckbox').checked);
 }
+
+function sendDataToPython(character) {
+    const infoBox = document.getElementById('infoBox');
+    // Make an AJAX request to the Flask endpoint
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/process_click_on_character', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Parse the JSON response from the server
+            var response = JSON.parse(xhr.responseText);
+            var resultFromPython = response.result;
+
+            // Display the result in the HTML element
+            infoBox.innerHTML = resultFromPython;
+        }
+    };
+    // Send the clicked character to the server
+    xhr.send('character=' + encodeURIComponent(character));
+}
+
+// List of colors
+var colors = ['#ADD8E6', '#90EE90', '#FB6060', '#FFFFE0'];
+
+// Call the functions to create UI elements when the page loads
+fetchInputStrings();
+createColorButtons();
+createMenu();
