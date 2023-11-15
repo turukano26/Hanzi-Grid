@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="top-menu">
+        <div class="charsetmenu" id="menu">
+            <label for="inputStrings">Select a Character Set:</label>
+            <select id="inputStrings"></select>
+        </div>
+        <div>
+            <input type="color" id="colorPicker" value="#000000">
+        </div>
+        <div id="colorButtons"></div>
+        <div>
+            <input type="checkbox" id="toggleCheckbox" onchange="toggleCursor()">
+            <label for="toggleCheckbox">Toggle Paint Mode</label>
+        </div>
+
+
+
+    </div>
+    <div class="container">
+        <div class="large-box" id="largeBox"></div>
+        <div class="color-menu" id="colorMenu">
+            <label for="colorSelector">Select Background Color:</label>
+            <select id="colorSelector">
+                <option value="white">Blank</option>
+                <option value="lightyellow">Cue Card Made</option>
+                <option value="lightblue">Light Blue</option>
+                <option value="lightgreen">Light Green</option>
+                <!-- Add more color options as needed -->
+            </select>
+        </div>
+        <div class="info-box" id="infoBox"></div>
+        <div class="grid-column">
+            <div class="grid" id="characterGrid"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
