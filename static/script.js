@@ -153,6 +153,22 @@ function createMenu() {
             console.error('No file selected.');
         }
     });
+
+    // Event listener and function to clear all a user's colorings
+    const clearButton = document.getElementById('clear')
+    clearButton.addEventListener('click', () => {
+        var isConfirmed = confirm('Are you sure you want to clear all your data?');
+        // Check the user's response
+        if (isConfirmed) {
+            // User clicked "OK," proceed with clearing data
+            localStorage.clear();
+            generateCharacterElements(currentInputString);
+            alert('Data cleared successfully!');
+        } else {
+            // User clicked "Cancel," do nothing
+            alert('Data clearing canceled.');
+        }
+    });
 }
 
 // Helper function to convert RGB to HEX
@@ -287,7 +303,7 @@ function exportUserData() {
     var link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
 
-    link.download = 'localStorageData.json'; // TODO: Set the download attribute with a user pickedfile name
+    link.download = 'Hanzi_Colourings.json'; // TODO: Set the download attribute with a user pickedfile name
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
