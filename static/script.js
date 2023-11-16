@@ -256,15 +256,18 @@ function handleSearch(searchText) {
     var gridElements = document.querySelectorAll('.grid span');
     gridElements.forEach(function (element) {
         element.style.border = '';
+        element.style.padding = '';
     });
 
-    var currentCharacter = searchText[0];
-    var currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
+    for (let i = 0; i < searchText.length; i++) {
+        var currentCharacter = searchText[i];
+        var currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
 
-    const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
-    if (clickedCell) {
-        clickedCell.style.border = '4px solid #000';
-        clickedCell.style.padding = '7px';
+        const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
+        if (clickedCell) {
+            clickedCell.style.border = '4px solid #000';
+            clickedCell.style.padding = '7px';
+        }
     }
 }
 
