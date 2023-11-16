@@ -267,14 +267,14 @@ function initializeSearchBar() {
 }
 
 function handleSearch(searchText) {
-
-    //removes previous styling from previous searches
+    // Removes previous styling from previous searches
     var gridElements = document.querySelectorAll('.grid span');
     gridElements.forEach(function (element) {
         element.style.border = '';
         element.style.padding = '';
     });
 
+    // Highlights the border of any characters in the search string
     for (let i = 0; i < searchText.length; i++) {
         var currentCharacter = searchText[i];
         var currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
@@ -284,6 +284,20 @@ function handleSearch(searchText) {
             clickedCell.style.border = '4px solid #000';
             clickedCell.style.padding = '7px';
         }
+    }
+
+    // Sets the largeBox to the first character in the search
+    const largeBox = document.getElementById('largeBox');
+    largeBox.textContent = searchText[0];
+    sendDataToPython(searchText[0]);
+
+    if (localStorage.getItem(currentUnicodeKey)) {
+        largeBox.style.backgroundColor = localStorage.getItem(currentUnicodeKey);
+        colorPicker.value = localStorage.getItem(currentUnicodeKey);
+    }
+    else {
+        largeBox.style.backgroundColor = '#FFFFFF';
+        colorPicker.value = '#FFFFFF';
     }
 }
 
