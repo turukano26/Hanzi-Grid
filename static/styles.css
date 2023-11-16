@@ -88,3 +88,14 @@ body {
     cursor: crosshair;
     /* Set the paintbrush cursor style */
 }
+
+.search-column {
+    margin-right: 10px;
+}
+
+#searchBar {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+}

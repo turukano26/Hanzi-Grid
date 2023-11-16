@@ -184,10 +184,12 @@ function changeColor(color) {
     }
 }
 
+// Function to toggle the cursor when the paintbrush mode is on
 function toggleCursor() {
     const body = document.body;
     body.classList.toggle('paintbrush-cursor', document.getElementById('toggleCheckbox').checked);
 }
+
 
 function sendDataToPython(character) {
     const infoBox = document.getElementById('infoBox');
@@ -209,10 +211,52 @@ function sendDataToPython(character) {
     xhr.send('character=' + encodeURIComponent(character));
 }
 
+function initializeSearchBar() {
+    var searchBar = document.getElementById('searchBar');
+
+    // Add an event listener for the 'keyup' event
+    searchBar.addEventListener('keyup', function (event) {
+        // Check if the key pressed is Enter (key code 13)
+        if (event.keyCode === 13) {
+            // Call your custom function with the inputted text
+            handleSearch(searchBar.value);
+        }
+    });
+}
+
+function handleSearch(searchText) {
+
+    //removes previous styling from previous searches
+    var gridElements = document.querySelectorAll('.grid span');
+    gridElements.forEach(function (element) {
+        element.style.border = '';
+    });
+
+    var currentCharacter = searchText[0];
+    var currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
+
+    const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
+    if (clickedCell) {
+        clickedCell.style.border = '4px solid #000';
+        clickedCell.style.padding = '7px';
+    }
+}
+
 // List of colors
-var colors = ['#ADD8E6', '#90EE90', '#FB6060', '#FFFFE0'];
+var colors = [
+    '#ff6060',
+    '#ADD8E6',
+    '#90FF80',
+    '#E9B1FF',
+    '#fed9a6',
+    '#ffffcc',
+    '#e5d8bd',
+    '#fddaec',
+    '#f2f2f2'
+];
 
 // Call the functions to create UI elements when the page loads
 fetchInputStrings();
 createColorButtons();
 createMenu();
+initializeSearchBar();

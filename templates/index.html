@@ -22,7 +22,7 @@
         </div>
 
         <div>
-            <select name="S/T-mode", id="simpTradMenu">
+            <select name="S/T-mode" , id="simpTradMenu">
                 <option value="Original">Original</option>
                 <option value="Simplified">Force Simplified</option>
                 <option value="Traditional">Force Traditional</option>
@@ -36,6 +36,9 @@
         <div class="info-box" id="infoBox"></div>
         <div class="grid-column">
             <div class="grid" id="characterGrid"></div>
+        </div>
+        <div class="search-column">
+            <input type="text" id="searchBar" placeholder="Search...">
         </div>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
