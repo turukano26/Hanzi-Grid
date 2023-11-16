@@ -1,4 +1,7 @@
 // script.js
+
+var currentInputString;
+
 function fetchInputStrings() {
     const simpTradMenu = document.getElementById('simpTradMenu');
     var simptrad = simpTradMenu.value;
@@ -51,11 +54,13 @@ function fetchInputStrings() {
 }
 
 function generateCharacterElements(inputString) {
+
     const characterGrid = document.getElementById('characterGrid');
     const largeBox = document.getElementById('largeBox');
     const colorPicker = document.getElementById('colorPicker');
 
     characterGrid.innerHTML = ''; // Clear the existing grid
+    currentInputString = inputString; // Update the Global
 
     for (let i = 0; i < inputString.value.length; i++) {
         const character = inputString.value[i];
@@ -101,7 +106,8 @@ function generateCharacterElements(inputString) {
 
 
 function createMenu() {
-    // Event listener to handle color selection
+
+    // Event listener to handle color selection and update the large box and cell color
     colorPicker.addEventListener('change', () => {
         const selectedColor = colorPicker.value;
         const largeBox = document.getElementById('largeBox');
@@ -123,9 +129,29 @@ function createMenu() {
         }
     });
 
+    // Event listener to refetch input strings if force traditional/simplified is picked
     const simptradmenu = document.getElementById('simpTradMenu');
     simptradmenu.addEventListener('change', () => {
         fetchInputStrings();
+    });
+
+    // Event listener for the Export Button
+    const exportButton = document.getElementById('export')
+    exportButton.addEventListener('click', () => {
+        exportUserData();
+    });
+
+    // Event listener for when a file is selected to Import
+    const inputElement = document.getElementById('fileInput');
+    inputElement.addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        // Check if a file is selected
+        if (file) {
+            // Call the function to add data to localStorage
+            addToLocalStorage(file);
+        } else {
+            console.error('No file selected.');
+        }
     });
 }
 
@@ -240,6 +266,62 @@ function handleSearch(searchText) {
         clickedCell.style.border = '4px solid #000';
         clickedCell.style.padding = '7px';
     }
+}
+
+function exportUserData() {
+    // Exports every key value pair in local storage into a json file
+    // Then downloads it for the user
+    var keys = Object.keys(localStorage);
+
+    var dataObject = {};
+
+    keys.forEach(function (key) {
+        dataObject[key] = localStorage.getItem(key);
+    });
+
+    var jsonString = JSON.stringify(dataObject, null, 2);
+    var blob = new Blob([jsonString], { type: 'application/json' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+
+    link.download = 'localStorageData.json'; // TODO: Set the download attribute with a user pickedfile name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Function to read and parse a JSON file
+function readJSONFile(file, callback) {
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            var data = JSON.parse(e.target.result);
+            callback(null, data);
+        } catch (error) {
+            callback(error, null);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+// Function to add data from JSON file to localStorage
+function addToLocalStorage(jsonFile) {
+    readJSONFile(jsonFile, function (error, data) {
+        if (error) {
+            console.error('Error reading JSON file:', error);
+        } else {
+            // Clear the current localStorage
+            localStorage.clear();
+            // Add each key-value pair to localStorage
+            Object.keys(data).forEach(function (key) {
+                localStorage.setItem(key, data[key]);
+            });
+            console.log('Data added to localStorage successfully!');
+            generateCharacterElements(currentInputString);
+        }
+    });
 }
 
 // List of colors

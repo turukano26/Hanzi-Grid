@@ -68,6 +68,7 @@
     box-sizing: border-box;
     height: 50px;
     width: 50px;
+    background-color: white;
 }
 
 .top-menu {
