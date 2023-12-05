@@ -367,7 +367,7 @@ var colors = [
     '#ffffcc',
     '#e5d8bd',
     '#fddaec',
-    '#f2f2f2'
+    '#FFFFFF'
 ];
 
 // Call the functions to create UI elements when the page loads
