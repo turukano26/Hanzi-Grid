@@ -55,56 +55,76 @@ function fetchInputStrings() {
 
 function generateCharacterElements(inputString) {
 
-    const characterGrid = document.getElementById('characterGrid');
+    const macroGrid = document.getElementById('macroGrid');
     const largeBox = document.getElementById('largeBox');
     const colorPicker = document.getElementById('colorPicker');
 
-    characterGrid.innerHTML = ''; // Clear the existing grid
+    macroGrid.innerHTML = ''; // Clear the existing grid
     currentInputString = inputString; // Update the Global
 
-    for (let i = 0; i < inputString.value.length; i++) {
-        const character = inputString.value[i];
-        const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
-        const span = document.createElement('span');
-        span.textContent = character;
-        span.setAttribute('data-unicode', unicodeKey); // Add data attribute for identification
-        characterGrid.appendChild(span);
+    console.log(inputString);
 
-        // Check if the cell was previously colored and apply the class
-        if (localStorage.getItem(unicodeKey)) {
-            span.style.backgroundColor = localStorage.getItem(unicodeKey);
+    for (let i = 0; i < inputString.value.length; i++) {
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid';
+
+        // Create a heading for the grid with the label of the inner value
+        const heading = document.createElement('h1');
+        heading.textContent = inputString.value[i].label;
+
+
+        for (let j = 0; j < inputString.value[i].value.length; j++) {
+            const character = inputString.value[i].value[j];
+            const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
+            const span = document.createElement('span');
+            span.textContent = character;
+            span.setAttribute('data-unicode', unicodeKey); // Add data attribute for identification
+            gridDiv.appendChild(span);
+
+            // Check if the cell was previously colored and apply the class
+            if (localStorage.getItem(unicodeKey)) {
+                span.style.backgroundColor = localStorage.getItem(unicodeKey);
+            }
+
+            span.addEventListener('click', () => {
+                // Single-click behavior: Display the character in the large box
+                largeBox.textContent = character;
+                // Get the color from the selected cell
+                const cellColor = window.getComputedStyle(span).backgroundColor;
+                // Update the background color of the large box
+                largeBox.style.backgroundColor = cellColor;
+
+                sendDataToPython(character);
+
+                // If in paint mode, color the cell and update acordingly
+                if (document.getElementById('toggleCheckbox').checked) {
+
+                    const selectedColor = colorPicker.value;
+                    // Update the color for the most recent character in localStorage
+                    localStorage.setItem(unicodeKey, selectedColor);
+                    // Update the background color of the large box
+                    largeBox.style.backgroundColor = selectedColor;
+                    // Update the color of the clicked cell
+                    span.style.backgroundColor = selectedColor;
+                }
+                else {
+                    // otherwise copy the clicked on cell's color to the color picker
+                    colorPicker.value = rgbToHex(cellColor);
+                }
+            });
         }
 
-        span.addEventListener('click', () => {
-            // Single-click behavior: Display the character in the large box
-            largeBox.textContent = character;
-            // Get the color from the selected cell
-            const cellColor = window.getComputedStyle(span).backgroundColor;
-            // Update the background color of the large box
-            largeBox.style.backgroundColor = cellColor;
+        // Append the heading and paragraph to the grid div
+        macroGrid.appendChild(heading);
 
-            sendDataToPython(character);
-
-            // If in paint mode, color the cell and update acordingly
-            if (document.getElementById('toggleCheckbox').checked) {
-
-                const selectedColor = colorPicker.value;
-                // Update the color for the most recent character in localStorage
-                localStorage.setItem(unicodeKey, selectedColor);
-                // Update the background color of the large box
-                largeBox.style.backgroundColor = selectedColor;
-                // Update the color of the clicked cell
-                span.style.backgroundColor = selectedColor;
-            }
-            else {
-                // otherwise copy the clicked on cell's color to the color picker
-                colorPicker.value = rgbToHex(cellColor);
-            }
-        });
+        // Append the grid div to the container
+        macroGrid.appendChild(gridDiv);
     }
 }
 
-
+//TODO: only the first instance of a character has their colour changed
+//TODO: fix scrolling
 function createMenu() {
 
     // Event listener to handle color selection and update the large box and cell color

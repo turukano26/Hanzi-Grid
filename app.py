@@ -3,6 +3,7 @@ from chinese_english_lookup import Dictionary
 from pypinyin.contrib.tone_convert import to_tone
 import json
 from hanziconv import HanziConv
+import os
 
 # Create a Flask application
 app = Flask(__name__)
@@ -32,40 +33,27 @@ def process_click_on_character():
 
 @app.route('/get_input_strings', methods=['POST'])
 def get_input_strings():
-    simp_or_trad = request.form['simptrad']
     input_strings = load_input_strings_from_file()
-
-    if simp_or_trad == 'Traditional':
-        new_strings = []
-        for string in input_strings:
-            new_strings.append(
-                {"label": string['label'], "value": HanziConv.toTraditional(string['value'])})
-        return jsonify({"inputStrings": new_strings})
-
-    elif simp_or_trad == 'Simplified':
-        new_strings = []
-        for string in input_strings:
-            new_strings.append(
-                {"label": string['label'], "value": HanziConv.toSimplified(string['value'])})
-        return jsonify({"inputStrings": new_strings})
-
-    else:
-        return jsonify({"inputStrings": input_strings})
+    return jsonify({"inputStrings": input_strings})
 
 
 def load_input_strings_from_file():
-    try:
-        with open('character_sets.json', 'r', encoding='utf-8') as file:
-            input_strings = json.load(file)
-        return input_strings
-    except FileNotFoundError:
-        # Log the error or print a message to help identify the issue
-        print("File not found: 'static/character_sets.json'")
-        return []
-    except Exception as e:
-        # Log the error or print a message to help identify the issue
-        print(f"Error loading JSON file: {e}")
-        return []
+    input_strings = []
+    for character_set in os.listdir('charactersets'):
+        try:
+            with open('charactersets/' + character_set, 'r', encoding='utf-8') as file:
+                input_strings.append(json.load(file))
+        
+        except FileNotFoundError:
+            # Log the error or print a message to help identify the issue
+            print(f"File not found: {character_set}")
+
+        except Exception as e:
+            # Log the error or print a message to help identify the issue
+            print(f"Error loading JSON file: {e}")
+
+    return input_strings
+
 
 
 def create_character_info_sheet(character):
