@@ -3,8 +3,6 @@
 var currentInputString;
 
 function fetchInputStrings() {
-    const simpTradMenu = document.getElementById('simpTradMenu');
-    var simptrad = simpTradMenu.value;
 
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
@@ -50,7 +48,7 @@ function fetchInputStrings() {
             generateCharacterElements(inputStrings[oldIndex]);
         }
     };
-    xhr.send('simptrad=' + encodeURIComponent(simptrad));
+    xhr.send('simptrad=0');
 }
 
 function generateCharacterElements(inputString) {
@@ -124,7 +122,7 @@ function generateCharacterElements(inputString) {
 }
 
 //TODO: only the first instance of a character has their colour changed
-//TODO: fix scrolling
+
 function createMenu() {
 
     // Event listener to handle color selection and update the large box and cell color
@@ -147,12 +145,6 @@ function createMenu() {
         if (clickedCell) {
             clickedCell.style.backgroundColor = selectedColor;
         }
-    });
-
-    // Event listener to refetch input strings if force traditional/simplified is picked
-    const simptradmenu = document.getElementById('simpTradMenu');
-    simptradmenu.addEventListener('change', () => {
-        fetchInputStrings();
     });
 
     // Event listener for the Export Button

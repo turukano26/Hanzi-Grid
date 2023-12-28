@@ -47,8 +47,12 @@
 
 .grid-column {
     flex-grow: 1;
-    overflow-y: scroll;
     /* Allow the grid column to be scrollable */
+}
+
+.macro-grid {
+    overflow-y: scroll;
+    max-height: 94vh;
 }
 
 .grid {
