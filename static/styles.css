@@ -60,7 +60,6 @@
     grid-template-columns: repeat(20, 1fr);
     gap: 10px;
     max-width: 600px;
-    max-height: 94vh;
 }
 
 .grid span {
