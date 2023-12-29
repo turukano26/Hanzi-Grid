@@ -22,17 +22,48 @@
         </div>
 
         <div>
-            <button id="export">Export</button>
+            <button id="open-popup-menu-btn">Menu</button>
         </div>
 
-        <div>
-            <input type="file" id="fileInput" accept=".json">
-        </div>
+        <div id="popup-menu-container">
+            <div id="popup-menu">
+                <div id="tabs">
+                    <button onclick="showSubmenu('submenu1')">Color Sets</button>
+                    <button onclick="showSubmenu('submenu2')">Languages</button>
+                </div>
 
-        <div>
-            <button id="clear">Clear All</button>
-        </div>
+                <div class="submenu active" id="submenu1">
+                    <h2>Import/Export Colorings</h2>
+                    <h3>Use this to save your current colorings as a .json file</h3>
+                    <div><button id="export">Export</button></div>
 
+                    <h3>Use this to upload a .json file as your current colorings</h3>
+                    <div><input type="file" id="fileInput" accept=".json"></div>
+
+                    <h3>Be careful! Use this to delete all your current colorings</h3>
+                    <div><button id="clear">Clear All</button></div>
+
+                </div>
+
+                <div class="submenu" id="submenu2">
+                    <h2>Enable Languages</h2>
+
+                    <input type="checkbox" id="chineseCheckbox" onchange="toggleCursor()">
+                    <label for="chineseCheckbox">Toggle Chinese</label>
+
+                    <input type="checkbox" id="japaneseCheckbox" onchange="toggleCursor()">
+                    <label for="japaneseCheckbox">Toggle Japanese</label>
+
+                    <input type="checkbox" id="koreanCheckbox" onchange="toggleCursor()">
+                    <label for="koreanCheckbox">Toggle Korean</label>
+
+                    <input type="checkbox" id="vietnameseCheckbox" onchange="toggleCursor()">
+                    <label for="vietnameseCheckbox">Toggle Vietnamese</label>
+                </div>
+
+                <div id="close-btn" onclick="closePopupMenu()">X</div>
+            </div>
+        </div>
     </div>
     <div class="container">
         <div class="large-box" id="largeBox"></div>

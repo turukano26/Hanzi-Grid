@@ -387,3 +387,32 @@ fetchInputStrings();
 createColorButtons();
 createMenu();
 initializeSearchBar();
+
+
+document.getElementById('open-popup-menu-btn').addEventListener('click', openPopupMenu);
+
+function openPopupMenu() {
+    document.getElementById('popup-menu-container').style.display = 'flex';
+}
+
+function closePopupMenu() {
+    document.getElementById('popup-menu-container').style.display = 'none';
+}
+
+function showSubmenu(submenuId) {
+    // Hide all submenus
+    const submenus = document.querySelectorAll('.submenu');
+    submenus.forEach(submenu => submenu.classList.remove('active'));
+
+    // Show the selected submenu
+    document.getElementById(submenuId).classList.add('active');
+}
+
+// Update slider values in real-time
+document.getElementById('slider1').addEventListener('input', function () {
+    document.getElementById('slider1-value').innerText = this.value;
+});
+
+document.getElementById('slider2').addEventListener('input', function () {
+    document.getElementById('slider2-value').innerText = this.value;
+});
