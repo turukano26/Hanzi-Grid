@@ -36,12 +36,16 @@
                     <h2>Import/Export Colorings</h2>
                     <h3>Use this to save your current colorings as a .json file</h3>
                     <div><button id="export">Export</button></div>
+                    <br>
 
-                    <h3>Use this to upload a .json file as your current colorings</h3>
+                    <h3>Use this to upload a .json file with your saved colorings. <br>
+                        Be careful! This will overwrite all your current colorings!</h3>
                     <div><input type="file" id="fileInput" accept=".json"></div>
+                    <br>
 
-                    <h3>Be careful! Use this to delete all your current colorings</h3>
+                    <h3>Use this to reset all your current colorings. Be careful!</h3>
                     <div><button id="clear">Clear All</button></div>
+                    <br>
 
                 </div>
 
@@ -61,6 +65,7 @@
                         <input type="checkbox" id="chineseTangCheckbox" onchange="toggleCursor()">
                         <label for="chineseTangCheckbox">Toggle Tang-era Reading</label>
                     </div>
+                    <br>
 
                     <h3>Japanese</h3>
                     <div>
@@ -75,14 +80,21 @@
                         <input type="checkbox" id="japaneseExtrasCheckbox" onchange="toggleCursor()">
                         <label for="japaneseExtrasCheckbox">Toggle Japanese Extra Info</label>
                     </div>
+                    <br>
 
                     <h3>Korean</h3>
-                    <input type="checkbox" id="koreanCheckbox" onchange="toggleCursor()">
-                    <label for="koreanCheckbox">Toggle Hanja Readings</label>
+                    <div>
+                        <input type="checkbox" id="koreanCheckbox" onchange="toggleCursor()">
+                        <label for="koreanCheckbox">Toggle Hanja Readings</label>
+                    </div>
+                    <br>
 
                     <h3>Vietnamese</h3>
-                    <input type="checkbox" id="vietnameseCheckbox" onchange="toggleCursor()">
-                    <label for="vietnameseCheckbox">Toggle Chu Nom/Han Nom Readings</label>
+                    <div>
+                        <input type="checkbox" id="vietnameseCheckbox" onchange="toggleCursor()">
+                        <label for="vietnameseCheckbox">Toggle Chu Nom/Han Nom Readings</label>
+                    </div>
+                    <br>
                 </div>
 
                 <div id="close-btn" onclick="closePopupMenu()">X</div>

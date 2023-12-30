@@ -63,13 +63,10 @@ def create_character_info_sheet(character):
     return_str += character_entry.simp + " | " + character_entry.trad + '<br><br>'
 
     for dict_entry in character_entry.definition_entries:
-        return_str += '<span style="color:' + \
-            tone_color_dict[dict_entry.pinyin[-1]] + \
-            '; font-size: 30px ">' + " • " + \
-            to_tone(dict_entry.pinyin) + '</span>  '
+        return_str += f'<span style="color:{tone_color_dict[dict_entry.pinyin[-1]]}; font-size: 30px "> • {to_tone(dict_entry.pinyin)} </span>'
 
         for definition in dict_entry.definitions:
-            return_str += " - " + definition + '<br>'
+            return_str += f' - {definition} <br>'
         return_str += '<br>'
 
     return return_str
