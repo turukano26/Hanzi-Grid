@@ -53,6 +53,8 @@ function fetchInputStrings() {
 
 function generateCharacterElements(inputString) {
 
+    //TODO: fix rendering of characters that are outside Unicode's BMP
+
     const macroGrid = document.getElementById('macroGrid');
     const largeBox = document.getElementById('largeBox');
     const colorPicker = document.getElementById('colorPicker');
