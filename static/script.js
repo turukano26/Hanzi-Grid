@@ -93,7 +93,7 @@ function generateCharacterElements(inputString) {
                 // Update the background color of the large box
                 largeBox.style.backgroundColor = cellColor;
 
-                sendDataToPython(character);
+                processCharacterClick(character);
 
                 // If in paint mode, color the cell and update acordingly
                 if (document.getElementById('toggleCheckbox').checked) {
@@ -121,7 +121,7 @@ function generateCharacterElements(inputString) {
     }
 }
 
-//TODO: only the first instance of a character has their colour changed
+//TODO: BUG only the first instance of a character has their colour changed
 
 function createMenu() {
 
@@ -184,6 +184,12 @@ function createMenu() {
 
     // Event listener to open the popup menu
     document.getElementById('open-popup-menu-btn').addEventListener('click', openPopupMenu);
+
+    // Loop through each checkbox inside the "languagemenu" div and update its state based on localStorage
+    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
+    checkboxes.forEach(function (checkbox) {
+        checkbox.checked = localStorage.getItem(checkbox.id) === 'true';
+    });
 }
 
 // Helper function to convert RGB to HEX
@@ -199,7 +205,7 @@ function rgbToHex(rgb) {
 }
 
 
-// Function to create buttons dynamically
+// Function to create color buttons dynamically
 function createColorButtons() {
     var colorButtonsContainer = document.getElementById('colorButtons');
 
@@ -248,12 +254,13 @@ function toggleCursor() {
 }
 
 
-function sendDataToPython(character) {
+function processCharacterClick(character) {
     const infoBox = document.getElementById('infoBox');
+
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/process_click_on_character', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function () {
         if (xhr.status === 200) {
             // Parse the JSON response from the server
@@ -264,8 +271,21 @@ function sendDataToPython(character) {
             infoBox.innerHTML = resultFromPython;
         }
     };
+
+    // Create an object to hold the character and language options
+    const requestData = {
+        character: character
+    };
+
+    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
+
+    // Loop through each checkbox and add its value to the requestData object
+    checkboxes.forEach(function (checkbox) {
+        requestData[checkbox.id] = checkbox.checked;
+    });
+
     // Send the clicked character to the server
-    xhr.send('character=' + encodeURIComponent(character));
+    xhr.send(JSON.stringify(requestData));
 }
 
 function initializeSearchBar() {
@@ -304,7 +324,7 @@ function handleSearch(searchText) {
     // Sets the largeBox to the first character in the search
     const largeBox = document.getElementById('largeBox');
     largeBox.textContent = searchText[0];
-    sendDataToPython(searchText[0]);
+    processCharacterClick(searchText[0]);
 
     if (localStorage.getItem(currentUnicodeKey)) {
         largeBox.style.backgroundColor = localStorage.getItem(currentUnicodeKey);
@@ -380,6 +400,12 @@ function openPopupMenu() {
 
 function closePopupMenu() {
     document.getElementById('popup-menu-container').style.display = 'none';
+
+    // Saves the values for the language options into localStorage
+    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
+    checkboxes.forEach(function (checkbox) {
+        localStorage.setItem(checkbox.id, checkbox.checked);
+    });
 }
 
 function showSubmenu(submenuId) {

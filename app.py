@@ -25,7 +25,8 @@ def index():
 
 @app.route('/process_click_on_character', methods=['POST'])
 def process_click_on_character():
-    character = request.form['character']
+    character = request.get_json()['character']
+    print(request.get_json())
     # Replace with your actual Python function
     result = create_character_info_sheet(character)
     return jsonify(result=result)

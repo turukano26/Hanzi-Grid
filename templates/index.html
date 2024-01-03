@@ -28,11 +28,55 @@
         <div id="popup-menu-container">
             <div id="popup-menu">
                 <div id="tabs">
-                    <button onclick="showSubmenu('submenu1')">Color Sets</button>
-                    <button onclick="showSubmenu('submenu2')">Languages</button>
+                    <button onclick="showSubmenu('languagemenu')">Color Sets</button>
+                    <button onclick="showSubmenu('importexportmenu')">Languages</button>
                 </div>
 
-                <div class="submenu active" id="submenu1">
+                <div class="submenu active" id="languagemenu">
+                    <h2>Enable Languages</h2>
+
+                    <h3>Chinese</h3>
+                    <input type="checkbox" id="chineseSimpTradCheckbox" onchange="toggleCursor()">
+                    <label for="chineseSimpTradCheckbox">Toggle Simplified/Traditional</label>
+                    <br>
+                    <input type="checkbox" id="chineseMandarinCheckbox" onchange="toggleCursor()">
+                    <label for="chineseMandarinCheckbox">Toggle Mandarin</label>
+                    <br>
+                    <input type="checkbox" id="chineseCantoneseCheckbox" onchange="toggleCursor()">
+                    <label for="chineseCantoneseCheckbox">Toggle Cantonese</label>
+                    <br>
+                    <input type="checkbox" id="chineseTangCheckbox" onchange="toggleCursor()">
+                    <label for="chineseTangCheckbox">Toggle Tang-era Reading</label>
+                    <br>
+
+                    <h3>Japanese</h3>
+                    <input type="checkbox" id="japaneseMeaningCheckbox" onchange="toggleCursor()">
+                    <label for="japaneseMeaningCheckbox">Toggle Japanese Meanings</label>
+                    <br>
+                    <input type="checkbox" id="japaneseKunCheckbox" onchange="toggleCursor()">
+                    <label for="japaneseKunCheckbox">Toggle Japanese Kun-Readings</label>
+                    <br>
+                    <input type="checkbox" id="japaneseOnCheckbox" onchange="toggleCursor()">
+                    <label for="japaneseOnCheckbox">Toggle Japanese On-Readings</label>
+                    <br>
+                    <input type="checkbox" id="japaneseExtrasCheckbox" onchange="toggleCursor()">
+                    <label for="japaneseExtrasCheckbox">Toggle Japanese Extra Info</label>
+                    <br>
+
+
+                    <h3>Korean</h3>
+                    <input type="checkbox" id="koreanCheckbox" onchange="toggleCursor()">
+                    <label for="koreanCheckbox">Toggle Hanja Readings</label>
+                    <br>
+
+                    <h3>Vietnamese</h3>
+                    <input type="checkbox" id="vietnameseCheckbox" onchange="toggleCursor()">
+                    <label for="vietnameseCheckbox">Toggle Chu Nom/Han Nom Readings</label>
+                    <br>
+                </div>
+
+                <div class="submenu" id="importexportmenu">
+
                     <h2>Import/Export Colorings</h2>
                     <h3>Use this to save your current colorings as a .json file</h3>
                     <div><button id="export">Export</button></div>
@@ -47,54 +91,7 @@
                     <div><button id="clear">Clear All</button></div>
                     <br>
 
-                </div>
 
-                <div class="submenu" id="submenu2">
-                    <h2>Enable Languages</h2>
-
-                    <h3>Chinese</h3>
-                    <div>
-                        <input type="checkbox" id="chineseSimpTradCheckbox" onchange="toggleCursor()">
-                        <label for="chineseSimpTradCheckbox">Toggle Simplified/Traditional</label>
-                        <input type="checkbox" id="chineseMandarinCheckbox" onchange="toggleCursor()">
-                        <label for="chineseMandarinCheckbox">Toggle Mandarin</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="chineseCantoneseCheckbox" onchange="toggleCursor()">
-                        <label for="chineseCantoneseCheckbox">Toggle Cantonese</label>
-                        <input type="checkbox" id="chineseTangCheckbox" onchange="toggleCursor()">
-                        <label for="chineseTangCheckbox">Toggle Tang-era Reading</label>
-                    </div>
-                    <br>
-
-                    <h3>Japanese</h3>
-                    <div>
-                        <input type="checkbox" id="japaneseMeaningCheckbox" onchange="toggleCursor()">
-                        <label for="japaneseMeaningCheckbox">Toggle Japanese Meanings</label>
-                        <input type="checkbox" id="japaneseKunCheckbox" onchange="toggleCursor()">
-                        <label for="japaneseKunCheckbox">Toggle Japanese Kun-Readings</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="japaneseOnCheckbox" onchange="toggleCursor()">
-                        <label for="japaneseOnCheckbox">Toggle Japanese On-Readings</label>
-                        <input type="checkbox" id="japaneseExtrasCheckbox" onchange="toggleCursor()">
-                        <label for="japaneseExtrasCheckbox">Toggle Japanese Extra Info</label>
-                    </div>
-                    <br>
-
-                    <h3>Korean</h3>
-                    <div>
-                        <input type="checkbox" id="koreanCheckbox" onchange="toggleCursor()">
-                        <label for="koreanCheckbox">Toggle Hanja Readings</label>
-                    </div>
-                    <br>
-
-                    <h3>Vietnamese</h3>
-                    <div>
-                        <input type="checkbox" id="vietnameseCheckbox" onchange="toggleCursor()">
-                        <label for="vietnameseCheckbox">Toggle Chu Nom/Han Nom Readings</label>
-                    </div>
-                    <br>
                 </div>
 
                 <div id="close-btn" onclick="closePopupMenu()">X</div>
