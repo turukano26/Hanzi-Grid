@@ -4,17 +4,21 @@ from pypinyin.contrib.tone_convert import to_tone
 import json
 from hanziconv import HanziConv
 import os
+import pinyin_jyutping
 
 # Create a Flask application
 app = Flask(__name__)
 d = Dictionary()
+j = pinyin_jyutping.PinyinJyutping()
+
 
 tone_color_dict = {
     '1': '#e32200',
     '2': '#f2cf05',
     '3': '#17a30a',
     '4': '#008fcc',
-    '5': '#8f8f8f'
+    '5': '#8f8f8f',
+    '6': '#aa8f2f'
 }
 
 
@@ -67,7 +71,15 @@ def create_character_info_sheet(json_data):
     if json_data['chineseSimpTradCheckbox']:
         return_str += character_entry.simp + " | " + character_entry.trad + '<br><br>'
 
-    # Adds an element for mandarin defintions and readings
+    # Adds an element for Cantonese readings
+    if json_data['chineseCantoneseCheckbox']:
+        readings = zip(j.jyutping_all_solutions(character)['solutions'][0], [x[-1] for x in j.jyutping_all_solutions(character, tone_numbers=True)['solutions'][0]])
+        return_str += '<p>'
+        for reading, tone in readings:
+            return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px ">{reading}, </span>'
+        return_str += '</p>---------------------<br>'
+
+    # Adds an element for Mandarin defintions and readings
     if json_data['chineseMandarinCheckbox']:
         for dict_entry in character_entry.definition_entries:
             return_str += f'<span style="color:{tone_color_dict[dict_entry.pinyin[-1]]}; font-size: 30px "> • {to_tone(dict_entry.pinyin)} </span>'
