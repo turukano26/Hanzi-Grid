@@ -5,11 +5,19 @@ import json
 from hanziconv import HanziConv
 import os
 import pinyin_jyutping
+from cihai.core import Cihai
+
 
 # Create a Flask application
 app = Flask(__name__)
+
+# load dictionaries
 d = Dictionary()
 j = pinyin_jyutping.PinyinJyutping()
+c = Cihai()
+
+if not c.unihan.is_bootstrapped:  # download and install Unihan to db
+    c.unihan.bootstrap()
 
 
 tone_color_dict = {
@@ -85,25 +93,76 @@ def create_character_info_sheet(json_data):
         try:
             readings = zip(j.jyutping_all_solutions(character)['solutions'][0], [x[-1] for x in j.jyutping_all_solutions(character, tone_numbers=True)['solutions'][0]])
             num_of_readings = len(j.jyutping_all_solutions(character)['solutions'][0])
-            return_str += '<span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
             for i, (reading, tone) in enumerate(readings):
                 return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{',' if i < num_of_readings-1 else ''} </span>'
-            return_str += '</p>---------------------'
+            return_str += '</p>'
         except:
-            return_str += 'No Cantonese Reading Found'
+            return_str += '<hr>No Cantonese Reading Found<hr>'
 
     # Adds an element for Mandarin defintions and readings
     if json_data['chineseMandarinCheckbox']:
         try:
-            return_str += '<span style="color:#999999 ;font-size: 12px">Mandarin</span><p>'
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>'
             for dict_entry in character_entry.definition_entries:
-                return_str += f'<span style="color:{tone_color_dict[dict_entry.pinyin[-1]]}; font-size: 30px "> • {to_tone(dict_entry.pinyin)} </span>'
+                return_str += f'<span style="color:{tone_color_dict[dict_entry.pinyin[-1]]}; font-size: 30px "> • {to_tone(dict_entry.pinyin)} </span><br>'
 
                 for definition in dict_entry.definitions:
                     return_str += f' - {definition} <br>'
                 return_str += '<br>'
         except:
-            return_str += 'error with dictionary lookup!!'
+            return_str += '<hr>error with dictionary lookup!!'
+
+
+    if json_data['chineseTangCheckbox']:
+        try:
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Middle Chinese</span><p>'
+            cihai_query = c.unihan.lookup_char(character).first()
+            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(cihai_query.kTang.lower().split())}</span>'
+
+        except:
+            return_str += 'No Middle Chinese Reading'
+
+
+    if json_data['japaneseKunCheckbox']:
+        try:
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Kun-Reading</span><p>'
+            cihai_query = c.unihan.lookup_char(character).first()
+            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(cihai_query.kJapaneseKun.lower().split())}</span>'
+
+        except:
+            return_str += 'No Kun-Reading'
+
+
+    if json_data['japaneseOnCheckbox']:
+        try:
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">On-Reading</span><p>'
+            cihai_query = c.unihan.lookup_char(character).first()
+            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(cihai_query.kJapaneseOn.lower().split())}</span>'
+
+        except:
+            return_str += 'No On-Reading'
+
+
+    if json_data['koreanCheckbox']:
+        try:
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Korean Reading</span><p>'
+            cihai_query = c.unihan.lookup_char(character).first()
+            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(cihai_query.kKorean.lower().split())}</span>'
+
+        except:
+            return_str += 'No Korean Reading'
+
+
+    if json_data['vietnameseCheckbox']:
+        try:
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Vietnamese Reading</span><p>'
+            cihai_query = c.unihan.lookup_char(character).first()
+            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(cihai_query.kVietnamese.lower().split())}</span>'
+
+        except:
+            return_str += 'No Vietnamese Reading'
+
 
     return return_str
 
