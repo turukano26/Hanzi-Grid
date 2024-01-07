@@ -2,17 +2,17 @@
 
 var currentInputString;
 
-function fetchInputStrings() {
+function fetchCharacterSetNames() {
 
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/get_input_strings', true);
+    xhr.open('POST', '/get_character_set_names', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function () {
         if (xhr.status === 200) {
             // Parse the JSON response from the server
             var response = JSON.parse(xhr.responseText);
-            var inputStrings = response.inputStrings;
+            var inputStrings = response.charSetNames;
 
             // Populate the input strings dropdown with labels
             const inputStringsDropdown = document.getElementById('inputStrings');
@@ -447,7 +447,7 @@ var colors = [
 ];
 
 // Call the functions to create UI elements when the page loads
-fetchInputStrings();
+fetchCharacterSetNames();
 createColorButtons();
 createMenu();
 initializeSearchBar();
