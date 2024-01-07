@@ -21,6 +21,21 @@ tone_color_dict = {
     '6': '#aa8f2f'
 }
 
+input_strings = []
+for character_set in os.listdir('charactersets'):
+    try:
+        with open('charactersets/' + character_set, 'r', encoding='utf-8') as file:
+            input_strings.append(json.load(file))
+    
+    except FileNotFoundError:
+        # Log the error or print a message to help identify the issue
+        print(f"File not found: {character_set}")
+
+    except Exception as e:
+        # Log the error or print a message to help identify the issue
+        print(f"Error loading JSON file: {e}")
+        
+
 
 @app.route('/')
 def index():
@@ -35,26 +50,22 @@ def process_click_on_character():
 
 @app.route('/get_input_strings', methods=['POST'])
 def get_input_strings():
-    input_strings = load_input_strings_from_file()
-    return jsonify({"inputStrings": input_strings})
+    input_strings_names = load_input_strings_from_file()
+    return jsonify({"inputStrings": input_strings_names})
+
+
+@app.route('/get_character_set', methods=['POST'])
+def get_character_set():
+    char_set_name = request.form['charSet']
+    for input_string in input_strings:
+        if input_string['label'] == char_set_name:
+            return jsonify({"inputString": input_string})
+        
+    return []
 
 
 def load_input_strings_from_file():
-    input_strings = []
-    for character_set in os.listdir('charactersets'):
-        try:
-            with open('charactersets/' + character_set, 'r', encoding='utf-8') as file:
-                input_strings.append(json.load(file))
-        
-        except FileNotFoundError:
-            # Log the error or print a message to help identify the issue
-            print(f"File not found: {character_set}")
-
-        except Exception as e:
-            # Log the error or print a message to help identify the issue
-            print(f"Error loading JSON file: {e}")
-
-    return input_strings
+    return [i['label'] for i in input_strings]
 
 
 

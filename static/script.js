@@ -18,11 +18,6 @@ function fetchInputStrings() {
             const inputStringsDropdown = document.getElementById('inputStrings');
 
             // Clear existing options and event listeners before populating
-            var oldIndex = 0;
-            //if (inputStringsDropdown !== -1) {
-            //    oldIndex = inputStringsDropdown.selectedIndex;
-            //}
-
             inputStringsDropdown.innerHTML = '';
             inputStringsDropdown.removeEventListener('change', handleInputChange);
 
@@ -30,28 +25,46 @@ function fetchInputStrings() {
             inputStrings.forEach((inputString, index) => {
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = inputString.label;
+                option.textContent = inputString;
                 inputStringsDropdown.appendChild(option);
             });
 
-            inputStringsDropdown.selectedIndex = oldIndex;
+            inputStringsDropdown.selectedIndex = 0;
 
             // Event listener to handle input string changes
             inputStringsDropdown.addEventListener('change', handleInputChange);
             function handleInputChange() {
                 const selectedIndex = inputStringsDropdown.value;
                 const selectedInputString = inputStrings[selectedIndex];
-                generateCharacterElements(selectedInputString);
+                fetchCharacterSet(selectedInputString);
             }
 
             // Initialize with the first input string
-            generateCharacterElements(inputStrings[oldIndex]);
+            fetchCharacterSet(inputStrings[0]);
         }
     };
     xhr.send('simptrad=0');
 }
 
+function fetchCharacterSet(selectedInputString) {
+    // Make an AJAX request to the Flask endpoint
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/get_character_set', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Parse the JSON response from the server
+            var response = JSON.parse(xhr.responseText);
+            var characterSet = response.inputString;
+            generateCharacterElements(characterSet);
+        }
+    };
+    xhr.send('charSet=' + selectedInputString);
+}
+
+
 function generateCharacterElements(inputString) {
+    console.log(inputString);
 
     //TODO: fix rendering of characters that are outside Unicode's BMP
 
