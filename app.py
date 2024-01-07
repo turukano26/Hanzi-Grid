@@ -12,12 +12,12 @@ from cihai.core import Cihai
 app = Flask(__name__)
 
 # load dictionaries
-#d = Dictionary()
+d = Dictionary()
 j = pinyin_jyutping.PinyinJyutping()
-c = Cihai()
+"""c = Cihai()
 
 if not c.unihan.is_bootstrapped:  # download and install Unihan to db
-    c.unihan.bootstrap()
+    c.unihan.bootstrap()"""
 
 
 tone_color_dict = {
@@ -75,7 +75,7 @@ def get_character_set():
 def create_character_info_sheet(json_data):
 
     character = json_data['character']
-    #character_entry = d.lookup(character)
+    character_entry = d.lookup(character)
     #TODO: fix some traditional characters not appearing in the lookup
 
     # a string that accumulates html elements based on which language options are enabled
