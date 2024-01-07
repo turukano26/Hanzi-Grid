@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, jsonify
 from chinese_english_lookup import Dictionary
 from pypinyin.contrib.tone_convert import to_tone
 import json
-from hanziconv import HanziConv
+#from hanziconv import HanziConv
 import os
 import pinyin_jyutping
-from cihai.core import Cihai
+#from cihai.core import Cihai
 
 
 # Create a Flask application
