@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, jsonify
 from chinese_english_lookup import Dictionary
 from pypinyin.contrib.tone_convert import to_tone
 import json
-#from hanziconv import HanziConv
+from hanziconv import HanziConv
 import os
 import pinyin_jyutping
-#from cihai.core import Cihai
+from cihai.core import Cihai
 
 
 # Create a Flask application
@@ -14,10 +14,10 @@ app = Flask(__name__)
 # load dictionaries
 d = Dictionary()
 j = pinyin_jyutping.PinyinJyutping()
-"""c = Cihai()
+c = Cihai()
 
 if not c.unihan.is_bootstrapped:  # download and install Unihan to db
-    c.unihan.bootstrap()"""
+    c.unihan.bootstrap()
 
 
 tone_color_dict = {
@@ -88,17 +88,6 @@ def create_character_info_sheet(json_data):
         except:
             return_str += 'error with dictionary lookup!!'
 
-    # Adds an element for Cantonese readings
-    if json_data['chineseCantoneseCheckbox']:
-        try:
-            readings = zip(j.jyutping_all_solutions(character)['solutions'][0], [x[-1] for x in j.jyutping_all_solutions(character, tone_numbers=True)['solutions'][0]])
-            num_of_readings = len(j.jyutping_all_solutions(character)['solutions'][0])
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
-            for i, (reading, tone) in enumerate(readings):
-                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{',' if i < num_of_readings-1 else ''} </span>'
-            return_str += '</p>'
-        except:
-            return_str += '<hr>No Cantonese Reading Found<hr>'
 
     # Adds an element for Mandarin defintions and readings
     if json_data['chineseMandarinCheckbox']:
@@ -112,6 +101,19 @@ def create_character_info_sheet(json_data):
                 return_str += '<br>'
         except:
             return_str += '<hr>error with dictionary lookup!!'
+
+
+    # Adds an element for Cantonese readings
+    if json_data['chineseCantoneseCheckbox']:
+        try:
+            readings = zip(j.jyutping_all_solutions(character)['solutions'][0], [x[-1] for x in j.jyutping_all_solutions(character, tone_numbers=True)['solutions'][0]])
+            num_of_readings = len(j.jyutping_all_solutions(character)['solutions'][0])
+            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
+            for i, (reading, tone) in enumerate(readings):
+                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{',' if i < num_of_readings-1 else ''} </span>'
+            return_str += '</p>'
+        except:
+            return_str += '<hr>No Cantonese Reading Found<hr>'
 
 
     if json_data['chineseTangCheckbox']:

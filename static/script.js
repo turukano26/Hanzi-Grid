@@ -3,7 +3,6 @@
 var currentInputString;
 
 function fetchCharacterSetNames() {
-
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/get_character_set_names', true);
@@ -46,6 +45,7 @@ function fetchCharacterSetNames() {
     xhr.send('simptrad=0');
 }
 
+
 function fetchCharacterSet(selectedInputString) {
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
@@ -63,9 +63,42 @@ function fetchCharacterSet(selectedInputString) {
 }
 
 
-function generateCharacterElements(inputString) {
-    console.log(inputString);
+function fetchCharacterInfo(character) {
+    const infoBox = document.getElementById('infoBox');
 
+    // Make an AJAX request to the Flask endpoint
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/process_click_on_character', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Parse the JSON response from the server
+            var response = JSON.parse(xhr.responseText);
+            var resultFromPython = response.result;
+
+            // Display the result in the HTML element
+            infoBox.innerHTML = resultFromPython;
+        }
+    };
+
+    // Create an object to hold the character and language options
+    const requestData = {
+        character: character
+    };
+
+    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
+
+    // Loop through each checkbox and add its value to the requestData object
+    checkboxes.forEach(function (checkbox) {
+        requestData[checkbox.id] = checkbox.checked;
+    });
+
+    // Send the clicked character to the server
+    xhr.send(JSON.stringify(requestData));
+}
+
+
+function generateCharacterElements(inputString) {
     //TODO: fix rendering of characters that are outside Unicode's BMP
 
     const macroGrid = document.getElementById('macroGrid');
@@ -74,8 +107,6 @@ function generateCharacterElements(inputString) {
 
     macroGrid.innerHTML = ''; // Clear the existing grid
     currentInputString = inputString; // Update the Global
-
-    console.log(inputString);
 
     for (let i = 0; i < inputString.value.length; i++) {
 
@@ -108,7 +139,7 @@ function generateCharacterElements(inputString) {
                 // Update the background color of the large box
                 largeBox.style.backgroundColor = cellColor;
 
-                processCharacterClick(character);
+                fetchCharacterInfo(character);
 
                 // If in paint mode, color the cell and update acordingly
                 if (document.getElementById('toggleCheckbox').checked) {
@@ -137,7 +168,6 @@ function generateCharacterElements(inputString) {
 }
 
 //TODO: BUG only the first instance of a character has their colour changed
-
 function createMenu() {
 
     // Event listener to handle color selection and update the large box and cell color
@@ -269,40 +299,6 @@ function toggleCursor() {
 }
 
 
-function processCharacterClick(character) {
-    const infoBox = document.getElementById('infoBox');
-
-    // Make an AJAX request to the Flask endpoint
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/process_click_on_character', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            // Parse the JSON response from the server
-            var response = JSON.parse(xhr.responseText);
-            var resultFromPython = response.result;
-
-            // Display the result in the HTML element
-            infoBox.innerHTML = resultFromPython;
-        }
-    };
-
-    // Create an object to hold the character and language options
-    const requestData = {
-        character: character
-    };
-
-    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
-
-    // Loop through each checkbox and add its value to the requestData object
-    checkboxes.forEach(function (checkbox) {
-        requestData[checkbox.id] = checkbox.checked;
-    });
-
-    // Send the clicked character to the server
-    xhr.send(JSON.stringify(requestData));
-}
-
 function initializeSearchBar() {
     var searchBar = document.getElementById('searchBar');
 
@@ -339,7 +335,7 @@ function handleSearch(searchText) {
     // Sets the largeBox to the first character in the search
     const largeBox = document.getElementById('largeBox');
     largeBox.textContent = searchText[0];
-    processCharacterClick(searchText[0]);
+    fetchCharacterInfo(searchText[0]);
 
     if (localStorage.getItem(currentUnicodeKey)) {
         largeBox.style.backgroundColor = localStorage.getItem(currentUnicodeKey);
@@ -421,6 +417,11 @@ function closePopupMenu() {
     checkboxes.forEach(function (checkbox) {
         localStorage.setItem(checkbox.id, checkbox.checked);
     });
+
+    // Updates the currently selected character's infobox
+    const largeBox = document.getElementById('largeBox');
+    const currentCharacter = largeBox.textContent;
+    fetchCharacterInfo(currentCharacter)
 }
 
 function showSubmenu(submenuId) {
