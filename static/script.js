@@ -107,6 +107,7 @@ function fetchSearchResults(searchString, searchType) {
         if (xhr.status === 200) {
             // Parse the JSON response from the server
             var response = JSON.parse(xhr.responseText);
+            console.log(response);
             var characterSet = response.inputString;
             generateCharacterElements(characterSet);
         }
