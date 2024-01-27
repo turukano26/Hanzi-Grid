@@ -5,3 +5,4 @@ pypinyin
 pinyin_jyutping
 gunicorn
 pandas
+pyarrow
