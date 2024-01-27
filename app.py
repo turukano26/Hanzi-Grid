@@ -124,13 +124,16 @@ def create_character_info_sheet(json_data):
     # Adds an element for Cantonese readings
     if json_data['chineseCantoneseCheckbox']:
         try:
-            """readings = zip(j.jyutping_all_solutions(character)['solutions'][0], [x[-1] for x in jyut.jyutping_all_solutions(character, tone_numbers=True)['solutions'][0]])
-            num_of_readings = len(jyut.jyutping_all_solutions(character)['solutions'][0])
+            canto_readings = character_info['kCantonese']
+            #readings = [[r[:-1], r[-1]]for r in canto_readings]
+            readings = [[canto_readings[:-1], canto_readings[-1]]]
+            print(readings)
+
             return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
+
             for i, (reading, tone) in enumerate(readings):
-                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{',' if i < num_of_readings-1 else ''} </span>'
-            return_str += '</p>'"""
-            return_str += '<hr>No Cantonese Reading Found<hr>'
+                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{',' if i < len([0])-1 else ''} </span>'
+            
         except:
             return_str += '<hr>No Cantonese Reading Found<hr>'
 
