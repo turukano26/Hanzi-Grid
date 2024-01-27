@@ -2,9 +2,6 @@ git+https://github.com/zenje/chinese-english-lookup.git@56ec1e70c09157b802298166
 flask
 wheel
 pypinyin
-hanziconv
 pinyin_jyutping
 gunicorn
-cihai
-#jamdict 
-#jamdict-data
+pandas

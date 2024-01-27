@@ -98,6 +98,23 @@ function fetchCharacterInfo(character) {
 }
 
 
+function fetchSearchResults(searchString, searchType) {
+    // Make an AJAX request to the Flask endpoint
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/get_search_results', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Parse the JSON response from the server
+            var response = JSON.parse(xhr.responseText);
+            var characterSet = response.inputString;
+            generateCharacterElements(characterSet);
+        }
+    };
+    xhr.send('searchString=' + searchString + '&searchType=' + searchType);
+}
+
+
 function generateCharacterElements(inputString) {
     //TODO: fix rendering of characters that are outside Unicode's BMP
 
@@ -312,6 +329,7 @@ function initializeSearchBar() {
     });
 }
 
+
 function handleSearch(searchText) {
     // Removes previous styling from previous searches
     var gridElements = document.querySelectorAll('.grid span');
@@ -320,6 +338,12 @@ function handleSearch(searchText) {
         element.style.padding = '';
     });
 
+    var searchTypeDropdown = document.getElementById('searchTypeDropdown')
+    fetchSearchResults(searchText, searchTypeDropdown.value)
+}
+
+
+function handleSearchResults() {
     // Highlights the border of any characters in the search string
     for (let i = 0; i < searchText.length; i++) {
         var currentCharacter = searchText[i];
