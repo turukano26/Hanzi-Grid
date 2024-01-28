@@ -79,7 +79,10 @@ def get_search_results():
         pass
 
     elif search_type == 'Pinyin':
-        chars_to_return = ''.join(mand_def_df[mand_def_df['pinyin_num'].apply(lambda x: search_string == x.lower()[:-1])]['character'].unique())
+
+        matches = mand_def_df[mand_def_df['pinyin_num'].apply(lambda x: search_string == x.lower()[:-1])]
+        matches = matches.merge(char_info_df, left_on='character', right_index=True).sort_values('kFrequency')
+        chars_to_return = ''.join(matches['character'].unique())
         return jsonify({"search": chars_to_return})
         
     elif search_type == 'Romaji':
