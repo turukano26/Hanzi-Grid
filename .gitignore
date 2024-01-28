@@ -14,3 +14,6 @@ __pycache__/
 # Ignore environment-specific files
 .env
 .env.*
+
+# ignore notebooks for testing
+*.ipynb
