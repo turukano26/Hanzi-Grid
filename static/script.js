@@ -194,23 +194,7 @@ function createMenu() {
     // Event listener to handle color selection and update the large box and cell color
     colorPicker.addEventListener('change', () => {
         const selectedColor = colorPicker.value;
-        const largeBox = document.getElementById('largeBox');
-
-        // Get the current character from the large box
-        const currentCharacter = largeBox.textContent;
-        const currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
-
-        // Update the color for the most recent character in localStorage
-        localStorage.setItem(currentUnicodeKey, selectedColor);
-
-        // Update the background color of the large box
-        largeBox.style.backgroundColor = selectedColor;
-
-        // Update the color of the clicked cell
-        const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
-        if (clickedCell) {
-            clickedCell.style.backgroundColor = selectedColor;
-        }
+        changeColor(selectedColor);
     });
 
     // Event listener for the Export Button
@@ -295,6 +279,9 @@ function createColorButtons() {
 
 // Function to update the color of the currently selected character's cell 
 function changeColor(color) {
+
+    const largeBox = document.getElementById('largeBox');
+
     // Get the color picker element
     var colorPicker = document.getElementById('colorPicker');
     // Set the value to the selected color
@@ -310,11 +297,12 @@ function changeColor(color) {
     // Update the background color of the large box
     largeBox.style.backgroundColor = color;
 
-    // Update the color of the clicked cell
-    const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
-    if (clickedCell) {
-        clickedCell.style.backgroundColor = color;
-    }
+    // Update the color of the matching cells
+    const matchingCells = document.querySelectorAll(`span[data-unicode="${currentUnicodeKey}"]`);
+    console.log(matchingCells);
+    matchingCells.forEach(cell => {
+        cell.style.backgroundColor = color;
+    });
 }
 
 // Function to toggle the cursor when the paintbrush mode is on
