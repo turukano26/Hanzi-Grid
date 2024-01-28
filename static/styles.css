@@ -78,8 +78,8 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
-    max-width: 200px;
-    max-height: 94vh;
+    overflow-y: scroll;
+    max-height: 88vh;
 }
 
 .search-grid span {

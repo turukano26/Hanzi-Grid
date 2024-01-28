@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from chinese_english_lookup import Dictionary
-from pypinyin.contrib.tone_convert import to_tone
 import json
 import os
 import pandas as pd
@@ -11,7 +9,6 @@ import pandas as pd
 app = Flask(__name__)
 
 # load dictionaries
-eng_chin_dict = Dictionary()
 #jyut = pinyin_jyutping.PinyinJyutping()
 
 
@@ -41,6 +38,7 @@ for character_set in os.listdir('charactersets'):
 
 
 char_info_df = pd.read_parquet('df.parquet')
+mand_def_df = pd.read_parquet('mandarin_eng_dictionary.parquet')
         
 
 @app.route('/')
@@ -77,10 +75,14 @@ def get_search_results():
 
     if search_type == 'Character':
         return search_string
+    
     elif search_type == 'Radical':
         pass
+
     elif search_type == 'Pinyin':
-        pass
+        chars_to_return = ''.join(mand_def_df[mand_def_df['pinyin_num'].apply(lambda x: search_string == x.lower()[:-1])]['character'].unique())
+        return jsonify({"search": chars_to_return})
+        
     elif search_type == 'Romaji':
         #searchs the jd_romaji_kun and jd_romaji_on columns for matches, then returns the characters that match
         exclude = {ord(x): None for x in '..,-/ ,'}
@@ -88,7 +90,7 @@ def get_search_results():
         results_on = char_info_df[char_info_df['jd_romaji_on'].apply(lambda x: search_string in [s.translate(exclude) for s in x])]
 
         chars_to_return = ''.join(list(pd.concat([results_kun, results_on]).sort_values(['jd_freq', 'jd_grade']).index))
-        return jsonify({"search_result": chars_to_return})
+        return jsonify({"search": chars_to_return})
     
     else:
         return "wtf"
@@ -99,7 +101,6 @@ def create_character_info_sheet(json_data):
 
     character = json_data['character']
     character_info = char_info_df.loc[character]
-    character_entry = eng_chin_dict.lookup(character)
     #TODO: fix some traditional characters not appearing in the lookup
 
     # a string that accumulates html elements based on which language options are enabled
@@ -116,11 +117,12 @@ def create_character_info_sheet(json_data):
     # Adds an element for Mandarin defintions and readings
     if json_data['chineseMandarinCheckbox']:
         try:
+            mandarin_readings = mand_def_df[mand_def_df['character'] == character]
             return_str += '<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>'
-            for dict_entry in character_entry.definition_entries:
-                return_str += f'<span style="color:{tone_color_dict[dict_entry.pinyin[-1]]}; font-size: 30px "> • {to_tone(dict_entry.pinyin)} </span><br>'
+            for i, reading in mandarin_readings.iterrows():
+                return_str += f'<span style="color:{tone_color_dict[reading['pinyin_num'][-1]]}; font-size: 30px "> • {reading['pinyin_accent']} </span><br>'
 
-                for definition in dict_entry.definitions:
+                for definition in reading['definitions']:
                     return_str += f' - {definition} <br>'
                 return_str += '<br>'
         except:

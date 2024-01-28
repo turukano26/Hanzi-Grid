@@ -87,7 +87,6 @@ function fetchCharacterInfo(character) {
     };
 
     const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
-
     // Loop through each checkbox and add its value to the requestData object
     checkboxes.forEach(function (checkbox) {
         requestData[checkbox.id] = checkbox.checked;
@@ -114,6 +113,7 @@ function fetchSearchResults(searchString, searchType) {
     };
     xhr.send('searchString=' + searchString + '&searchType=' + searchType);
 }
+
 
 function generateMacroGrid(characterSet) {
 
@@ -143,8 +143,8 @@ function generateMacroGrid(characterSet) {
 }
 
 
-
 function generateCharacterElements(parentGrid, inputString) {
+    console.log(inputString)
     //TODO: fix rendering of characters that are outside Unicode's BMP
 
     for (let j = 0; j < inputString.length; j++) {
