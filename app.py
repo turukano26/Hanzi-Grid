@@ -106,11 +106,11 @@ def create_character_info_sheet(json_data):
     return_str = ''
     
     # Adds an element for the chinese simplified and traditional variants
-    if json_data['chineseSimpTradCheckbox']:
+    """if json_data['chineseSimpTradCheckbox']:
         try:
             return_str += character_entry.simp + " | " + character_entry.trad + '<br><br>'
         except:
-            return_str += 'error with dictionary lookup!!'
+            return_str += 'error with dictionary lookup!!'"""
 
 
     # Adds an element for Mandarin defintions and readings
