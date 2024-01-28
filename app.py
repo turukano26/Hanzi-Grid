@@ -71,7 +71,6 @@ def get_character_set():
 def get_search_results():
     search_string = request.form['searchString']
     search_type = request.form['searchType']
-    print(search_type)
 
     if search_type == 'Character':
         return search_string
@@ -135,7 +134,6 @@ def create_character_info_sheet(json_data):
             canto_readings = character_info['kCantonese']
             #readings = [[r[:-1], r[-1]]for r in canto_readings]
             readings = [[canto_readings[:-1], canto_readings[-1]]]
-            print(readings)
 
             return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
 

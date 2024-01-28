@@ -144,7 +144,6 @@ function generateMacroGrid(characterSet) {
 
 
 function generateCharacterElements(parentGrid, inputString) {
-    console.log(inputString)
     //TODO: fix rendering of characters that are outside Unicode's BMP
 
     for (let j = 0; j < inputString.length; j++) {
@@ -253,11 +252,15 @@ function createMenu() {
     document.getElementById('open-popup-menu-btn').addEventListener('click', openPopupMenu);
 
     // Loop through each checkbox inside the "languagemenu" div and update its state based on localStorage
-    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
-    checkboxes.forEach(function (checkbox) {
-        checkbox.checked = localStorage.getItem(checkbox.id) === 'true';
-    });
+    if (localStorage.length != 0) {
+        const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = localStorage.getItem(checkbox.id) === 'true';
+        });
+
+    }
 }
+
 
 // Helper function to convert RGB to HEX
 function rgbToHex(rgb) {
