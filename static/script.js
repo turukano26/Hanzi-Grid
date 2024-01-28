@@ -56,7 +56,7 @@ function fetchCharacterSet(selectedInputString) {
             // Parse the JSON response from the server
             var response = JSON.parse(xhr.responseText);
             var characterSet = response.inputString;
-            generateCharacterElements(characterSet);
+            generateMacroGrid(characterSet);
         }
     };
     xhr.send('charSet=' + selectedInputString);
@@ -105,82 +105,87 @@ function fetchSearchResults(searchString, searchType) {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function () {
         if (xhr.status === 200) {
+            const macroGrid = document.getElementById('searchGrid');
+            macroGrid.innerHTML = '';
             // Parse the JSON response from the server
             var response = JSON.parse(xhr.responseText);
-            var characterSet = response.inputString;
-            generateCharacterElements(characterSet);
+            generateCharacterElements(macroGrid, response.search);
         }
     };
     xhr.send('searchString=' + searchString + '&searchType=' + searchType);
 }
 
-
-function generateCharacterElements(inputString) {
-    //TODO: fix rendering of characters that are outside Unicode's BMP
+function generateMacroGrid(characterSet) {
 
     const macroGrid = document.getElementById('macroGrid');
     const largeBox = document.getElementById('largeBox');
     const colorPicker = document.getElementById('colorPicker');
 
     macroGrid.innerHTML = ''; // Clear the existing grid
-    currentInputString = inputString; // Update the Global
+    currentInputString = characterSet; // Update the Global
 
-    for (let i = 0; i < inputString.value.length; i++) {
+    for (let i = 0; i < characterSet.value.length; i++) {
 
         const gridDiv = document.createElement('div');
         gridDiv.className = 'grid';
 
         // Create a heading for the grid with the label of the inner value
         const heading = document.createElement('h1');
-        heading.textContent = inputString.value[i].label;
+        heading.textContent = characterSet.value[i].label;
 
-
-        for (let j = 0; j < inputString.value[i].value.length; j++) {
-            const character = inputString.value[i].value[j];
-            const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
-            const span = document.createElement('span');
-            span.textContent = character;
-            span.setAttribute('data-unicode', unicodeKey); // Add data attribute for identification
-            gridDiv.appendChild(span);
-
-            // Check if the cell was previously colored and apply the class
-            if (localStorage.getItem(unicodeKey)) {
-                span.style.backgroundColor = localStorage.getItem(unicodeKey);
-            }
-
-            span.addEventListener('click', () => {
-                // Single-click behavior: Display the character in the large box
-                largeBox.textContent = character;
-                // Get the color from the selected cell
-                const cellColor = window.getComputedStyle(span).backgroundColor;
-                // Update the background color of the large box
-                largeBox.style.backgroundColor = cellColor;
-
-                fetchCharacterInfo(character);
-
-                // If in paint mode, color the cell and update acordingly
-                if (document.getElementById('toggleCheckbox').checked) {
-
-                    const selectedColor = colorPicker.value;
-                    // Update the color for the most recent character in localStorage
-                    localStorage.setItem(unicodeKey, selectedColor);
-                    // Update the background color of the large box
-                    largeBox.style.backgroundColor = selectedColor;
-                    // Update the color of the clicked cell
-                    span.style.backgroundColor = selectedColor;
-                }
-                else {
-                    // otherwise copy the clicked on cell's color to the color picker
-                    colorPicker.value = rgbToHex(cellColor);
-                }
-            });
-        }
+        generateCharacterElements(gridDiv, characterSet.value[i].value);
 
         // Append the heading and paragraph to the grid div
         macroGrid.appendChild(heading);
-
         // Append the grid div to the container
-        macroGrid.appendChild(gridDiv);
+        macroGrid.appendChild(gridDiv)
+    }
+}
+
+
+
+function generateCharacterElements(parentGrid, inputString) {
+    //TODO: fix rendering of characters that are outside Unicode's BMP
+
+    for (let j = 0; j < inputString.length; j++) {
+        const character = inputString[j];
+        const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
+        const span = document.createElement('span');
+        span.textContent = character;
+        span.setAttribute('data-unicode', unicodeKey); // Add data attribute for identification
+        parentGrid.appendChild(span);
+
+        // Check if the cell was previously colored and apply the class
+        if (localStorage.getItem(unicodeKey)) {
+            span.style.backgroundColor = localStorage.getItem(unicodeKey);
+        }
+
+        span.addEventListener('click', () => {
+            // Single-click behavior: Display the character in the large box
+            largeBox.textContent = character;
+            // Get the color from the selected cell
+            const cellColor = window.getComputedStyle(span).backgroundColor;
+            // Update the background color of the large box
+            largeBox.style.backgroundColor = cellColor;
+
+            fetchCharacterInfo(character);
+
+            // If in paint mode, color the cell and update acordingly
+            if (document.getElementById('toggleCheckbox').checked) {
+
+                const selectedColor = colorPicker.value;
+                // Update the color for the most recent character in localStorage
+                localStorage.setItem(unicodeKey, selectedColor);
+                // Update the background color of the large box
+                largeBox.style.backgroundColor = selectedColor;
+                // Update the color of the clicked cell
+                span.style.backgroundColor = selectedColor;
+            }
+            else {
+                // otherwise copy the clicked on cell's color to the color picker
+                colorPicker.value = rgbToHex(cellColor);
+            }
+        });
     }
 }
 
@@ -236,7 +241,7 @@ function createMenu() {
         if (isConfirmed) {
             // User clicked "OK," proceed with clearing data
             localStorage.clear();
-            generateCharacterElements(currentInputString);
+            generateMacroGrid(currentInputString);
             alert('Data cleared successfully!');
         } else {
             // User clicked "Cancel," do nothing
@@ -422,7 +427,7 @@ function addToLocalStorage(jsonFile) {
                 localStorage.setItem(key, data[key]);
             });
             console.log('Data added to localStorage successfully!');
-            generateCharacterElements(currentInputString);
+            generateMacroGrid(currentInputString);
         }
     });
 }

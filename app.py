@@ -82,8 +82,14 @@ def get_search_results():
     elif search_type == 'Pinyin':
         pass
     elif search_type == 'Romaji':
-        result = j.lookup(search_string)
-        pass
+        #searchs the jd_romaji_kun and jd_romaji_on columns for matches, then returns the characters that match
+        exclude = {ord(x): None for x in '..,-/ ,'}
+        results_kun = char_info_df[char_info_df['jd_romaji_kun'].apply(lambda x: search_string in [s.translate(exclude) for s in x])]
+        results_on = char_info_df[char_info_df['jd_romaji_on'].apply(lambda x: search_string in [s.translate(exclude) for s in x])]
+
+        chars_to_return = ''.join(list(pd.concat([results_kun, results_on]).sort_values(['jd_freq', 'jd_grade']).index))
+        return jsonify({"search_result": chars_to_return})
+    
     else:
         return "wtf"
 
