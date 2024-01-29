@@ -11,7 +11,7 @@
     <div class="top-menu">
         <div class="charsetmenu" id="menu">
             <label for="inputStrings">Select a Character Set:</label>
-            <select id="inputStrings"></select>
+            <select id="inputStrings" class="character-set-dropdown"></select>
         </div>
         <div>
             <input type="color" id="colorPicker" value="#000000">
@@ -23,7 +23,7 @@
         </div>
 
         <div>
-            <button id="open-popup-menu-btn">Menu</button>
+            <button id="open-popup-menu-btn" class="popup-menu-btn">Menu</button>
         </div>
 
         <div id="popup-menu-container">
@@ -100,8 +100,10 @@
         </div>
     </div>
     <div class="container">
-        <div class="large-box" id="largeBox"></div>
-        <div class="info-box" id="infoBox"></div>
+        <div class="info-column">
+            <div class="large-box" id="largeBox"></div>
+            <div class="info-box" id="infoBox"></div>
+        </div>
         <div class="grid-column">
             <div class="macro-grid" id="macroGrid"></div>
         </div>

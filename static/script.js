@@ -279,6 +279,7 @@ function createColorButtons() {
 }
 
 // Function to update the color of the currently selected character's cell 
+// updates the largeBox, colorpicker, localStorage, and any matching grid cells
 function changeColor(color) {
 
     const largeBox = document.getElementById('largeBox');
@@ -311,6 +312,20 @@ function toggleCursor() {
     body.classList.toggle('paintbrush-cursor', document.getElementById('toggleCheckbox').checked);
 }
 
+function intializeInfoColumn() {
+    const largeBox = document.getElementById('largeBox');
+
+    largeBox.textContent = '一';
+    var unicodeKey = '一'.codePointAt(0).toString(16);
+
+    fetchCharacterInfo('一');
+
+    if (localStorage.getItem(unicodeKey)) {
+        largeBox.style.backgroundColor = localStorage.getItem(unicodeKey);
+    }
+
+
+}
 
 function initializeSearchBar() {
     var searchBar = document.getElementById('searchBar');
@@ -457,3 +472,4 @@ fetchCharacterSetNames();
 createColorButtons();
 createMenu();
 initializeSearchBar();
+intializeInfoColumn();
