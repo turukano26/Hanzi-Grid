@@ -104,11 +104,12 @@ function fetchSearchResults(searchString, searchType) {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function () {
         if (xhr.status === 200) {
-            const macroGrid = document.getElementById('searchGrid');
-            macroGrid.innerHTML = '';
+            const searchGrid = document.getElementById('searchGrid');
+            searchGrid.innerHTML = '';
             // Parse the JSON response from the server
             var response = JSON.parse(xhr.responseText);
-            generateCharacterElements(macroGrid, response.search);
+            highlightSearchResults(response.search)
+            generateCharacterElements(searchGrid, response.search);
         }
     };
     xhr.send('searchString=' + searchString + '&searchType=' + searchType);
@@ -338,31 +339,16 @@ function handleSearch(searchText) {
 }
 
 
-function handleSearchResults() {
-    // Highlights the border of any characters in the search string
-    for (let i = 0; i < searchText.length; i++) {
-        var currentCharacter = searchText[i];
-        var currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
+// Highlights the border of any characters in the search string
+function highlightSearchResults(searchResults) {
+    for (const character of searchResults) {
 
+        var currentUnicodeKey = character.codePointAt(0).toString(16);
         const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
         if (clickedCell) {
             clickedCell.style.border = '4px solid #000';
             clickedCell.style.padding = '7px';
         }
-    }
-
-    // Sets the largeBox to the first character in the search
-    const largeBox = document.getElementById('largeBox');
-    largeBox.textContent = searchText[0];
-    fetchCharacterInfo(searchText[0]);
-
-    if (localStorage.getItem(currentUnicodeKey)) {
-        largeBox.style.backgroundColor = localStorage.getItem(currentUnicodeKey);
-        colorPicker.value = localStorage.getItem(currentUnicodeKey);
-    }
-    else {
-        largeBox.style.backgroundColor = '#FFFFFF';
-        colorPicker.value = '#FFFFFF';
     }
 }
 

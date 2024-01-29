@@ -3,3 +3,4 @@ wheel
 gunicorn
 pandas
 pyarrow
+regex

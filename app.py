@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 import pandas as pd
+import regex
+
 #import pinyin_jyutping
 
 
@@ -73,8 +75,13 @@ def get_search_results():
     search_type = request.form['searchType']
 
     if search_type == 'Character':
-        return search_string
-    
+         # Use regex to find CJK characters in the input string
+        cjk_range = regex.compile(r'\p{Script=Han}')
+        cjk_characters = cjk_range.findall(search_string)
+        chars_to_return = ''.join(cjk_characters)
+
+        return jsonify({"search": chars_to_return})
+
     elif search_type == 'Radical':
         pass
 
