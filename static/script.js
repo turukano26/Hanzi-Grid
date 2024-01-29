@@ -323,6 +323,9 @@ function intializeInfoColumn() {
     if (localStorage.getItem(unicodeKey)) {
         largeBox.style.backgroundColor = localStorage.getItem(unicodeKey);
     }
+    else {
+        largeBox.style.backgroundColor = '#ffffff'
+    }
 
 
 }
