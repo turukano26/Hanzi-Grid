@@ -118,8 +118,6 @@ function fetchSearchResults(searchString, searchType) {
 function generateMacroGrid(characterSet) {
 
     const macroGrid = document.getElementById('macroGrid');
-    const largeBox = document.getElementById('largeBox');
-    const colorPicker = document.getElementById('colorPicker');
 
     macroGrid.innerHTML = ''; // Clear the existing grid
     currentInputString = characterSet; // Update the Global
@@ -144,10 +142,12 @@ function generateMacroGrid(characterSet) {
 
 
 function generateCharacterElements(parentGrid, inputString) {
+
+    const largeBox = document.getElementById('largeBox');
+    const colorPicker = document.getElementById('colorPicker');
     //TODO: fix rendering of characters that are outside Unicode's BMP
 
-    for (let j = 0; j < inputString.length; j++) {
-        const character = inputString[j];
+    for (const character of inputString) {
         const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
         const span = document.createElement('span');
         span.textContent = character;
@@ -299,7 +299,6 @@ function changeColor(color) {
 
     // Update the color of the matching cells
     const matchingCells = document.querySelectorAll(`span[data-unicode="${currentUnicodeKey}"]`);
-    console.log(matchingCells);
     matchingCells.forEach(cell => {
         cell.style.backgroundColor = color;
     });
