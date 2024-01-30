@@ -38,6 +38,7 @@ for character_set in os.listdir('charactersets'):
         # Log the error or print a message to help identify the issue
         print(f"Error loading JSON file: {e}")
 
+character_sets.sort(key=lambda x: x['label'])
 
 char_info_df = pd.read_parquet('df.parquet')
 mand_def_df = pd.read_parquet('mandarin_eng_dictionary.parquet')
