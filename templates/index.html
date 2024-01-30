@@ -11,9 +11,7 @@
     <div class="top-menu">
         <span style="color:#000000 ;font-size: 42px; margin-right: 60px; font-weight: bold;">omni-hanzi</span>
 
-        <div>
-            <button id="open-popup-menu-btn" class="popup-menu-btn">Menu</button>
-        </div>
+
         <div class="charsetmenu" id="menu">
             <label for="inputStrings">Select a Character Set:</label>
             <select id="inputStrings" class="character-set-dropdown"></select>
@@ -26,7 +24,9 @@
             <input type="checkbox" id="toggleCheckbox" onchange="toggleCursor()">
             <label for="toggleCheckbox">Toggle Paint Mode</label>
         </div>
-
+        <div>
+            <button id="open-popup-menu-btn" class="popup-menu-btn">Menu</button>
+        </div>
 
         <div id="popup-menu-container">
             <div id="popup-menu">
@@ -39,32 +39,33 @@
                     <h2>Enable Languages</h2>
 
                     <h3>Chinese</h3>
-                    <input type="checkbox" id="chineseSimpTradCheckbox" onchange="toggleCursor()" checked>
-                    <label for="chineseSimpTradCheckbox">Toggle Simplified/Traditional</label>
+                    <input type="checkbox" id="chineseMandarinCheckbox" onchange="toggleCursor()" checked>
+                    <label for="chineseMandarinCheckbox">Toggle Mandarin Definitions and Readings</label>
                     <br>
+                    <!--<input type="checkbox" id="chineseSimpTradCheckbox" onchange="toggleCursor()" checked>
+                    <label for="chineseSimpTradCheckbox">Toggle Simplified/Traditional</label>
+                    <br>-->
                     <input type="checkbox" id="chineseCantoneseCheckbox" onchange="toggleCursor()" checked>
                     <label for="chineseCantoneseCheckbox">Toggle Cantonese Readings</label>
                     <br>
                     <input type="checkbox" id="chineseTangCheckbox" onchange="toggleCursor()" checked>
                     <label for="chineseTangCheckbox">Toggle Middle-Chinese Reading</label>
                     <br>
-                    <input type="checkbox" id="chineseMandarinCheckbox" onchange="toggleCursor()" checked>
-                    <label for="chineseMandarinCheckbox">Toggle Mandarin Definitions and Readings</label>
-                    <br>
+
 
                     <h3>Japanese</h3>
-                    <input type="checkbox" id="japaneseMeaningCheckbox" onchange="toggleCursor()" checked>
+                    <!--<input type="checkbox" id="japaneseMeaningCheckbox" onchange="toggleCursor()" checked>
                     <label for="japaneseMeaningCheckbox">Toggle Japanese Meanings</label>
-                    <br>
+                    <br>-->
                     <input type="checkbox" id="japaneseKunCheckbox" onchange="toggleCursor()" checked>
                     <label for="japaneseKunCheckbox">Toggle Japanese Kun-Readings</label>
                     <br>
                     <input type="checkbox" id="japaneseOnCheckbox" onchange="toggleCursor()" checked>
                     <label for="japaneseOnCheckbox">Toggle Japanese On-Readings</label>
                     <br>
-                    <input type="checkbox" id="japaneseExtrasCheckbox" onchange="toggleCursor()" checked>
+                    <!--<input type="checkbox" id="japaneseExtrasCheckbox" onchange="toggleCursor()" checked>
                     <label for="japaneseExtrasCheckbox">Toggle Japanese Extra Info</label>
-                    <br>
+                    <br>-->
 
 
                     <h3>Korean</h3>
@@ -114,8 +115,8 @@
                 <option value="Pinyin">Pinyin</option>
                 <option value="Romaji">Romaji</option>
                 <option value="Character">Character</option>
-                <option value="Radical">Radical</option>
-                <option value="Meaning">Meaning</option>
+                <!-- <option value="Radical">Radical</option> -->
+                <!-- <option value="Meaning">Meaning</option> -->
             </select>
             <input type="text" class='search-bar' id="searchBar" placeholder="Search...">
             <div class="search-grid" id="searchGrid"></div>
