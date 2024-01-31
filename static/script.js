@@ -146,7 +146,6 @@ function generateCharacterElements(parentGrid, inputString) {
 
     const largeBox = document.getElementById('largeBox');
     const colorPicker = document.getElementById('colorPicker');
-    //TODO: fix rendering of characters that are outside Unicode's BMP
 
     for (const character of inputString) {
         const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
@@ -189,7 +188,6 @@ function generateCharacterElements(parentGrid, inputString) {
     }
 }
 
-//TODO: BUG only the first instance of a character has their colour changed
 function createMenu() {
 
     // Event listener to handle color selection and update the large box and cell color
@@ -476,3 +474,17 @@ createColorButtons();
 createMenu();
 initializeSearchBar();
 intializeInfoColumn();
+
+
+/* To dos:
+
+fix traditional noit getting mandarin def
+add other backup mandarin defs
+cantonese fix to use jyutping
+add non bmp to dataframes
+fix nu: in search
+fix capitalization in search
+add japanese definitions
+add japanese hiragana and katakana
+
+*/
