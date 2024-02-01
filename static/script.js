@@ -477,10 +477,11 @@ intializeInfoColumn();
 
 
 /* To dos:
-
-fix traditional noit getting mandarin def
+add joyo kanji
+fix traditional not getting mandarin def
 add other backup mandarin defs
 cantonese fix to use jyutping
+also look at sinopy lib
 add non bmp to dataframes
 fix nu: in search
 fix capitalization in search
