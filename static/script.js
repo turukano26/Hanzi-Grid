@@ -477,15 +477,16 @@ intializeInfoColumn();
 
 
 /* To dos:
-add joyo kanji
-fix traditional not getting mandarin def
+Bugs:
+fix traditional not getting mandarin definitions
 add other backup mandarin defs
-cantonese fix to use jyutping
-also look at sinopy lib
-add non bmp to dataframes
-fix nu: in search
-fix capitalization in search
+
+Features:
 add japanese definitions
 add japanese hiragana and katakana
 
+Database Stuff:
+cantonese fix to use jyutping
+also look at sinopy lib
+fix 'u:' in pinyin
 */

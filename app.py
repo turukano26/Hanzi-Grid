@@ -88,16 +88,16 @@ def get_search_results():
 
     elif search_type == 'Pinyin':
 
-        matches = mand_def_df[mand_def_df['pinyin_num'].apply(lambda x: search_string == x.lower()[:-1])]
+        matches = mand_def_df[mand_def_df['pinyin_num'].apply(lambda x: search_string.lower() == x.lower()[:-1].strip(": ,.-_"))]
         matches = matches.merge(char_info_df, left_on='character', right_index=True).sort_values('kFrequency')
         chars_to_return = ''.join(matches['character'].unique())
         return jsonify({"search": chars_to_return})
         
     elif search_type == 'Romaji':
         #searchs the jd_romaji_kun and jd_romaji_on columns for matches, then returns the characters that match
-        exclude = {ord(x): None for x in '..,-/ ,'}
-        results_kun = char_info_df[char_info_df['jd_romaji_kun'].apply(lambda x: search_string in [s.translate(exclude) for s in x])]
-        results_on = char_info_df[char_info_df['jd_romaji_on'].apply(lambda x: search_string in [s.translate(exclude) for s in x])]
+        exclude = {ord(x): None for x in ':..,-/_ ,'}
+        results_kun = char_info_df[char_info_df['jd_romaji_kun'].apply(lambda x: search_string.lower() in [s.translate(exclude).lower() for s in x])]
+        results_on = char_info_df[char_info_df['jd_romaji_on'].apply(lambda x: search_string.lower() in [s.translate(exclude).lower() for s in x])]
 
         chars_to_return = ''.join(list(pd.concat([results_kun, results_on]).sort_values(['jd_freq', 'jd_grade']).index))
         return jsonify({"search": chars_to_return})
