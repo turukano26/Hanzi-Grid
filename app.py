@@ -10,9 +10,6 @@ import regex
 # Create a Flask application
 app = Flask(__name__)
 
-# load dictionaries
-#jyut = pinyin_jyutping.PinyinJyutping()
-
 
 tone_color_dict = {
     '1': '#e32200',
