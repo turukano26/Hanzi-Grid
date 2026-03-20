@@ -130,7 +130,7 @@ def create_character_info_sheet(json_data):
             mandarin_readings = mand_def_df[mand_def_df['character'] == character]
             return_str += '<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>'
             for i, reading in mandarin_readings.iterrows():
-                return_str += f'<span style="color:{tone_color_dict[reading['pinyin_num'][-1]]}; font-size: 30px "> • {reading['pinyin_accent']} </span><br>'
+                return_str += f'<span style="color:{tone_color_dict[reading["pinyin_num"][-1]]}; font-size: 30px "> • {reading["pinyin_accent"]} </span><br>'
 
                 for definition in reading['definitions']:
                     return_str += f' - {definition} <br>'
@@ -149,7 +149,7 @@ def create_character_info_sheet(json_data):
             return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
 
             for i, (reading, tone) in enumerate(readings):
-                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{',' if i < len([0])-1 else ''} </span>'
+                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{"," if i < len([0])-1 else ""} </span>'
             
         except:
             return_str += '<hr>No Cantonese Reading Found<hr>'

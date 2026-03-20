@@ -1,33 +1,96 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 /* styles.css */
 
 .container {
     display: flex;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .large-box {
     font-size: 144px;
-    margin-right: 20px;
-    margin-left: 20px;
-    margin-top: 20px;
-    height: 220px;
-    width: 200px;
+    margin: 20px 0 0 0;
+    width: min(100%, 220px);
+    aspect-ratio: 1 / 1;
+    height: auto;
     text-align: center;
+    box-sizing: border-box;
+    align-self: center;
 }
 
 
 .info-box {
     display: flex;
     flex-direction: column;
-    margin-right: 20px;
-    position: absolute;
-    left: 20px;
-    width: 200px;
+    margin-top: 12px;
+    position: static;
+    left: auto;
+    width: 100%;
     word-wrap: normal;
-    top: 340px;
-    overflow-y: scroll;
-    bottom: 5%;
+    top: auto;
+    overflow-y: auto;
+    bottom: auto;
+    flex: 1 1 auto;
+    min-height: 180px;
     background-color: white;
     padding: 8px;
+    box-sizing: border-box;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+}
+
+.info-box::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.info-box::before,
+.info-box::after {
+    content: "";
+    position: sticky;
+    left: 0;
+    right: 0;
+    display: block;
+    height: 16px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 120ms ease-in-out;
+}
+
+.info-box::before {
+    top: 0;
+    margin-bottom: -16px;
+    background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0));
+}
+
+.info-box::after {
+    bottom: 0;
+    margin-top: -16px;
+    background: linear-gradient(to top, #ffffff, rgba(255, 255, 255, 0));
+}
+
+.info-box.show-top-fade::before {
+    opacity: 1;
+}
+
+.info-box.show-bottom-fade::after {
+    opacity: 1;
+}
+
+.info-box:focus {
+    outline: 2px solid #7d9fd3;
+    outline-offset: -2px;
 }
 
 
@@ -48,8 +111,13 @@
 }
 
 .grid-column {
-    margin-left: 20px;
-    flex-grow: 1;
+    margin-left: 12px;
+    margin-right: 12px;
+    flex: 1 1 auto;
+    min-width: 280px;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
     flex-direction: row;
     /* Allow the grid column to be scrollable */
 }
@@ -57,9 +125,12 @@
 .macro-grid {
     padding-right: 20px;
     display: flex;
-    overflow-y: scroll;
-    max-height: 88vh;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
     flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: #b5b5b5 transparent;
 }
 
 .grid {
@@ -82,10 +153,11 @@
 
 .search-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
     gap: 10px;
-    overflow-y: scroll;
-    max-height: 86vh;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
 }
 
 .search-grid span {
@@ -102,6 +174,10 @@
 
 .top-menu {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .top-menu div {
@@ -112,6 +188,8 @@
 body {
     cursor: default;
     /* Set the default cursor style */
+    display: flex;
+    flex-direction: column;
 }
 
 .paintbrush-cursor {
@@ -122,7 +200,14 @@ body {
 .search-column {
     background-color: #f5f5f5;
     padding: 10px;
-    margin-left: 5px;
+    flex: 0 0 320px;
+    min-width: 220px;
+    max-width: 33.333vw;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
 #searchBar {
@@ -205,12 +290,42 @@ body {
 
 .info-column {
     background-color: #f5f5f5;
+    position: relative;
+    flex: 0 0 240px;
+    min-width: 220px;
+    max-width: 33.333vw;
+    display: flex;
+    flex-direction: column;
+    padding: 0 12px 12px 12px;
+    box-sizing: border-box;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.column-resizer {
+    width: 6px;
+    cursor: col-resize;
+    background-color: #d3d3d3;
+    border-left: 1px solid #c4c4c4;
+    border-right: 1px solid #c4c4c4;
+    flex: 0 0 6px;
+}
+
+.column-resizer:hover {
+    background-color: #bfbfbf;
+}
+
+.resizing {
+    user-select: none;
+    cursor: col-resize !important;
 }
 
 
 .search-type-dropdown {
     padding: 5px;
-    margin: 5px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .character-set-dropdown {
@@ -225,6 +340,5 @@ body {
 }
 
 .search-bar {
-    margin: 5px;
-    margin-bottom: 8px;
+    margin: 5px 0 8px 0;
 }

@@ -78,6 +78,7 @@ function fetchCharacterInfo(character) {
 
             // Display the result in the HTML element
             infoBox.innerHTML = resultFromPython;
+            updateInfoBoxFadeState();
         }
     };
 
@@ -87,13 +88,68 @@ function fetchCharacterInfo(character) {
     };
 
     const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
+    let anyLanguageEnabled = false;
     // Loop through each checkbox and add its value to the requestData object
     checkboxes.forEach(function (checkbox) {
         requestData[checkbox.id] = checkbox.checked;
+        if (checkbox.checked) {
+            anyLanguageEnabled = true;
+        }
     });
+
+    if (!anyLanguageEnabled) {
+        infoBox.innerHTML = '<span style="color:#666666;">Enable at least one language in Menu > Languages to see character info.</span>';
+        infoBox.scrollTop = 0;
+        updateInfoBoxFadeState();
+        return;
+    }
 
     // Send the clicked character to the server
     xhr.send(JSON.stringify(requestData));
+}
+
+function updateInfoBoxFadeState() {
+    const infoBox = document.getElementById('infoBox');
+    if (!infoBox) {
+        return;
+    }
+    infoBox.classList.remove('show-top-fade', 'show-bottom-fade');
+}
+
+function initializeInfoBoxInteractions() {
+    const infoBox = document.getElementById('infoBox');
+    if (!infoBox) {
+        return;
+    }
+
+    infoBox.addEventListener('scroll', updateInfoBoxFadeState);
+
+    infoBox.addEventListener('keydown', function (event) {
+        const step = 40;
+        const pageStep = Math.max(120, infoBox.clientHeight - 40);
+
+        if (event.key === 'ArrowDown') {
+            infoBox.scrollBy({ top: step, behavior: 'auto' });
+            event.preventDefault();
+        } else if (event.key === 'ArrowUp') {
+            infoBox.scrollBy({ top: -step, behavior: 'auto' });
+            event.preventDefault();
+        } else if (event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
+            infoBox.scrollBy({ top: pageStep, behavior: 'auto' });
+            event.preventDefault();
+        } else if (event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
+            infoBox.scrollBy({ top: -pageStep, behavior: 'auto' });
+            event.preventDefault();
+        } else if (event.key === 'Home') {
+            infoBox.scrollTo({ top: 0, behavior: 'auto' });
+            event.preventDefault();
+        } else if (event.key === 'End') {
+            infoBox.scrollTo({ top: infoBox.scrollHeight, behavior: 'auto' });
+            event.preventDefault();
+        }
+    });
+
+    updateInfoBoxFadeState();
 }
 
 
@@ -238,9 +294,11 @@ function createMenu() {
     if (localStorage.length != 0) {
         const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
         checkboxes.forEach(function (checkbox) {
-            checkbox.checked = localStorage.getItem(checkbox.id) === 'true';
+            const storedValue = localStorage.getItem(checkbox.id);
+            if (storedValue !== null) {
+                checkbox.checked = storedValue === 'true';
+            }
         });
-
     }
 }
 
@@ -454,6 +512,79 @@ function showSubmenu(submenuId) {
     document.getElementById(submenuId).classList.add('active');
 }
 
+function initializeColumnResizers() {
+    const leftResizer = document.getElementById('leftResizer');
+    const rightResizer = document.getElementById('rightResizer');
+    const infoColumn = document.getElementById('infoColumn');
+    const gridColumn = document.getElementById('gridColumn');
+    const searchColumn = document.getElementById('searchColumn');
+
+    setupColumnResizer(leftResizer, infoColumn, gridColumn);
+    setupColumnResizer(rightResizer, gridColumn, searchColumn);
+}
+
+function setupColumnResizer(resizer, leftColumn, rightColumn) {
+    if (!resizer || !leftColumn || !rightColumn) {
+        return;
+    }
+
+    resizer.addEventListener('mousedown', function (event) {
+        event.preventDefault();
+
+        const startX = event.clientX;
+        const startLeftWidth = leftColumn.getBoundingClientRect().width;
+        const startRightWidth = rightColumn.getBoundingClientRect().width;
+        const totalWidth = startLeftWidth + startRightWidth;
+        const minLeftWidth = parseInt(window.getComputedStyle(leftColumn).minWidth, 10) || 120;
+        const minRightWidth = parseInt(window.getComputedStyle(rightColumn).minWidth, 10) || 120;
+        const maxLeftWidth = getMaxColumnWidth(leftColumn);
+        const maxRightWidth = getMaxColumnWidth(rightColumn);
+
+        document.body.classList.add('resizing');
+
+        function onMouseMove(moveEvent) {
+            const deltaX = moveEvent.clientX - startX;
+            const minDeltaFromLeft = minLeftWidth - startLeftWidth;
+            const maxDeltaFromLeft = maxLeftWidth - startLeftWidth;
+            const maxDeltaFromRightMin = startRightWidth - minRightWidth;
+            const minDeltaFromRightMax = startRightWidth - maxRightWidth;
+
+            const minAllowedDelta = Math.max(minDeltaFromLeft, minDeltaFromRightMax);
+            const maxAllowedDelta = Math.min(maxDeltaFromLeft, maxDeltaFromRightMin);
+            const clampedDelta = Math.min(maxAllowedDelta, Math.max(minAllowedDelta, deltaX));
+
+            const newLeftWidth = startLeftWidth + clampedDelta;
+            const newRightWidth = totalWidth - newLeftWidth;
+
+            leftColumn.style.flex = `0 0 ${newLeftWidth}px`;
+            rightColumn.style.flex = `0 0 ${newRightWidth}px`;
+        }
+
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.body.classList.remove('resizing');
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+}
+
+function getMaxColumnWidth(column) {
+    const maxWidth = window.getComputedStyle(column).maxWidth;
+    if (!maxWidth || maxWidth === 'none') {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    const parsed = parseFloat(maxWidth);
+    if (Number.isNaN(parsed)) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    return parsed;
+}
+
 
 // List of colors
 var colors = [
@@ -474,6 +605,8 @@ createColorButtons();
 createMenu();
 initializeSearchBar();
 intializeInfoColumn();
+initializeInfoBoxInteractions();
+initializeColumnResizers();
 
 
 /* To dos:
