@@ -40,8 +40,28 @@ for character_set in os.listdir('charactersets'):
 
 character_sets.sort(key=lambda x: x['label'])
 
-char_info_df = pd.read_parquet('df.parquet')
-mand_def_df = pd.read_parquet('mandarin_eng_dictionary.parquet')
+# Load only columns used by current routes to reduce memory usage.
+char_info_columns = [
+    'kFrequency',
+    'jd_freq',
+    'jd_grade',
+    'jd_romaji_kun',
+    'jd_romaji_on',
+    'kCantonese',
+    'kTang',
+    'jd_kor_r',
+    'jd_viet',
+]
+
+mandarin_def_columns = [
+    'character',
+    'pinyin_num',
+    'pinyin_accent',
+    'definitions',
+]
+
+char_info_df = pd.read_parquet('df.parquet', columns=char_info_columns)
+mand_def_df = pd.read_parquet('mandarin_eng_dictionary.parquet', columns=mandarin_def_columns)
         
 
 @app.route('/')
