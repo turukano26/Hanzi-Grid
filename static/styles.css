@@ -93,6 +93,24 @@ body {
     outline-offset: -2px;
 }
 
+.info-box .info-box-cjk {
+    cursor: pointer;
+    border-radius: 2px;
+    padding: 0 1px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: background-color 90ms ease, color 90ms ease;
+}
+
+.info-box .info-box-cjk:hover,
+.info-box .info-box-cjk:focus {
+    background-color: rgba(125, 159, 211, 0.38);
+    outline: none;
+}
+
+.info-box .info-box-cjk:focus-visible {
+    box-shadow: 0 0 0 2px rgba(125, 159, 211, 0.9);
+}
 
 
 .color-defaults {
@@ -291,7 +309,7 @@ body {
 .info-column {
     background-color: #f5f5f5;
     position: relative;
-    flex: 0 0 240px;
+    flex: 0 0 360px;
     min-width: 220px;
     max-width: 33.333vw;
     display: flex;

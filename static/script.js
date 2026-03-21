@@ -78,6 +78,7 @@ function fetchCharacterInfo(character) {
 
             // Display the result in the HTML element
             infoBox.innerHTML = resultFromPython;
+            wrapCjkCharactersInInfoBox(infoBox);
             updateInfoBoxFadeState();
         }
     };
@@ -100,6 +101,7 @@ function fetchCharacterInfo(character) {
     if (!anyLanguageEnabled) {
         infoBox.innerHTML = '<span style="color:#666666;">Enable at least one language in Menu > Languages to see character info.</span>';
         infoBox.scrollTop = 0;
+        wrapCjkCharactersInInfoBox(infoBox);
         updateInfoBoxFadeState();
         return;
     }
@@ -116,6 +118,98 @@ function updateInfoBoxFadeState() {
     infoBox.classList.remove('show-top-fade', 'show-bottom-fade');
 }
 
+// Matches Han, Hiragana, Katakana, and Hangul syllables (CJK text in the info panel)
+var INFO_BOX_CJK_REGEX = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu;
+
+function wrapCjkCharactersInInfoBox(infoBox) {
+    if (!infoBox) {
+        return;
+    }
+    var textNodes = [];
+    var walker = document.createTreeWalker(infoBox, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+        if (node.parentElement && node.parentElement.closest('.info-box-cjk')) {
+            continue;
+        }
+        textNodes.push(node);
+    }
+    for (var i = 0; i < textNodes.length; i++) {
+        var textNode = textNodes[i];
+        var text = textNode.nodeValue;
+        if (!text) {
+            continue;
+        }
+        INFO_BOX_CJK_REGEX.lastIndex = 0;
+        if (!INFO_BOX_CJK_REGEX.test(text)) {
+            continue;
+        }
+        INFO_BOX_CJK_REGEX.lastIndex = 0;
+        var parent = textNode.parentNode;
+        if (!parent) {
+            continue;
+        }
+        var fragment = document.createDocumentFragment();
+        var lastIndex = 0;
+        var match;
+        while ((match = INFO_BOX_CJK_REGEX.exec(text)) !== null) {
+            var ch = match[0];
+            var start = match.index;
+            if (start > lastIndex) {
+                fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+            }
+            var span = document.createElement('span');
+            span.className = 'info-box-cjk';
+            span.textContent = ch;
+            span.setAttribute('role', 'button');
+            span.setAttribute('tabindex', '0');
+            span.setAttribute('aria-label', 'View character ' + ch);
+            fragment.appendChild(span);
+            lastIndex = start + ch.length;
+        }
+        if (lastIndex < text.length) {
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+        }
+        parent.replaceChild(fragment, textNode);
+    }
+}
+
+function activateCharacterFromInfoBox(character) {
+    var largeBox = document.getElementById('largeBox');
+    var colorPicker = document.getElementById('colorPicker');
+    var unicodeKey = character.codePointAt(0).toString(16);
+    var matchingCells = document.querySelectorAll('span[data-unicode="' + unicodeKey + '"]');
+
+    largeBox.textContent = character;
+
+    var cellColor;
+    if (matchingCells.length) {
+        cellColor = window.getComputedStyle(matchingCells[0]).backgroundColor;
+    } else if (localStorage.getItem(unicodeKey)) {
+        cellColor = localStorage.getItem(unicodeKey);
+    } else {
+        cellColor = '#ffffff';
+    }
+    largeBox.style.backgroundColor = cellColor;
+
+    fetchCharacterInfo(character);
+
+    if (document.getElementById('toggleCheckbox').checked) {
+        var selectedColor = colorPicker.value;
+        localStorage.setItem(unicodeKey, selectedColor);
+        largeBox.style.backgroundColor = selectedColor;
+        matchingCells.forEach(function (span) {
+            span.style.backgroundColor = selectedColor;
+        });
+    } else {
+        if (matchingCells.length) {
+            colorPicker.value = rgbToHex(window.getComputedStyle(matchingCells[0]).backgroundColor);
+        } else if (localStorage.getItem(unicodeKey)) {
+            colorPicker.value = localStorage.getItem(unicodeKey);
+        }
+    }
+}
+
 function initializeInfoBoxInteractions() {
     const infoBox = document.getElementById('infoBox');
     if (!infoBox) {
@@ -123,8 +217,23 @@ function initializeInfoBoxInteractions() {
     }
 
     infoBox.addEventListener('scroll', updateInfoBoxFadeState);
+    infoBox.addEventListener('click', function (event) {
+        var target = event.target.closest('.info-box-cjk');
+        if (!target || !infoBox.contains(target)) {
+            return;
+        }
+        event.preventDefault();
+        activateCharacterFromInfoBox(target.textContent);
+    });
 
     infoBox.addEventListener('keydown', function (event) {
+        if (event.target.classList && event.target.classList.contains('info-box-cjk')) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                activateCharacterFromInfoBox(event.target.textContent);
+                return;
+            }
+        }
         const step = 40;
         const pageStep = Math.max(120, infoBox.clientHeight - 40);
 
