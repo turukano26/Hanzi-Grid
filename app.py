@@ -11,15 +11,6 @@ import regex
 app = Flask(__name__)
 
 
-tone_color_dict = {
-    '1': '#e32200',
-    '2': '#f2cf05',
-    '3': '#17a30a',
-    '4': '#008fcc',
-    '5': '#8f8f8f',
-    '6': '#aa8f2f'
-}
-
 # pre-loads all the json data for the character sets
 character_sets = []
 for character_set in os.listdir('charactersets'):
@@ -130,99 +121,80 @@ def create_character_info_sheet(json_data):
     character_info = char_info_df.loc[character]
     #TODO: fix some traditional characters not appearing in the lookup
 
-    # a string that accumulates html elements based on which language options are enabled
-    return_str = ''
-    
-    # Adds an element for the chinese simplified and traditional variants
-    """if json_data['chineseSimpTradCheckbox']:
-        try:
-            return_str += character_entry.simp + " | " + character_entry.trad + '<br><br>'
-        except:
-            return_str += 'error with dictionary lookup!!'"""
-
+    out = {}
 
     # Adds an element for Mandarin defintions and readings
     if json_data['chineseMandarinCheckbox']:
         try:
             mandarin_readings = mand_def_df[mand_def_df['character'] == character]
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>'
+            readings = []
             for i, reading in mandarin_readings.iterrows():
-                return_str += f'<span style="color:{tone_color_dict[reading["pinyin_num"][-1]]}; font-size: 30px "> • {reading["pinyin_accent"]} </span><br>'
-
-                for definition in reading['definitions']:
-                    return_str += f' - {definition} <br>'
-                return_str += '<br>'
-        except:
-            return_str += '<hr>error with dictionary lookup!!'
-
+                pinyin_num = reading['pinyin_num']
+                tone = str(pinyin_num)[-1] if pinyin_num is not None else '5'
+                defs = reading['definitions']
+                if defs is None:
+                    definitions = []
+                else:
+                    definitions = [str(d) for d in list(defs)]
+                readings.append({
+                    'pinyin_accent': str(reading['pinyin_accent']),
+                    'tone': tone,
+                    'definitions': definitions,
+                })
+            out['mandarin'] = {'readings': readings}
+        except Exception:
+            out['mandarin'] = {'error': 'error with dictionary lookup!!'}
 
     # Adds an element for Cantonese readings
     if json_data['chineseCantoneseCheckbox']:
         try:
             canto_readings = character_info['kCantonese']
-            #readings = [[r[:-1], r[-1]]for r in canto_readings]
             readings = [[canto_readings[:-1], canto_readings[-1]]]
-
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>'
-
-            for i, (reading, tone) in enumerate(readings):
-                return_str += f'<span style="color:{tone_color_dict[tone]}; font-size: 30px">{reading}{"," if i < len([0])-1 else ""} </span>'
-            
-        except:
-            return_str += '<hr>No Cantonese Reading Found<hr>'
-
+            out['cantonese'] = {
+                'segments': [
+                    {'text': r[0], 'tone': str(r[1])}
+                    for r in readings
+                ]
+            }
+        except Exception:
+            out['cantonese'] = {'error': 'No Cantonese Reading Found'}
 
     if json_data['chineseTangCheckbox']:
         try:
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Middle Chinese</span><p>'
             tang_readings = character_info['kTang']
-            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(tang_readings.lower().split())}</span>'
-
-        except:
-            return_str += 'No Middle Chinese Readings'
-
+            out['tang'] = {'text': ', '.join(tang_readings.lower().split())}
+        except Exception:
+            out['tang'] = {'error': 'No Middle Chinese Readings'}
 
     if json_data['japaneseKunCheckbox']:
         try:
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Kun-Reading</span><p>'
             kun_readings = character_info['jd_romaji_kun']
-            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(kun_readings)}</span>'
-
-        except:
-            return_str += 'No Kun-Readings'
-
+            out['japanese_kun'] = {'items': [str(x) for x in list(kun_readings)]}
+        except Exception:
+            out['japanese_kun'] = {'error': 'No Kun-Readings'}
 
     if json_data['japaneseOnCheckbox']:
         try:
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">On-Reading</span><p>'
             on_readings = character_info['jd_romaji_on']
-            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(on_readings)}</span>'
-
-        except:
-            return_str += 'No On-Readings'
-
+            out['japanese_on'] = {'items': [str(x) for x in list(on_readings)]}
+        except Exception:
+            out['japanese_on'] = {'error': 'No On-Readings'}
 
     if json_data['koreanCheckbox']:
         try:
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Korean Reading</span><p>'
             korean_readings = character_info['jd_kor_r']
-            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(korean_readings)}</span>'
-
-        except:
-            return_str += 'No Korean Readings'
-
+            out['korean'] = {'items': [str(x) for x in list(korean_readings)]}
+        except Exception:
+            out['korean'] = {'error': 'No Korean Readings'}
 
     if json_data['vietnameseCheckbox']:
         try:
-            return_str += '<hr><span style="color:#999999 ;font-size: 12px">Vietnamese Reading</span><p>'
             viet_readings = character_info['jd_viet']
-            return_str += f'<span style="color:#333333 ;font-size: 30px">{", ".join(viet_readings)}</span>'
+            out['vietnamese'] = {'items': [str(x) for x in list(viet_readings)]}
+        except Exception:
+            out['vietnamese'] = {'error': 'No Vietnamese Readings'}
 
-        except:
-            return_str += 'No Vietnamese Readings'
-
-
-    return return_str
+    return out
 
 
 # Run the application
