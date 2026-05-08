@@ -217,7 +217,12 @@ def parse_cedict(txt_path: Path) -> dict[int, list[dict]]:
 # ---------------------------------------------------------------------------
 
 def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
-    """Insert CC-CEDICT data into the database, merging with existing Unihan data."""
+    """Insert CC-CEDICT data into the database as its own reading rows.
+
+    Each CEDICT entry becomes a new reading row with source_id = SOURCE_CEDICT.
+    No attempt is made to merge with existing Unihan readings; deduplication by
+    pinyin value happens at display time in _get_mandarin().
+    """
     con = sqlite3.connect(db_path)
     con.execute("PRAGMA foreign_keys = ON")
     con.execute("PRAGMA journal_mode = WAL")
@@ -234,45 +239,24 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
     )
     existing_etyms: dict[int, int] = dict(cur.fetchall())
 
-    # Existing Mandarin readings: (codepoint, accented_pinyin) → reading_id
+    # Codepoints that already have CEDICT readings (idempotency on re-run)
     cur.execute(
         """
-        SELECT e.codepoint, rt.value, r.id
+        SELECT DISTINCT e.codepoint
         FROM readings r
-        JOIN etymologies e  ON e.id  = r.etymology_id
-        JOIN reading_transcriptions rt ON rt.reading_id = r.id
-        WHERE e.language_id = ? AND rt.transcription_system_id = ?
+        JOIN etymologies e ON e.id = r.etymology_id
+        WHERE e.language_id = ? AND r.source_id = ?
         """,
-        (LANG_MANDARIN, TS_PINYIN),
+        (LANG_MANDARIN, SOURCE_CEDICT),
     )
-    existing_readings: dict[tuple[int, str], int] = {}
-    for cp, pinyin, reading_id in cur.fetchall():
-        key = (cp, unicodedata.normalize("NFC", pinyin))
-        existing_readings[key] = reading_id
-
-    # Max reading sort_order per etymology (to append new readings correctly)
-    cur.execute(
-        """
-        SELECT e.id, COALESCE(MAX(r.sort_order), 0)
-        FROM etymologies e
-        LEFT JOIN readings r ON r.etymology_id = e.id
-        WHERE e.language_id = ?
-        GROUP BY e.id
-        """,
-        (LANG_MANDARIN,),
-    )
-    max_reading_sort: dict[int, int] = dict(cur.fetchall())
-
-    # Max sense sort_order per reading (to continue numbering)
-    cur.execute("SELECT reading_id, MAX(sort_order) FROM senses GROUP BY reading_id")
-    max_sense_sort: dict[int, int] = dict(cur.fetchall())
+    imported_codepoints: set[int] = {row[0] for row in cur.fetchall()}
 
     # Existing characters (for checking FK safety)
     cur.execute("SELECT codepoint FROM characters")
     known_chars: set[int] = {row[0] for row in cur.fetchall()}
 
     print(f"Pre-loaded: {len(existing_etyms):,} etymologies, "
-          f"{len(existing_readings):,} readings, {len(known_chars):,} characters")
+          f"{len(imported_codepoints):,} already imported, {len(known_chars):,} characters")
 
     # ------------------------------------------------------------------
     # Process entries
@@ -281,9 +265,7 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
     stats = {
         "chars_created": 0,
         "etyms_created": 0,
-        "readings_matched": 0,
         "readings_created": 0,
-        "pinyin_num_added": 0,
         "senses_added": 0,
     }
 
@@ -291,6 +273,10 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
         cur.execute("BEGIN")
 
         for cp, entries in cedict.items():
+            # Skip if already imported (idempotency)
+            if cp in imported_codepoints:
+                continue
+
             # Ensure character exists
             if cp not in known_chars:
                 cur.execute(
@@ -310,82 +296,43 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
                 )
                 etym_id = cur.lastrowid
                 existing_etyms[cp] = etym_id
-                max_reading_sort[etym_id] = 0
                 stats["etyms_created"] += 1
 
-            for entry in entries:
+            for sort_idx, entry in enumerate(entries, start=1):
                 pinyin_accent = unicodedata.normalize("NFC", entry["pinyin_accent"])
                 pinyin_num = entry["pinyin_num"]
                 tone = entry["tone"]
                 defs = entry["definitions"]
 
-                # --- Match or create reading ---
-                reading_id = existing_readings.get((cp, pinyin_accent))
+                # Create new reading row under SOURCE_CEDICT
+                cur.execute(
+                    "INSERT INTO readings (etymology_id, source_id, kind, tone, sort_order) "
+                    "VALUES (?, ?, 'reading', ?, ?)",
+                    (etym_id, SOURCE_CEDICT, tone, sort_idx),
+                )
+                reading_id = cur.lastrowid
 
-                if reading_id is not None:
-                    # Reading exists (from Unihan) — add CEDICT as second source
-                    cur.execute(
-                        "INSERT OR IGNORE INTO reading_sources (reading_id, source_id) "
-                        "VALUES (?, ?)",
-                        (reading_id, SOURCE_CEDICT),
-                    )
-                    # Add numbered pinyin transcription if missing
-                    cur.execute(
-                        "INSERT OR IGNORE INTO reading_transcriptions "
-                        "(reading_id, transcription_system_id, value) VALUES (?, ?, ?)",
-                        (reading_id, TS_PINYIN_NUM, pinyin_num),
-                    )
-                    if cur.rowcount > 0:
-                        stats["pinyin_num_added"] += 1
-                    stats["readings_matched"] += 1
+                # Both accented and numbered pinyin transcriptions
+                cur.execute(
+                    "INSERT INTO reading_transcriptions "
+                    "(reading_id, transcription_system_id, value) VALUES (?, ?, ?)",
+                    (reading_id, TS_PINYIN, pinyin_accent),
+                )
+                cur.execute(
+                    "INSERT INTO reading_transcriptions "
+                    "(reading_id, transcription_system_id, value) VALUES (?, ?, ?)",
+                    (reading_id, TS_PINYIN_NUM, pinyin_num),
+                )
+                stats["readings_created"] += 1
 
-                else:
-                    # New reading — create under existing etymology
-                    max_reading_sort[etym_id] = max_reading_sort.get(etym_id, 0) + 1
+                # Definitions as senses
+                for i, defn in enumerate(defs, start=1):
                     cur.execute(
-                        "INSERT INTO readings (etymology_id, kind, tone, sort_order) "
-                        "VALUES (?, 'reading', ?, ?)",
-                        (etym_id, tone, max_reading_sort[etym_id]),
-                    )
-                    reading_id = cur.lastrowid
-
-                    # Transcriptions: both accented and numbered
-                    cur.execute(
-                        "INSERT INTO reading_transcriptions "
-                        "(reading_id, transcription_system_id, value) VALUES (?, ?, ?)",
-                        (reading_id, TS_PINYIN, pinyin_accent),
-                    )
-                    cur.execute(
-                        "INSERT INTO reading_transcriptions "
-                        "(reading_id, transcription_system_id, value) VALUES (?, ?, ?)",
-                        (reading_id, TS_PINYIN_NUM, pinyin_num),
-                    )
-
-                    # Source
-                    cur.execute(
-                        "INSERT INTO reading_sources (reading_id, source_id) VALUES (?, ?)",
-                        (reading_id, SOURCE_CEDICT),
-                    )
-
-                    existing_readings[(cp, pinyin_accent)] = reading_id
-                    stats["readings_created"] += 1
-
-                # --- Add definitions as senses ---
-                base_sort = max_sense_sort.get(reading_id, 0)
-                for i, defn in enumerate(defs):
-                    cur.execute(
-                        "INSERT INTO senses (reading_id, sort_order, definition) "
-                        "VALUES (?, ?, ?)",
-                        (reading_id, base_sort + i + 1, defn),
-                    )
-                    sense_id = cur.lastrowid
-                    cur.execute(
-                        "INSERT INTO sense_sources (sense_id, source_id) VALUES (?, ?)",
-                        (sense_id, SOURCE_CEDICT),
+                        "INSERT INTO senses (reading_id, source_id, sort_order, definition) "
+                        "VALUES (?, ?, ?, ?)",
+                        (reading_id, SOURCE_CEDICT, i, defn),
                     )
                     stats["senses_added"] += 1
-
-                max_sense_sort[reading_id] = base_sort + len(defs)
 
         con.commit()
         print("\nCommitted.")
@@ -399,12 +346,10 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
         con.close()
 
     # Print stats
-    print(f"\n  Characters created:        {stats['chars_created']:,}")
-    print(f"  Etymologies created:       {stats['etyms_created']:,}")
-    print(f"  Readings matched (Unihan): {stats['readings_matched']:,}")
-    print(f"  Readings created (new):    {stats['readings_created']:,}")
-    print(f"  Numbered pinyin added:     {stats['pinyin_num_added']:,}")
-    print(f"  Senses added:              {stats['senses_added']:,}")
+    print(f"\n  Characters created:  {stats['chars_created']:,}")
+    print(f"  Etymologies created: {stats['etyms_created']:,}")
+    print(f"  Readings created:    {stats['readings_created']:,}")
+    print(f"  Senses added:        {stats['senses_added']:,}")
 
 
 # ---------------------------------------------------------------------------
@@ -445,21 +390,20 @@ def main() -> None:
 
     # Summary
     con = sqlite3.connect(args.db)
-    for table in [
-        "characters", "etymologies", "readings",
-        "reading_transcriptions", "senses", "reading_sources", "sense_sources",
-    ]:
+    print("\nRow counts after import:")
+    for table in ["characters", "etymologies", "readings", "reading_transcriptions", "senses"]:
         (n,) = con.execute(f"SELECT count(*) FROM {table}").fetchone()
         print(f"  {table}: {n:,} rows")
 
-    # How many readings are attested by both sources?
+    # How many codepoints have readings from both Unihan and CEDICT?
     (both,) = con.execute("""
-        SELECT COUNT(DISTINCT rs1.reading_id)
-        FROM reading_sources rs1
-        JOIN reading_sources rs2 ON rs2.reading_id = rs1.reading_id
-        WHERE rs1.source_id = 1 AND rs2.source_id = 2
+        SELECT COUNT(DISTINCT e.codepoint)
+        FROM etymologies e
+        WHERE e.language_id = 1
+          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 1)
+          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 2)
     """).fetchone()
-    print(f"\n  Readings attested by BOTH Unihan + CEDICT: {both:,}")
+    print(f"\n  Characters with both Unihan + CEDICT Mandarin readings: {both:,}")
 
     con.close()
     print("\nDone.")

@@ -245,12 +245,13 @@ CREATE TABLE etymologies (
 CREATE TABLE readings (
     id              INTEGER PRIMARY KEY,
     etymology_id    INTEGER NOT NULL REFERENCES etymologies(id),
+    source_id       INTEGER NOT NULL REFERENCES sources(id),
     kind            TEXT    NOT NULL DEFAULT 'reading'
                     CHECK (kind IN ('reading', 'reconstruction')),
     category        TEXT,
     subcategory     TEXT,
     tone            TEXT,
-    sort_order      INTEGER NOT NULL DEFAULT 0,
+    sort_order      INTEGER NOT NULL DEFAULT 0,  -- ordering within this source's readings
     features        TEXT                   -- JSON
 );
 
@@ -273,6 +274,7 @@ CREATE TABLE reading_transcriptions (
 CREATE TABLE senses (
     id              INTEGER PRIMARY KEY,
     reading_id      INTEGER NOT NULL REFERENCES readings(id),
+    source_id       INTEGER NOT NULL REFERENCES sources(id),
     sort_order      INTEGER NOT NULL DEFAULT 0,
     definition      TEXT    NOT NULL,
     part_of_speech  TEXT,                  -- 'noun', 'verb', 'adjective', etc.
@@ -296,36 +298,22 @@ CREATE TABLE examples (
 
 
 -- ============================================================
--- 3b. SOURCE ATTRIBUTION (many-to-many)
+-- 3b. SOURCE ATTRIBUTION
 -- ============================================================
--- These junction tables record which reference works attest each piece
--- of linguistic data. A reading or definition can come from multiple
--- sources; a single source contains data for many readings/definitions.
+-- readings.source_id and senses.source_id record which reference work
+-- each row came from directly. When two sources attest the same
+-- pronunciation, they each get their own reading row; display code
+-- deduplicates by converted value and picks the preferred source.
 --
--- Using junction tables (not a single source_id FK) because:
---   • CC-CEDICT and Wiktionary may both attest the same reading
---   • You want to track provenance without duplicating data rows
---   • You can query "everything from source X" or "all sources for item Y"
+-- etymology_sources is a junction table (many-to-many) because a single
+-- etymology grouping can be confirmed by multiple references without
+-- warranting duplicate rows.
 
 CREATE TABLE etymology_sources (
     etymology_id INTEGER NOT NULL REFERENCES etymologies(id) ON DELETE CASCADE,
     source_id    INTEGER NOT NULL REFERENCES sources(id),
     notes        TEXT,                     -- e.g., "listed under alternate reading"
     PRIMARY KEY (etymology_id, source_id)
-);
-
-CREATE TABLE reading_sources (
-    reading_id  INTEGER NOT NULL REFERENCES readings(id) ON DELETE CASCADE,
-    source_id   INTEGER NOT NULL REFERENCES sources(id),
-    notes       TEXT,
-    PRIMARY KEY (reading_id, source_id)
-);
-
-CREATE TABLE sense_sources (
-    sense_id    INTEGER NOT NULL REFERENCES senses(id) ON DELETE CASCADE,
-    source_id   INTEGER NOT NULL REFERENCES sources(id),
-    notes       TEXT,
-    PRIMARY KEY (sense_id, source_id)
 );
 
 
@@ -441,8 +429,8 @@ CREATE INDEX idx_components_component     ON character_components(component_code
 
 -- Source attribution (reverse lookups: "everything from source X")
 CREATE INDEX idx_etym_sources_source      ON etymology_sources(source_id);
-CREATE INDEX idx_reading_sources_source   ON reading_sources(source_id);
-CREATE INDEX idx_sense_sources_source     ON sense_sources(source_id);
+CREATE INDEX idx_readings_source          ON readings(source_id);
+CREATE INDEX idx_senses_source            ON senses(source_id);
 CREATE INDEX idx_glyphs_source            ON character_glyphs(source_id);
 CREATE INDEX idx_variants_source          ON character_variants(source_id);
 CREATE INDEX idx_components_source        ON character_components(source_id);
@@ -514,15 +502,13 @@ SELECT
     r.category,
     s.id          AS sense_id,
     s.definition,
-    src.short_name AS source,
-    ss.notes       AS source_notes
+    src.short_name AS source
 FROM characters        c
 JOIN etymologies       e   ON e.codepoint    = c.codepoint
 JOIN languages         l   ON l.id           = e.language_id
 JOIN readings          r   ON r.etymology_id = e.id
 JOIN senses            s   ON s.reading_id   = r.id
-LEFT JOIN sense_sources ss  ON ss.sense_id   = s.id
-LEFT JOIN sources      src ON src.id         = ss.source_id
+JOIN sources           src ON src.id         = s.source_id
 ORDER BY c.codepoint, l.sort_order, e.etymology_order, r.sort_order, s.sort_order;
 
 -- Component breakdown view

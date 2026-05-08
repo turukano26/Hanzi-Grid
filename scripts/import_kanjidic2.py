@@ -167,30 +167,12 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
         """
         SELECT DISTINCT r.etymology_id
         FROM readings r
-        JOIN reading_sources rs ON rs.reading_id = r.id
         JOIN etymologies e ON e.id = r.etymology_id
-        WHERE e.language_id = ? AND rs.source_id = ?
+        WHERE e.language_id = ? AND r.source_id = ?
         """,
         (LANG_TOKYO, SOURCE_KD2),
     )
     imported_etyms: set[int] = {row[0] for row in cur.fetchall()}
-
-    # Max reading sort_order per etymology (so KD2 readings continue after Unihan's)
-    cur.execute(
-        """
-        SELECT r.etymology_id, COALESCE(MAX(r.sort_order), 0)
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        WHERE e.language_id = ?
-        GROUP BY r.etymology_id
-        """,
-        (LANG_TOKYO,),
-    )
-    max_sort: dict[int, int] = dict(cur.fetchall())
-
-    # Max sense sort_order per reading
-    cur.execute("SELECT reading_id, MAX(sort_order) FROM senses GROUP BY reading_id")
-    max_sense_sort: dict[int, int] = dict(cur.fetchall())
 
     # Known characters
     cur.execute("SELECT codepoint FROM characters")
@@ -256,7 +238,6 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
                 )
                 etym_id = cur.lastrowid
                 existing_etyms[cp] = etym_id
-                max_sort[etym_id] = 0
                 stats['etyms_created'] += 1
 
             # Skip readings if already imported from KD2 (idempotency)
@@ -264,6 +245,7 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
                 continue
 
             # Process each rmgroup (usually one per kanji)
+            sort_counter = 0
             for rmg in entry['rmgroups']:
                 first_reading_id = None
 
@@ -272,12 +254,12 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
                         has_okurigana = '.' in kana_val
                         features = '{"okurigana": true}' if has_okurigana else None
 
-                        max_sort[etym_id] = max_sort.get(etym_id, 0) + 1
+                        sort_counter += 1
                         cur.execute(
                             "INSERT INTO readings "
-                            "(etymology_id, kind, category, sort_order, features) "
-                            "VALUES (?, 'reading', ?, ?, ?)",
-                            (etym_id, category, max_sort[etym_id], features),
+                            "(etymology_id, source_id, kind, category, sort_order, features) "
+                            "VALUES (?, ?, 'reading', ?, ?, ?)",
+                            (etym_id, SOURCE_KD2, category, sort_counter, features),
                         )
                         reading_id = cur.lastrowid
 
@@ -286,10 +268,6 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
                             "(reading_id, transcription_system_id, value) VALUES (?, ?, ?)",
                             (reading_id, TS_KANA, kana_val),
                         )
-                        cur.execute(
-                            "INSERT INTO reading_sources (reading_id, source_id) VALUES (?, ?)",
-                            (reading_id, SOURCE_KD2),
-                        )
 
                         if first_reading_id is None:
                             first_reading_id = reading_id
@@ -297,20 +275,13 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
 
                 # Attach English meanings to the first reading of this rmgroup
                 if first_reading_id is not None and rmg['meanings']:
-                    base = max_sense_sort.get(first_reading_id, 0)
-                    for i, meaning in enumerate(rmg['meanings']):
+                    for i, meaning in enumerate(rmg['meanings'], start=1):
                         cur.execute(
-                            "INSERT INTO senses (reading_id, sort_order, definition) "
-                            "VALUES (?, ?, ?)",
-                            (first_reading_id, base + i + 1, meaning),
-                        )
-                        sense_id = cur.lastrowid
-                        cur.execute(
-                            "INSERT INTO sense_sources (sense_id, source_id) VALUES (?, ?)",
-                            (sense_id, SOURCE_KD2),
+                            "INSERT INTO senses (reading_id, source_id, sort_order, definition) "
+                            "VALUES (?, ?, ?, ?)",
+                            (first_reading_id, SOURCE_KD2, i, meaning),
                         )
                         stats['senses_added'] += 1
-                    max_sense_sort[first_reading_id] = base + len(rmg['meanings'])
 
         con.commit()
         print("\nCommitted.")
@@ -377,34 +348,29 @@ def main() -> None:
     # Summary
     con = sqlite3.connect(args.db)
     print("\nRow counts after import:")
-    for table in [
-        "characters", "etymologies", "readings",
-        "reading_transcriptions", "senses", "reading_sources", "sense_sources",
-    ]:
+    for table in ["characters", "etymologies", "readings", "reading_transcriptions", "senses"]:
         (n,) = con.execute(f"SELECT count(*) FROM {table}").fetchone()
         print(f"  {table}: {n:,} rows")
 
-    # Check how many Japanese readings are now attested by both Unihan and Kanjidic2
+    # Characters with Japanese readings from both Unihan and Kanjidic2
     (both,) = con.execute("""
-        SELECT COUNT(DISTINCT rs1.reading_id)
-        FROM reading_sources rs1
-        JOIN reading_sources rs2 ON rs2.reading_id = rs1.reading_id
-        JOIN readings r ON r.id = rs1.reading_id
-        JOIN etymologies e ON e.id = r.etymology_id
-        WHERE rs1.source_id = 2 AND rs2.source_id = 3 AND e.language_id = 10
+        SELECT COUNT(DISTINCT e.codepoint)
+        FROM etymologies e
+        WHERE e.language_id = 10
+          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 2)
+          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 3)
     """).fetchone()
-    print(f"\n  Japanese readings attested by both Unihan + Kanjidic2: {both:,}")
+    print(f"\n  Characters with both Unihan + Kanjidic2 Japanese readings: {both:,}")
 
-    # Check Hepburn and kana coverage for Japanese readings
-    for ts_id, ts_name in [(30, 'Hepburn'), (32, 'Kana')]:
-        (n,) = con.execute("""
-            SELECT COUNT(*)
-            FROM reading_transcriptions rt
-            JOIN readings r ON r.id = rt.reading_id
-            JOIN etymologies e ON e.id = r.etymology_id
-            WHERE e.language_id = 10 AND rt.transcription_system_id = ?
-        """, (ts_id,)).fetchone()
-        print(f"  Japanese {ts_name} transcriptions: {n:,}")
+    # Kana coverage for Japanese readings
+    (n,) = con.execute("""
+        SELECT COUNT(*)
+        FROM reading_transcriptions rt
+        JOIN readings r ON r.id = rt.reading_id
+        JOIN etymologies e ON e.id = r.etymology_id
+        WHERE e.language_id = 10 AND rt.transcription_system_id = 32
+    """).fetchone()
+    print(f"  Japanese kana transcriptions: {n:,}")
 
     con.close()
     print("\nDone.")

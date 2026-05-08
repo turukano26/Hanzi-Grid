@@ -254,43 +254,40 @@ def create_character_info_sheet(json_data):
 
 
 def _get_mandarin(codepoint):
+    # Fetch all Mandarin readings with their source; prefer CEDICT (source 1) over Unihan (source 2)
     rows = db.execute("""
-        SELECT r.id, r.tone, rt.value AS pinyin
+        SELECT r.id, r.tone, r.source_id, rt.value AS pinyin
         FROM readings r
         JOIN etymologies e ON e.id = r.etymology_id
         JOIN reading_transcriptions rt ON rt.reading_id = r.id
         WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY e.etymology_order, r.sort_order
+        ORDER BY e.etymology_order, r.source_id ASC, r.sort_order
     """, (codepoint, LANG_MANDARIN, TS_PINYIN)).fetchall()
 
     if not rows:
         return {'error': 'No Mandarin readings found'}
 
-    readings = []
-    for reading_id, tone, pinyin in rows:
-        # Prefer CC-CEDICT definitions (per-reading) over Unihan (character-level)
+    # Deduplicate by NFC-normalised pinyin, preferring CEDICT rows (lower source_id)
+    seen: dict[str, dict] = {}  # pinyin → reading dict
+    import unicodedata
+    for reading_id, tone, source_id, pinyin in rows:
+        key = unicodedata.normalize("NFC", pinyin)
+        if key in seen:
+            continue  # already recorded a preferred (lower source_id) row
+
         defs = db.execute("""
-            SELECT s.definition FROM senses s
-            JOIN sense_sources ss ON ss.sense_id = s.id
-            WHERE s.reading_id = ? AND ss.source_id = ?
-            ORDER BY s.sort_order
-        """, (reading_id, SOURCE_CEDICT)).fetchall()
+            SELECT definition FROM senses
+            WHERE reading_id = ? AND source_id = ?
+            ORDER BY sort_order
+        """, (reading_id, source_id)).fetchall()
 
-        if not defs:
-            defs = db.execute("""
-                SELECT s.definition FROM senses s
-                JOIN sense_sources ss ON ss.sense_id = s.id
-                WHERE s.reading_id = ? AND ss.source_id = ?
-                ORDER BY s.sort_order
-            """, (reading_id, SOURCE_UNIHAN)).fetchall()
-
-        readings.append({
+        seen[key] = {
             'pinyin_accent': pinyin,
             'tone': tone or '5',
             'definitions': [d[0] for d in defs],
-        })
+        }
 
-    return {'readings': readings}
+    return {'readings': list(seen.values())}
 
 
 def _get_cantonese(codepoint):

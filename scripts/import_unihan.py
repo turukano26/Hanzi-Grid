@@ -335,9 +335,9 @@ def _insert_readings_for_language(
             tone = tone_fn(val) if tone_fn else None
 
             cur.execute(
-                "INSERT INTO readings (etymology_id, kind, category, tone, sort_order) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (etym_id, kind, category, tone, i + 1),
+                "INSERT INTO readings (etymology_id, source_id, kind, category, tone, sort_order) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (etym_id, SOURCE_UNIHAN, kind, category, tone, i + 1),
             )
             reading_id = cur.lastrowid
 
@@ -345,11 +345,6 @@ def _insert_readings_for_language(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
                 (reading_id, transcription_system_id, val),
-            )
-
-            cur.execute(
-                "INSERT INTO reading_sources (reading_id, source_id) VALUES (?, ?)",
-                (reading_id, SOURCE_UNIHAN),
             )
 
             # Track first reading per character for definition attachment
@@ -425,19 +420,15 @@ def import_japanese(
             ts_id = TS_KANA if is_kana else TS_HEPBURN
 
             cur.execute(
-                "INSERT INTO readings (etymology_id, kind, category, sort_order) "
-                "VALUES (?, 'reading', 'on', ?)",
-                (etym_id, sort_idx),
+                "INSERT INTO readings (etymology_id, source_id, kind, category, sort_order) "
+                "VALUES (?, ?, 'reading', 'on', ?)",
+                (etym_id, SOURCE_UNIHAN, sort_idx),
             )
             reading_id = cur.lastrowid
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
                 (reading_id, ts_id, val),
-            )
-            cur.execute(
-                "INSERT INTO reading_sources (reading_id, source_id) VALUES (?, ?)",
-                (reading_id, SOURCE_UNIHAN),
             )
             if cp not in primary_readings:
                 primary_readings[cp] = reading_id
@@ -453,19 +444,15 @@ def import_japanese(
             features = '{"okurigana": true}' if has_okurigana else None
 
             cur.execute(
-                "INSERT INTO readings (etymology_id, kind, category, sort_order, features) "
-                "VALUES (?, 'reading', 'kun', ?, ?)",
-                (etym_id, sort_idx, features),
+                "INSERT INTO readings (etymology_id, source_id, kind, category, sort_order, features) "
+                "VALUES (?, ?, 'reading', 'kun', ?, ?)",
+                (etym_id, SOURCE_UNIHAN, sort_idx, features),
             )
             reading_id = cur.lastrowid
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
                 (reading_id, ts_id, val),
-            )
-            cur.execute(
-                "INSERT INTO reading_sources (reading_id, source_id) VALUES (?, ?)",
-                (reading_id, SOURCE_UNIHAN),
             )
             if cp not in primary_readings:
                 primary_readings[cp] = reading_id
@@ -503,8 +490,9 @@ def import_korean(
         max_len = max(len(yale_vals), len(hangul_vals))
         for i in range(max_len):
             cur.execute(
-                "INSERT INTO readings (etymology_id, kind, sort_order) VALUES (?, 'reading', ?)",
-                (etym_id, i + 1),
+                "INSERT INTO readings (etymology_id, source_id, kind, sort_order) "
+                "VALUES (?, ?, 'reading', ?)",
+                (etym_id, SOURCE_UNIHAN, i + 1),
             )
             reading_id = cur.lastrowid
 
@@ -520,11 +508,6 @@ def import_korean(
                     "VALUES (?, ?, ?)",
                     (reading_id, TS_HANGUL, hangul_vals[i]),
                 )
-
-            cur.execute(
-                "INSERT INTO reading_sources (reading_id, source_id) VALUES (?, ?)",
-                (reading_id, SOURCE_UNIHAN),
-            )
             if cp not in primary_readings:
                 primary_readings[cp] = reading_id
             count += 1
@@ -591,13 +574,8 @@ def import_definitions(
 
         for i, defn in enumerate(defs):
             cur.execute(
-                "INSERT INTO senses (reading_id, sort_order, definition) VALUES (?, ?, ?)",
-                (reading_id, i + 1, defn),
-            )
-            sense_id = cur.lastrowid
-            cur.execute(
-                "INSERT INTO sense_sources (sense_id, source_id) VALUES (?, ?)",
-                (sense_id, SOURCE_UNIHAN),
+                "INSERT INTO senses (reading_id, source_id, sort_order, definition) VALUES (?, ?, ?, ?)",
+                (reading_id, SOURCE_UNIHAN, i + 1, defn),
             )
             count += 1
 
