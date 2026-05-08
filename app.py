@@ -1,10 +1,99 @@
 from flask import Flask, render_template, request, jsonify
 import json
 import os
+import sqlite3
 import pandas as pd
 import regex
 
-#import pinyin_jyutping
+
+# ---------------------------------------------------------------------------
+# Kana → Hepburn romanization (used by _get_japanese for display)
+# ---------------------------------------------------------------------------
+
+def _kata_to_hira(text: str) -> str:
+    result = []
+    for ch in text:
+        cp = ord(ch)
+        if 0x30A1 <= cp <= 0x30F6:
+            result.append(chr(cp - 0x60))
+        else:
+            result.append(ch)
+    return ''.join(result)
+
+
+_ROMAJI: dict[str, str] = {
+    'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
+    'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
+    'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho',
+    'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
+    'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo',
+    'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
+    'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo',
+    'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo',
+    'じゃ': 'ja',  'じゅ': 'ju',  'じょ': 'jo',
+    'ぢゃ': 'ja',  'ぢゅ': 'ju',  'ぢょ': 'jo',
+    'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo',
+    'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo',
+    'ふぁ': 'fa',  'ふぃ': 'fi',  'ふぇ': 'fe',  'ふぉ': 'fo',
+    'てぃ': 'ti',  'でぃ': 'di',  'でゅ': 'dyu',
+    'あ': 'a',  'い': 'i',  'う': 'u',  'え': 'e',  'お': 'o',
+    'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
+    'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so',
+    'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
+    'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no',
+    'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
+    'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo',
+    'や': 'ya', 'ゆ': 'yu', 'よ': 'yo',
+    'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro',
+    'わ': 'wa', 'ゐ': 'i',  'ゑ': 'e',  'を': 'o',
+    'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge', 'ご': 'go',
+    'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo',
+    'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de', 'ど': 'do',
+    'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo',
+    'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
+    'ぁ': 'a',  'ぃ': 'i',  'ぅ': 'u',  'ぇ': 'e',  'ぉ': 'o',
+    'ゃ': 'ya', 'ゅ': 'yu', 'ょ': 'yo', 'ゎ': 'wa',
+}
+
+
+def _kana_to_romaji(kana: str) -> str:
+    """Convert kana to lowercase Hepburn, preserving okurigana '.' and affix '-' markers."""
+    hira = _kata_to_hira(kana)
+    if not hira:
+        return ''
+    out: list[str] = []
+    i = 0
+    while i < len(hira):
+        ch = hira[i]
+        if ch in ('.',  '-', '\u30fc'):   # preserve markers; drop long-vowel mark
+            if ch != '\u30fc':
+                out.append(ch)
+            i += 1
+            continue
+        if ch == 'っ':
+            if i + 1 < len(hira):
+                nxt = _ROMAJI.get(hira[i + 1: i + 3]) or _ROMAJI.get(hira[i + 1], '')
+                if nxt:
+                    out.append(nxt[0])
+            i += 1
+            continue
+        if ch == 'ん':
+            if i + 1 < len(hira) and hira[i + 1] in 'あいうえおやゆよぁぃぅぇぉゃゅょん':
+                out.append("n'")
+            else:
+                out.append('n')
+            i += 1
+            continue
+        if i + 1 < len(hira):
+            pair = hira[i: i + 2]
+            if pair in _ROMAJI:
+                out.append(_ROMAJI[pair])
+                i += 2
+                continue
+        rom = _ROMAJI.get(ch)
+        out.append(rom if rom is not None else ch)
+        i += 1
+    return ''.join(out)
 
 
 # Create a Flask application
@@ -17,35 +106,55 @@ for character_set in os.listdir('charactersets'):
     try:
         with open('charactersets/' + character_set, 'r', encoding='utf-8') as file:
             character_sets.append(json.load(file))
-    
+
     except FileNotFoundError:
-        # Log the error or print a message to help identify the issue
         print(f"File not found: {character_set}")
 
     except Exception as e:
-        # Log the error or print a message to help identify the issue
         print(f"Error loading JSON file: {e}")
 
 character_sets.sort(key=lambda x: x['label'])
 
-# Load only columns used by current routes to reduce memory usage.
+# ---------------------------------------------------------------------------
+# SQLite database (used by character info sheet)
+# ---------------------------------------------------------------------------
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'omnihanzi.db')
+db = sqlite3.connect(DB_PATH, check_same_thread=False)
+db.execute("PRAGMA journal_mode = WAL")
+
+# Schema IDs (from schema.sql seed data)
+LANG_MANDARIN = 1
+LANG_CANTONESE = 2
+LANG_MIDDLE_CHINESE = 7
+LANG_TOKYO = 10
+LANG_KOREAN = 20
+LANG_VIETNAMESE = 30
+
+TS_PINYIN = 1
+TS_JYUTPING = 10
+TS_HEPBURN = 30
+TS_KANA = 32
+TS_STIMSON = 60
+TS_YALE_KO = 42
+TS_QUOC_NGU = 50
+
+SOURCE_CEDICT = 1
+SOURCE_UNIHAN = 2
+
+# ---------------------------------------------------------------------------
+# Parquet DataFrames (still used by search routes)
+# ---------------------------------------------------------------------------
 char_info_columns = [
     'kFrequency',
     'jd_freq',
     'jd_grade',
     'jd_romaji_kun',
     'jd_romaji_on',
-    'kCantonese',
-    'kTang',
-    'jd_kor_r',
-    'jd_viet',
 ]
 
 mandarin_def_columns = [
     'character',
     'pinyin_num',
-    'pinyin_accent',
-    'definitions',
 ]
 
 char_info_df = pd.read_parquet('df.parquet', columns=char_info_columns)
@@ -116,85 +225,178 @@ def get_search_results():
 
 
 def create_character_info_sheet(json_data):
-
     character = json_data['character']
-    character_info = char_info_df.loc[character]
-    #TODO: fix some traditional characters not appearing in the lookup
-
+    codepoint = ord(character)
     out = {}
 
-    # Adds an element for Mandarin defintions and readings
-    if json_data['chineseMandarinCheckbox']:
-        try:
-            mandarin_readings = mand_def_df[mand_def_df['character'] == character]
-            readings = []
-            for i, reading in mandarin_readings.iterrows():
-                pinyin_num = reading['pinyin_num']
-                tone = str(pinyin_num)[-1] if pinyin_num is not None else '5'
-                defs = reading['definitions']
-                if defs is None:
-                    definitions = []
-                else:
-                    definitions = [str(d) for d in list(defs)]
-                readings.append({
-                    'pinyin_accent': str(reading['pinyin_accent']),
-                    'tone': tone,
-                    'definitions': definitions,
-                })
-            out['mandarin'] = {'readings': readings}
-        except Exception:
-            out['mandarin'] = {'error': 'error with dictionary lookup!!'}
+    if json_data.get('chineseMandarinCheckbox'):
+        out['mandarin'] = _get_mandarin(codepoint)
 
-    # Adds an element for Cantonese readings
-    if json_data['chineseCantoneseCheckbox']:
-        try:
-            canto_readings = character_info['kCantonese']
-            readings = [[canto_readings[:-1], canto_readings[-1]]]
-            out['cantonese'] = {
-                'segments': [
-                    {'text': r[0], 'tone': str(r[1])}
-                    for r in readings
-                ]
-            }
-        except Exception:
-            out['cantonese'] = {'error': 'No Cantonese Reading Found'}
+    if json_data.get('chineseCantoneseCheckbox'):
+        out['cantonese'] = _get_cantonese(codepoint)
 
-    if json_data['chineseTangCheckbox']:
-        try:
-            tang_readings = character_info['kTang']
-            out['tang'] = {'text': ', '.join(tang_readings.lower().split())}
-        except Exception:
-            out['tang'] = {'error': 'No Middle Chinese Readings'}
+    if json_data.get('chineseTangCheckbox'):
+        out['tang'] = _get_tang(codepoint)
 
-    if json_data['japaneseKunCheckbox']:
-        try:
-            kun_readings = character_info['jd_romaji_kun']
-            out['japanese_kun'] = {'items': [str(x) for x in list(kun_readings)]}
-        except Exception:
-            out['japanese_kun'] = {'error': 'No Kun-Readings'}
+    if json_data.get('japaneseKunCheckbox'):
+        out['japanese_kun'] = _get_japanese(codepoint, 'kun')
 
-    if json_data['japaneseOnCheckbox']:
-        try:
-            on_readings = character_info['jd_romaji_on']
-            out['japanese_on'] = {'items': [str(x) for x in list(on_readings)]}
-        except Exception:
-            out['japanese_on'] = {'error': 'No On-Readings'}
+    if json_data.get('japaneseOnCheckbox'):
+        out['japanese_on'] = _get_japanese(codepoint, 'on')
 
-    if json_data['koreanCheckbox']:
-        try:
-            korean_readings = character_info['jd_kor_r']
-            out['korean'] = {'items': [str(x) for x in list(korean_readings)]}
-        except Exception:
-            out['korean'] = {'error': 'No Korean Readings'}
+    if json_data.get('koreanCheckbox'):
+        out['korean'] = _get_korean(codepoint)
 
-    if json_data['vietnameseCheckbox']:
-        try:
-            viet_readings = character_info['jd_viet']
-            out['vietnamese'] = {'items': [str(x) for x in list(viet_readings)]}
-        except Exception:
-            out['vietnamese'] = {'error': 'No Vietnamese Readings'}
+    if json_data.get('vietnameseCheckbox'):
+        out['vietnamese'] = _get_vietnamese(codepoint)
 
     return out
+
+
+def _get_mandarin(codepoint):
+    rows = db.execute("""
+        SELECT r.id, r.tone, rt.value AS pinyin
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_transcriptions rt ON rt.reading_id = r.id
+        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
+        ORDER BY e.etymology_order, r.sort_order
+    """, (codepoint, LANG_MANDARIN, TS_PINYIN)).fetchall()
+
+    if not rows:
+        return {'error': 'No Mandarin readings found'}
+
+    readings = []
+    for reading_id, tone, pinyin in rows:
+        # Prefer CC-CEDICT definitions (per-reading) over Unihan (character-level)
+        defs = db.execute("""
+            SELECT s.definition FROM senses s
+            JOIN sense_sources ss ON ss.sense_id = s.id
+            WHERE s.reading_id = ? AND ss.source_id = ?
+            ORDER BY s.sort_order
+        """, (reading_id, SOURCE_CEDICT)).fetchall()
+
+        if not defs:
+            defs = db.execute("""
+                SELECT s.definition FROM senses s
+                JOIN sense_sources ss ON ss.sense_id = s.id
+                WHERE s.reading_id = ? AND ss.source_id = ?
+                ORDER BY s.sort_order
+            """, (reading_id, SOURCE_UNIHAN)).fetchall()
+
+        readings.append({
+            'pinyin_accent': pinyin,
+            'tone': tone or '5',
+            'definitions': [d[0] for d in defs],
+        })
+
+    return {'readings': readings}
+
+
+def _get_cantonese(codepoint):
+    rows = db.execute("""
+        SELECT r.tone, rt.value AS jyutping
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_transcriptions rt ON rt.reading_id = r.id
+        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
+        ORDER BY r.sort_order
+    """, (codepoint, LANG_CANTONESE, TS_JYUTPING)).fetchall()
+
+    if not rows:
+        return {'error': 'No Cantonese Reading Found'}
+
+    segments = []
+    for tone, jyutping in rows:
+        # Strip trailing tone digit from jyutping for display
+        if jyutping and jyutping[-1].isdigit():
+            text = jyutping[:-1]
+            tone = jyutping[-1]
+        else:
+            text = jyutping
+            tone = tone or '1'
+        segments.append({'text': text, 'tone': str(tone)})
+
+    return {'segments': segments}
+
+
+def _get_tang(codepoint):
+    rows = db.execute("""
+        SELECT rt.value
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_transcriptions rt ON rt.reading_id = r.id
+        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
+        ORDER BY r.sort_order
+    """, (codepoint, LANG_MIDDLE_CHINESE, TS_STIMSON)).fetchall()
+
+    if not rows:
+        return {'error': 'No Middle Chinese Readings'}
+
+    return {'text': ', '.join(row[0].lower() for row in rows)}
+
+
+def _get_japanese(codepoint, category):
+    # Prefer kana (TS_KANA=32) as source so we can convert to romaji while
+    # preserving okurigana '.' and affix '-' markers. Fall back to stored
+    # Hepburn (TS_HEPBURN=30) for any readings that have no kana transcription.
+    rows = db.execute("""
+        SELECT COALESCE(kana.value, hep.value)
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        LEFT JOIN reading_transcriptions kana
+               ON kana.reading_id = r.id AND kana.transcription_system_id = ?
+        LEFT JOIN reading_transcriptions hep
+               ON hep.reading_id = r.id AND hep.transcription_system_id = ?
+        WHERE e.codepoint = ? AND e.language_id = ? AND r.category = ?
+          AND (kana.value IS NOT NULL OR hep.value IS NOT NULL)
+        ORDER BY r.sort_order
+    """, (TS_KANA, TS_HEPBURN, codepoint, LANG_TOKYO, category)).fetchall()
+
+    label = 'Kun' if category == 'kun' else 'On'
+    if not rows:
+        return {'error': f'No {label}-Readings'}
+
+    seen: set[str] = set()
+    items = []
+    for (val,) in rows:
+        romaji = _kana_to_romaji(val) if any('\u3040' <= c <= '\u30ff' for c in val) else val.lower()
+        if romaji not in seen:
+            seen.add(romaji)
+            items.append(romaji)
+    return {'items': items}
+
+
+def _get_korean(codepoint):
+    rows = db.execute("""
+        SELECT rt.value
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_transcriptions rt ON rt.reading_id = r.id
+        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
+        ORDER BY r.sort_order
+    """, (codepoint, LANG_KOREAN, TS_YALE_KO)).fetchall()
+
+    if not rows:
+        return {'error': 'No Korean Readings'}
+
+    return {'items': [row[0] for row in rows]}
+
+
+def _get_vietnamese(codepoint):
+    rows = db.execute("""
+        SELECT rt.value
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_transcriptions rt ON rt.reading_id = r.id
+        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
+        ORDER BY r.sort_order
+    """, (codepoint, LANG_VIETNAMESE, TS_QUOC_NGU)).fetchall()
+
+    if not rows:
+        return {'error': 'No Vietnamese Readings'}
+
+    return {'items': [row[0] for row in rows]}
 
 
 # Run the application
