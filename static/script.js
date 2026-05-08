@@ -83,71 +83,45 @@ function renderInfoBoxFromData(data) {
             continue;
         }
         var section = data[key];
-        if (key === 'mandarin') {
-            if (section.error) {
-                parts.push('<hr>error with dictionary lookup!!');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>');
-                var readings = section.readings || [];
-                for (var ri = 0; ri < readings.length; ri++) {
-                    var row = readings[ri];
-                    var toneColor = INFO_BOX_TONE_COLORS[row.tone] || '#333333';
-                    parts.push('<span style="color:' + toneColor + '; font-size: 30px "> • ' + row.pinyin_accent + ' </span><br>');
-                    var defs = row.definitions || [];
-                    for (var di = 0; di < defs.length; di++) {
-                        parts.push(' - ' + defs[di] + ' <br>');
-                    }
-                    parts.push('<br>');
+        if (section.error) {
+            continue;
+        } else if (key === 'mandarin') {
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>');
+            var readings = section.readings || [];
+            for (var ri = 0; ri < readings.length; ri++) {
+                var row = readings[ri];
+                var toneColor = INFO_BOX_TONE_COLORS[row.tone] || '#333333';
+                parts.push('<span style="color:' + toneColor + '; font-size: 30px "> • ' + row.pinyin_accent + ' </span><br>');
+                var defs = row.definitions || [];
+                for (var di = 0; di < defs.length; di++) {
+                    parts.push(' - ' + defs[di] + ' <br>');
                 }
+                parts.push('<br>');
             }
         } else if (key === 'cantonese') {
-            if (section.error) {
-                parts.push('<hr>No Cantonese Reading Found<hr>');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>');
-                var segments = section.segments || [];
-                for (var si = 0; si < segments.length; si++) {
-                    var seg = segments[si];
-                    var segToneColor = INFO_BOX_TONE_COLORS[seg.tone] || '#333333';
-                    var comma = (si < segments.length - 1) ? ',' : '';
-                    parts.push('<span style="color:' + segToneColor + '; font-size: 30px">' + seg.text + comma + ' </span>');
-                }
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>');
+            var segments = section.segments || [];
+            for (var si = 0; si < segments.length; si++) {
+                var seg = segments[si];
+                var segToneColor = INFO_BOX_TONE_COLORS[seg.tone] || '#333333';
+                var comma = (si < segments.length - 1) ? ',' : '';
+                parts.push('<span style="color:' + segToneColor + '; font-size: 30px">' + seg.text + comma + ' </span>');
             }
         } else if (key === 'tang') {
-            if (section.error) {
-                parts.push('No Middle Chinese Readings');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">Middle Chinese</span><p>');
-                parts.push('<span style="color:#333333 ;font-size: 30px">' + section.text + '</span>');
-            }
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Middle Chinese</span><p>');
+            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.text + '</span>');
         } else if (key === 'japanese_kun') {
-            if (section.error) {
-                parts.push('No Kun-Readings');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">Kun-Reading</span><p>');
-                parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-            }
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Kun-Reading</span><p>');
+            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
         } else if (key === 'japanese_on') {
-            if (section.error) {
-                parts.push('No On-Readings');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">On-Reading</span><p>');
-                parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-            }
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">On-Reading</span><p>');
+            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
         } else if (key === 'korean') {
-            if (section.error) {
-                parts.push('No Korean Readings');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">Korean Reading</span><p>');
-                parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-            }
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Korean Reading</span><p>');
+            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
         } else if (key === 'vietnamese') {
-            if (section.error) {
-                parts.push('No Vietnamese Readings');
-            } else {
-                parts.push('<hr><span style="color:#999999 ;font-size: 12px">Vietnamese Reading</span><p>');
-                parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-            }
+            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Vietnamese Reading</span><p>');
+            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
         }
     }
     return parts.join('');
