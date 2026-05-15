@@ -200,11 +200,32 @@ INSERT INTO variant_types (id, name, language_id, sort_order) VALUES
 CREATE TABLE characters (
     codepoint       INTEGER PRIMARY KEY,   -- Unicode codepoint value (e.g., 0x751F = 29983)
     character       TEXT    NOT NULL UNIQUE,-- the actual character: '生'
-    stroke_count    INTEGER,
-    radical_number  INTEGER,               -- Kangxi radical number (1–214)
-    frequency_rank  INTEGER,               -- corpus frequency rank (lower = more common)
     created_at      TEXT    DEFAULT (datetime('now')),
     updated_at      TEXT    DEFAULT (datetime('now'))
+);
+
+-- Modular key-value attributes for a character.
+-- Keeps the characters table minimal while allowing arbitrary properties
+-- (stroke count, frequency, WaniKani mnemonics, etc.) to be added from
+-- any source without schema changes.
+--
+-- value_type hints how to interpret the stored text:
+--   'integer' — parse as int
+--   'real'    — parse as float
+--   'text'    — plain string
+--   'json'    — parse as JSON (arrays, objects)
+--
+-- One canonical value per (codepoint, key) — last import wins.
+-- source_id records which reference work provided the value.
+CREATE TABLE character_attributes (
+    id          INTEGER PRIMARY KEY,
+    codepoint   INTEGER NOT NULL REFERENCES characters(codepoint),
+    key         TEXT    NOT NULL,
+    value       TEXT    NOT NULL,
+    value_type  TEXT    NOT NULL DEFAULT 'text'
+                CHECK (value_type IN ('integer', 'real', 'text', 'json')),
+    source_id   INTEGER REFERENCES sources(id),
+    UNIQUE(codepoint, key, source_id)
 );
 
 
@@ -379,30 +400,34 @@ CREATE TABLE character_components (
 -- 6. CHARACTER SETS (replaces charactersets/*.json)
 -- ============================================================
 
-CREATE TABLE character_set_groups (
+-- Recursive adjacency list — any node can be a root (parent_id IS NULL)
+-- or a child of another node, allowing arbitrary nesting depth.
+-- user_id NULL = built-in set; non-NULL = user-uploaded set.
+-- description is stored as Markdown and rendered on the frontend.
+CREATE TABLE character_set_nodes (
     id          INTEGER PRIMARY KEY,
-    name        TEXT    NOT NULL UNIQUE,
-    sort_order  INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE character_set_levels (
-    id          INTEGER PRIMARY KEY,
-    group_id    INTEGER NOT NULL REFERENCES character_set_groups(id),
+    parent_id   INTEGER REFERENCES character_set_nodes(id),
     name        TEXT    NOT NULL,
-    sort_order  INTEGER NOT NULL DEFAULT 0
+    description TEXT,                       -- Markdown
+    sort_order  INTEGER NOT NULL DEFAULT 0,
+    user_id     INTEGER                     -- NULL = built-in
 );
 
 CREATE TABLE character_set_members (
-    level_id    INTEGER NOT NULL REFERENCES character_set_levels(id),
+    node_id     INTEGER NOT NULL REFERENCES character_set_nodes(id),
     codepoint   INTEGER NOT NULL REFERENCES characters(codepoint),
     sort_order  INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (level_id, codepoint)
+    PRIMARY KEY (node_id, codepoint)
 );
 
 
 -- ============================================================
 -- 7. INDEXES
 -- ============================================================
+
+-- Character attributes
+CREATE INDEX idx_char_attrs_codepoint ON character_attributes(codepoint);
+CREATE INDEX idx_char_attrs_key       ON character_attributes(key);
 
 -- Linguistic hierarchy traversal
 CREATE INDEX idx_etymologies_char         ON etymologies(codepoint);
@@ -437,7 +462,8 @@ CREATE INDEX idx_components_source        ON character_components(source_id);
 
 -- Character sets
 CREATE INDEX idx_charset_members_char     ON character_set_members(codepoint);
-CREATE INDEX idx_charset_levels_group     ON character_set_levels(group_id);
+CREATE INDEX idx_charset_nodes_parent     ON character_set_nodes(parent_id);
+CREATE INDEX idx_charset_nodes_user       ON character_set_nodes(user_id);
 
 
 -- ============================================================

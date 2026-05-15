@@ -388,24 +388,6 @@ def main() -> None:
     print("\nImporting into database ...")
     import_cedict(args.db, cedict)
 
-    # Summary
-    con = sqlite3.connect(args.db)
-    print("\nRow counts after import:")
-    for table in ["characters", "etymologies", "readings", "reading_transcriptions", "senses"]:
-        (n,) = con.execute(f"SELECT count(*) FROM {table}").fetchone()
-        print(f"  {table}: {n:,} rows")
-
-    # How many codepoints have readings from both Unihan and CEDICT?
-    (both,) = con.execute("""
-        SELECT COUNT(DISTINCT e.codepoint)
-        FROM etymologies e
-        WHERE e.language_id = 1
-          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 1)
-          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 2)
-    """).fetchone()
-    print(f"\n  Characters with both Unihan + CEDICT Mandarin readings: {both:,}")
-
-    con.close()
     print("\nDone.")
 
 

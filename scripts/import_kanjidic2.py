@@ -202,28 +202,27 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
             # Ensure character row exists
             if cp not in known_chars:
                 cur.execute(
-                    "INSERT OR IGNORE INTO characters "
-                    "(codepoint, character, stroke_count, frequency_rank) "
-                    "VALUES (?, ?, ?, ?)",
-                    (cp, entry['character'], entry['stroke_count'], entry['freq']),
+                    "INSERT OR IGNORE INTO characters (codepoint, character) VALUES (?, ?)",
+                    (cp, entry['character']),
                 )
                 known_chars.add(cp)
                 stats['chars_created'] += 1
-            else:
-                # Update frequency and stroke count — Kanjidic2 is authoritative for Japanese
-                updates, values = [], []
-                if entry['freq'] is not None:
-                    updates.append("frequency_rank = ?")
-                    values.append(entry['freq'])
-                if entry['stroke_count'] is not None:
-                    updates.append("stroke_count = ?")
-                    values.append(entry['stroke_count'])
-                if updates:
-                    cur.execute(
-                        f"UPDATE characters SET {', '.join(updates)} WHERE codepoint = ?",
-                        (*values, cp),
-                    )
-                    stats['chars_updated'] += 1
+
+            # Upsert stroke count and frequency — Kanjidic2 is authoritative for Japanese
+            attr_rows = []
+            if entry['freq'] is not None:
+                attr_rows.append((cp, "frequency_rank", str(entry['freq']), "integer", SOURCE_KD2))
+            if entry['stroke_count'] is not None:
+                attr_rows.append((cp, "stroke_count", str(entry['stroke_count']), "integer", SOURCE_KD2))
+            for attr in attr_rows:
+                cur.execute(
+                    "INSERT INTO character_attributes (codepoint, key, value, value_type, source_id) "
+                    "VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(codepoint, key, source_id) DO UPDATE SET value=excluded.value",
+                    attr,
+                )
+            if attr_rows:
+                stats['chars_updated'] += 1
 
             if not entry['rmgroups']:
                 continue
@@ -345,34 +344,6 @@ def main() -> None:
     print("\nImporting into database ...")
     import_kanjidic2(args.db, entries)
 
-    # Summary
-    con = sqlite3.connect(args.db)
-    print("\nRow counts after import:")
-    for table in ["characters", "etymologies", "readings", "reading_transcriptions", "senses"]:
-        (n,) = con.execute(f"SELECT count(*) FROM {table}").fetchone()
-        print(f"  {table}: {n:,} rows")
-
-    # Characters with Japanese readings from both Unihan and Kanjidic2
-    (both,) = con.execute("""
-        SELECT COUNT(DISTINCT e.codepoint)
-        FROM etymologies e
-        WHERE e.language_id = 10
-          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 2)
-          AND EXISTS (SELECT 1 FROM readings r WHERE r.etymology_id = e.id AND r.source_id = 3)
-    """).fetchone()
-    print(f"\n  Characters with both Unihan + Kanjidic2 Japanese readings: {both:,}")
-
-    # Kana coverage for Japanese readings
-    (n,) = con.execute("""
-        SELECT COUNT(*)
-        FROM reading_transcriptions rt
-        JOIN readings r ON r.id = rt.reading_id
-        JOIN etymologies e ON e.id = r.etymology_id
-        WHERE e.language_id = 10 AND rt.transcription_system_id = 32
-    """).fetchone()
-    print(f"  Japanese kana transcriptions: {n:,}")
-
-    con.close()
     print("\nDone.")
 
 

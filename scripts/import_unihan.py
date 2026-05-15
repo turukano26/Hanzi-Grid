@@ -287,20 +287,36 @@ def parse_unihan_files() -> dict[int, dict[str, str]]:
 
 def import_characters(cur: sqlite3.Cursor, unihan: dict[int, dict[str, str]]) -> None:
     """Phase 1: populate the characters table."""
-    rows = []
-    for cp, fields in unihan.items():
-        char = chr(cp)
-        stroke_count = parse_total_strokes(fields)
-        radical, _ = parse_radical_stroke(fields)
-        grade = parse_grade_level(fields)
-        rows.append((cp, char, stroke_count, radical, grade))
-
+    rows = [(cp, chr(cp)) for cp in unihan]
     cur.executemany(
-        "INSERT OR IGNORE INTO characters (codepoint, character, stroke_count, radical_number, frequency_rank) "
-        "VALUES (?, ?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO characters (codepoint, character) VALUES (?, ?)",
         rows,
     )
     print(f"  characters: {cur.rowcount:,} inserted")
+
+
+def import_character_attributes(cur: sqlite3.Cursor, unihan: dict[int, dict[str, str]]) -> None:
+    """Phase 2: populate character_attributes with stroke count, radical, and PRC grade."""
+    rows = []
+    for cp, fields in unihan.items():
+        stroke_count = parse_total_strokes(fields)
+        radical, _ = parse_radical_stroke(fields)
+        grade = parse_grade_level(fields)
+
+        if stroke_count is not None:
+            rows.append((cp, "stroke_count", str(stroke_count), "integer", SOURCE_UNIHAN))
+        if radical is not None:
+            rows.append((cp, "radical_number", str(radical), "integer", SOURCE_UNIHAN))
+        if grade is not None:
+            rows.append((cp, "grade_level", str(grade), "integer", SOURCE_UNIHAN))
+
+    cur.executemany(
+        "INSERT INTO character_attributes (codepoint, key, value, value_type, source_id) "
+        "VALUES (?, ?, ?, ?, ?) "
+        "ON CONFLICT(codepoint, key, source_id) DO UPDATE SET value=excluded.value",
+        rows,
+    )
+    print(f"  character_attributes: {cur.rowcount:,} upserted")
 
 
 def _insert_readings_for_language(
@@ -664,6 +680,7 @@ def main() -> None:
         cur.execute("BEGIN")
 
         import_characters(cur, unihan)
+        import_character_attributes(cur, unihan)
         import_mandarin(cur, unihan, primary_readings)
         import_cantonese(cur, unihan, primary_readings)
         import_japanese(cur, unihan, primary_readings)
