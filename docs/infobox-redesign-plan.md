@@ -369,6 +369,52 @@ Until one of those exists, do **not** add empty leaves (IPA, Revised Rom,
 Zhùyīn, Wade-Giles, Cantonese Yale, etc.) to the manifest — they would render
 blank.
 
+### Reading categorization gap: Japanese on-reading subtypes
+
+On vs kun **is** captured (`readings.category`, populated for all Japanese
+readings). The finer **on-reading subtypes** (漢音 kan'on, 呉音 go'on, 唐音
+tō'on, 慣用音 kan'yō-on) are **not**: `readings.subcategory` exists for exactly
+this purpose (its schema comment lists `'kan'/'go'/'tou'/'souon'`) but is 100%
+NULL. The data is absent at the source — KANJIDIC2's DTD defines an `on_type`
+attribute, but the EDRDG dump never populates it (every `<reading
+r_type="ja_on">` is bare), and Unihan's `kJapaneseOn` carries no subtype either.
+So this cannot be a `value_transform`; it **needs a Wiktionary-class source**
+that tags on-reading type (e.g. Wiktionary's Japanese kanji reading tables) —
+a new `data/` dump + importer writing `subcategory`. Until then a manifest leaf
+that filters or labels by on-subtype would be empty for every character.
+
+### Japanese kana/Hepburn duplication and its dedup merge
+
+The "Hepburn (30, partial)" entry above is misleading: Unihan (`source_id` 2)
+and KANJIDIC2 (`source_id` 3) each emit the *same* Japanese pronunciations, but
+Unihan writes uppercase romaji into **ts 30** and KANJIDIC2 writes kana into
+**ts 32** — disjoint at the row level (0 readings carry both). `dedup_readings.py`
+never merges them because its `(transcription_system_id, value)` key treats
+`SEI`@ts30 and `セイ`@ts32 as unrelated. So Japanese has **zero** multi-source
+reading rows, unlike Mandarin/Cantonese where both sources agree on the ts and
+were merged. The current infobox papers over this by de-duplicating on the
+*romaji string* at request time inside `_get_japanese`.
+
+Canonical-form decision: **keep kana (ts 32) as canonical and derive Hepburn**
+via `_kana_to_romaji` (lossless — kana carries the okurigana `.`, affix `-`, and
+script distinctions that Unihan's stripped uppercase romaji loses). A dedicated
+Japanese merge pass folds each Unihan ts-30 row into its kana twin and unions
+its attestation. It is **hybrid, not pure**: ~77% of ts-30 rows have a kana twin
+and are merged away; ~23% (≈9,400) are Unihan-only orphans with no kana to
+convert from, so they **remain stored as ts-30** Hepburn. The DB therefore still
+stores some Hepburn after the merge — there is no single transcription system
+that is both lossless and universal here.
+
+**Merge key must include `category`/`subcategory`.** The match is scoped to the
+same `(etymology_id, kind, category, subcategory)` group the existing dedup uses,
+with a normalized-romaji bridge value (`_kana_to_romaji(kana)` marker-stripped
+vs `hepburn.lower()`) replacing the literal `(ts, value)`. On vs kun **cannot**
+be dropped from the key: there are **119** `(character, romaji-key)` pairs where
+the same romanization is *both* an on- and a kun-reading (e.g. 耼 `tan`/`ban`/`man`,
+腱 `ken`) — a category-blind key would wrongly collapse each pair into one,
+erasing the on/kun distinction. Keeping `subcategory` in the key (all-NULL today)
+future-proofs the merge for when an on-subtype source lands.
+
 ---
 
 ## 9. Persistence cleanup
