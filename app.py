@@ -293,29 +293,47 @@ def _get_mandarin(codepoint):
 
 def _get_cantonese(codepoint):
     rows = db.execute("""
-        SELECT r.tone, rt.value AS jyutping
+        SELECT r.id, r.tone, rt.value AS jyutping
         FROM readings r
         JOIN etymologies e ON e.id = r.etymology_id
         JOIN reading_transcriptions rt ON rt.reading_id = r.id
         WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY r.sort_order
+        ORDER BY e.etymology_order, r.sort_order
     """, (codepoint, LANG_CANTONESE, TS_JYUTPING)).fetchall()
 
     if not rows:
         return {'error': 'No Cantonese Reading Found'}
 
-    segments = []
-    for tone, jyutping in rows:
+    # Deduplicate by full jyutping (incl. tone digit); definitions come from
+    # CC-Canto senses unioned onto the surviving reading by dedup_readings.py.
+    seen: dict[str, dict] = {}  # jyutping → segment
+    for reading_id, tone, jyutping in rows:
+        if not jyutping or jyutping in seen:
+            continue
+
         # Strip trailing tone digit from jyutping for display
-        if jyutping and jyutping[-1].isdigit():
+        if jyutping[-1].isdigit():
             text = jyutping[:-1]
-            tone = jyutping[-1]
+            disp_tone = jyutping[-1]
         else:
             text = jyutping
-            tone = tone or '1'
-        segments.append({'text': text, 'tone': str(tone)})
+            disp_tone = tone or '1'
 
-    return {'segments': segments}
+        defs = db.execute("""
+            SELECT definition FROM senses
+            WHERE reading_id = ?
+            ORDER BY source_id, sort_order
+        """, (reading_id,)).fetchall()
+        # CC-Canto prefixes editorial notes with '#'; these aren't glosses.
+        definitions = [d[0] for d in defs if not d[0].startswith('#')]
+
+        seen[jyutping] = {
+            'text': text,
+            'tone': str(disp_tone),
+            'definitions': definitions,
+        }
+
+    return {'segments': list(seen.values())}
 
 
 def _get_tang(codepoint):

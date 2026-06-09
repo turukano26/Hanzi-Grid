@@ -7,7 +7,8 @@ Runs all import scripts in order:
   2. import_unihan.py       — Unihan readings, definitions, variants
   3. import_kanjidic2.py    — Japanese readings, frequency, stroke counts
   4. import_cedict.py       — Mandarin definitions from CC-CEDICT
-  5. import_character_sets.py — Jōyō and Jinmeiyō character sets
+  5. import_cccanto.py      — Cantonese readings + definitions from CC-Canto
+  6. import_character_sets.py — Jōyō and Jinmeiyō character sets
 
 Usage:
     python scripts/rebuild_db.py
@@ -28,6 +29,7 @@ STEPS = [
     ("Import Unihan",        ["import_unihan.py",         "--skip-download"]),
     ("Import KANJIDIC2",     ["import_kanjidic2.py",      "--skip-download"]),
     ("Import CC-CEDICT",     ["import_cedict.py",         "--skip-download"]),
+    ("Import CC-Canto",      ["import_cccanto.py",        "--skip-download"]),
     ("Import character sets",["import_character_sets.py", "--skip-download", "--force"]),
     ("Dedup readings",       ["dedup_readings.py"]),
 ]

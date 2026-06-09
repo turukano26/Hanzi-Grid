@@ -78,9 +78,10 @@ python scripts/rebuild_db.py                 # (add real downloads by NOT passin
 ```
 
 It runs, in order: `create_db.py` (apply `schema.sql`) → `import_unihan.py` →
-`import_kanjidic2.py` → `import_cedict.py` → `import_character_sets.py` → `dedup_readings.py`. Each
-importer can be run standalone with `--db` and `--skip-download`. Raw sources live under `data/`
-(Unihan, CC-CEDICT, KANJIDIC2), which is gitignored along with the `.db`.
+`import_kanjidic2.py` → `import_cedict.py` → `import_cccanto.py` → `import_character_sets.py` →
+`dedup_readings.py`. Each importer can be run standalone with `--db` and `--skip-download`. Raw
+sources live under `data/` (Unihan, CC-CEDICT, CC-Canto, KANJIDIC2), which is gitignored along with
+the `.db`.
 
 `dedup_readings.py` is a post-import pass: each importer inserts readings independently, so the same
 pronunciation under one etymology starts as several reading rows (one per source). The pass merges

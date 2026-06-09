@@ -104,8 +104,12 @@ function renderInfoBoxFromData(data) {
             for (var si = 0; si < segments.length; si++) {
                 var seg = segments[si];
                 var segToneColor = INFO_BOX_TONE_COLORS[seg.tone] || '#333333';
-                var comma = (si < segments.length - 1) ? ',' : '';
-                parts.push('<span style="color:' + segToneColor + '; font-size: 30px">' + seg.text + comma + ' </span>');
+                parts.push('<span style="color:' + segToneColor + '; font-size: 30px "> • ' + seg.text + ' </span><br>');
+                var cdefs = seg.definitions || [];
+                for (var cdi = 0; cdi < cdefs.length; cdi++) {
+                    parts.push(' - ' + cdefs[cdi] + ' <br>');
+                }
+                parts.push('<br>');
             }
         } else if (key === 'tang') {
             parts.push('<hr><span style="color:#999999 ;font-size: 12px">Middle Chinese</span><p>');

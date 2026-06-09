@@ -154,7 +154,8 @@ INSERT INTO sources (id, name, short_name, source_type, url) VALUES
     (9,  'GB 2312',                    'GB2312',   'standard',       NULL),
     (10, 'Jōyō Kanji (2010)',         'Jōyō',    'standard',       NULL),
     (11, 'CantoDict',                  'CDict',    'dictionary',     'https://cantodict.org'),
-    (12, 'Shuowen Jiezi',             'SWJZ',     'scholarly_work', NULL);
+    (12, 'Shuowen Jiezi',             'SWJZ',     'scholarly_work', NULL),
+    (13, 'CC-Canto',                   'CC-Canto', 'dictionary',     'https://cantonese.org');
 
 
 -- Types of historical script images.
