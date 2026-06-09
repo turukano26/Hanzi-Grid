@@ -256,12 +256,13 @@ def create_character_info_sheet(json_data):
 def _get_mandarin(codepoint):
     # Fetch all Mandarin readings with their source; prefer CEDICT (source 1) over Unihan (source 2)
     rows = db.execute("""
-        SELECT r.id, r.tone, r.source_id, rt.value AS pinyin
+        SELECT r.id, r.tone, ra.source_id, rt.value AS pinyin
         FROM readings r
         JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_attestations ra ON ra.reading_id = r.id
         JOIN reading_transcriptions rt ON rt.reading_id = r.id
         WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY e.etymology_order, r.source_id ASC, r.sort_order
+        ORDER BY e.etymology_order, ra.source_id ASC, r.sort_order
     """, (codepoint, LANG_MANDARIN, TS_PINYIN)).fetchall()
 
     if not rows:

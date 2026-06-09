@@ -245,7 +245,8 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
         SELECT DISTINCT e.codepoint
         FROM readings r
         JOIN etymologies e ON e.id = r.etymology_id
-        WHERE e.language_id = ? AND r.source_id = ?
+        JOIN reading_attestations ra ON ra.reading_id = r.id
+        WHERE e.language_id = ? AND ra.source_id = ?
         """,
         (LANG_MANDARIN, SOURCE_CEDICT),
     )
@@ -304,13 +305,17 @@ def import_cedict(db_path: Path, cedict: dict[int, list[dict]]) -> None:
                 tone = entry["tone"]
                 defs = entry["definitions"]
 
-                # Create new reading row under SOURCE_CEDICT
+                # Create new reading row, attested by SOURCE_CEDICT
                 cur.execute(
-                    "INSERT INTO readings (etymology_id, source_id, kind, tone, sort_order) "
-                    "VALUES (?, ?, 'reading', ?, ?)",
-                    (etym_id, SOURCE_CEDICT, tone, sort_idx),
+                    "INSERT INTO readings (etymology_id, kind, tone, sort_order) "
+                    "VALUES (?, 'reading', ?, ?)",
+                    (etym_id, tone, sort_idx),
                 )
                 reading_id = cur.lastrowid
+                cur.execute(
+                    "INSERT INTO reading_attestations (reading_id, source_id) VALUES (?, ?)",
+                    (reading_id, SOURCE_CEDICT),
+                )
 
                 # Both accented and numbered pinyin transcriptions
                 cur.execute(

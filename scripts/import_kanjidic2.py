@@ -168,7 +168,8 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
         SELECT DISTINCT r.etymology_id
         FROM readings r
         JOIN etymologies e ON e.id = r.etymology_id
-        WHERE e.language_id = ? AND r.source_id = ?
+        JOIN reading_attestations ra ON ra.reading_id = r.id
+        WHERE e.language_id = ? AND ra.source_id = ?
         """,
         (LANG_TOKYO, SOURCE_KD2),
     )
@@ -256,11 +257,15 @@ def import_kanjidic2(db_path: Path, entries: list[dict]) -> None:
                         sort_counter += 1
                         cur.execute(
                             "INSERT INTO readings "
-                            "(etymology_id, source_id, kind, category, sort_order, features) "
-                            "VALUES (?, ?, 'reading', ?, ?, ?)",
-                            (etym_id, SOURCE_KD2, category, sort_counter, features),
+                            "(etymology_id, kind, category, sort_order, features) "
+                            "VALUES (?, 'reading', ?, ?, ?)",
+                            (etym_id, category, sort_counter, features),
                         )
                         reading_id = cur.lastrowid
+                        cur.execute(
+                            "INSERT INTO reading_attestations (reading_id, source_id) VALUES (?, ?)",
+                            (reading_id, SOURCE_KD2),
+                        )
 
                         cur.execute(
                             "INSERT INTO reading_transcriptions "

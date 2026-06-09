@@ -351,11 +351,15 @@ def _insert_readings_for_language(
             tone = tone_fn(val) if tone_fn else None
 
             cur.execute(
-                "INSERT INTO readings (etymology_id, source_id, kind, category, tone, sort_order) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (etym_id, SOURCE_UNIHAN, kind, category, tone, i + 1),
+                "INSERT INTO readings (etymology_id, kind, category, tone, sort_order) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (etym_id, kind, category, tone, i + 1),
             )
             reading_id = cur.lastrowid
+            cur.execute(
+                "INSERT INTO reading_attestations (reading_id, source_id) VALUES (?, ?)",
+                (reading_id, SOURCE_UNIHAN),
+            )
 
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
@@ -436,11 +440,15 @@ def import_japanese(
             ts_id = TS_KANA if is_kana else TS_HEPBURN
 
             cur.execute(
-                "INSERT INTO readings (etymology_id, source_id, kind, category, sort_order) "
-                "VALUES (?, ?, 'reading', 'on', ?)",
-                (etym_id, SOURCE_UNIHAN, sort_idx),
+                "INSERT INTO readings (etymology_id, kind, category, sort_order) "
+                "VALUES (?, 'reading', 'on', ?)",
+                (etym_id, sort_idx),
             )
             reading_id = cur.lastrowid
+            cur.execute(
+                "INSERT INTO reading_attestations (reading_id, source_id) VALUES (?, ?)",
+                (reading_id, SOURCE_UNIHAN),
+            )
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
@@ -460,11 +468,15 @@ def import_japanese(
             features = '{"okurigana": true}' if has_okurigana else None
 
             cur.execute(
-                "INSERT INTO readings (etymology_id, source_id, kind, category, sort_order, features) "
-                "VALUES (?, ?, 'reading', 'kun', ?, ?)",
-                (etym_id, SOURCE_UNIHAN, sort_idx, features),
+                "INSERT INTO readings (etymology_id, kind, category, sort_order, features) "
+                "VALUES (?, 'reading', 'kun', ?, ?)",
+                (etym_id, sort_idx, features),
             )
             reading_id = cur.lastrowid
+            cur.execute(
+                "INSERT INTO reading_attestations (reading_id, source_id) VALUES (?, ?)",
+                (reading_id, SOURCE_UNIHAN),
+            )
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
@@ -506,11 +518,15 @@ def import_korean(
         max_len = max(len(yale_vals), len(hangul_vals))
         for i in range(max_len):
             cur.execute(
-                "INSERT INTO readings (etymology_id, source_id, kind, sort_order) "
-                "VALUES (?, ?, 'reading', ?)",
-                (etym_id, SOURCE_UNIHAN, i + 1),
+                "INSERT INTO readings (etymology_id, kind, sort_order) "
+                "VALUES (?, 'reading', ?)",
+                (etym_id, i + 1),
             )
             reading_id = cur.lastrowid
+            cur.execute(
+                "INSERT INTO reading_attestations (reading_id, source_id) VALUES (?, ?)",
+                (reading_id, SOURCE_UNIHAN),
+            )
 
             if i < len(yale_vals):
                 cur.execute(

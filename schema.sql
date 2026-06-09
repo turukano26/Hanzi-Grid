@@ -263,16 +263,19 @@ CREATE TABLE etymologies (
 -- `tone`        — stored here for convenience even though it's also encoded in some
 --                  transcription systems. Allows tone-based queries without parsing strings.
 -- `features`    — JSON blob for language-specific flags (e.g., {"okurigana": true}).
+-- A reading is a distinct pronunciation, independent of which source attests it.
+-- Source attribution lives in the reading_attestations junction (see section 3b),
+-- so a pronunciation confirmed by several references is ONE reading row with
+-- several attestations — not one duplicate row per source.
 CREATE TABLE readings (
     id              INTEGER PRIMARY KEY,
     etymology_id    INTEGER NOT NULL REFERENCES etymologies(id),
-    source_id       INTEGER NOT NULL REFERENCES sources(id),
     kind            TEXT    NOT NULL DEFAULT 'reading'
                     CHECK (kind IN ('reading', 'reconstruction')),
     category        TEXT,
     subcategory     TEXT,
     tone            TEXT,
-    sort_order      INTEGER NOT NULL DEFAULT 0,  -- ordering within this source's readings
+    sort_order      INTEGER NOT NULL DEFAULT 0,  -- display ordering within the etymology
     features        TEXT                   -- JSON
 );
 
@@ -321,20 +324,28 @@ CREATE TABLE examples (
 -- ============================================================
 -- 3b. SOURCE ATTRIBUTION
 -- ============================================================
--- readings.source_id and senses.source_id record which reference work
--- each row came from directly. When two sources attest the same
--- pronunciation, they each get their own reading row; display code
--- deduplicates by converted value and picks the preferred source.
---
--- etymology_sources is a junction table (many-to-many) because a single
--- etymology grouping can be confirmed by multiple references without
--- warranting duplicate rows.
+-- Shareable facts that several references can independently attest --
+-- etymologies and readings -- use junction tables (many-to-many) so
+-- agreement is represented by extra attestation rows pointing at ONE
+-- fact, rather than duplicate fact rows. senses.source_id stays inline
+-- because a definition's wording is source-specific (CC-CEDICT and Unihan
+-- phrase the same meaning differently), so it is genuinely a distinct row
+-- per source rather than a shared fact.
 
 CREATE TABLE etymology_sources (
     etymology_id INTEGER NOT NULL REFERENCES etymologies(id) ON DELETE CASCADE,
     source_id    INTEGER NOT NULL REFERENCES sources(id),
     notes        TEXT,                     -- e.g., "listed under alternate reading"
     PRIMARY KEY (etymology_id, source_id)
+);
+
+-- Which reference work(s) attest a given reading. A pronunciation confirmed
+-- by N sources is one readings row with N attestation rows here.
+CREATE TABLE reading_attestations (
+    reading_id INTEGER NOT NULL REFERENCES readings(id) ON DELETE CASCADE,
+    source_id  INTEGER NOT NULL REFERENCES sources(id),
+    notes      TEXT,                       -- e.g., "listed under alternate reading"
+    PRIMARY KEY (reading_id, source_id)
 );
 
 
@@ -454,7 +465,7 @@ CREATE INDEX idx_components_component     ON character_components(component_code
 
 -- Source attribution (reverse lookups: "everything from source X")
 CREATE INDEX idx_etym_sources_source      ON etymology_sources(source_id);
-CREATE INDEX idx_readings_source          ON readings(source_id);
+CREATE INDEX idx_read_attest_source       ON reading_attestations(source_id);
 CREATE INDEX idx_senses_source            ON senses(source_id);
 CREATE INDEX idx_glyphs_source            ON character_glyphs(source_id);
 CREATE INDEX idx_variants_source          ON character_variants(source_id);

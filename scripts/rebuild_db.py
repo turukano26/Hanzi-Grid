@@ -29,6 +29,7 @@ STEPS = [
     ("Import KANJIDIC2",     ["import_kanjidic2.py",      "--skip-download"]),
     ("Import CC-CEDICT",     ["import_cedict.py",         "--skip-download"]),
     ("Import character sets",["import_character_sets.py", "--skip-download", "--force"]),
+    ("Dedup readings",       ["dedup_readings.py"]),
 ]
 
 
