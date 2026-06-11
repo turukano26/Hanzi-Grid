@@ -82,7 +82,13 @@ the `.db`.
 pronunciation under one etymology starts as several reading rows (one per source). The pass merges
 readings that share an identical `(transcription_system_id, value)` within the same
 `(etymology_id, kind, category, subcategory)`, unioning their `reading_attestations`,
-`reading_transcriptions` and `senses` onto the lowest-id survivor. It is idempotent.
+`reading_transcriptions` and `senses` onto the lowest-id survivor. It is idempotent. Two
+cross-system **bridge** passes handle readings that the generic rule misses because the same
+pronunciation is spelled in two different systems: `merge_japanese_romaji` folds Unihan's Hepburn
+rows onto their Kanjidic kana twins, and `merge_korean_yale` folds Unihan's Yale-only Korean rows
+onto their Hangul twins (romanizing each Hangul to Yale via `hangul_roman.hangul_to_yale`, then
+matching). In both, the native-script row (kana / Hangul) is the survivor; the Korean bridge keeps
+Unihan's Yale value by moving it onto the survivor (it is not lossy, unlike the JA romaji).
 
 `import_libhangul.py` imports libhangul's `hanja.txt` (a colon-delimited `reading:hanja:eumhun`
 Korean→Hanja dictionary). It keeps only single-Hangul→single-Hanja entries and creates Korean

@@ -47,14 +47,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = ROOT / "omnihanzi.db"
 
-# Shared kana→Hepburn converter (single home in romaji.py, also used by app.py).
+# Shared romanizers (single home in their own modules, also used by app.py).
 sys.path.insert(0, str(ROOT))
 from romaji import _kana_to_romaji  # noqa: E402
+from hangul_roman import hangul_to_yale  # noqa: E402
 
 # Japanese reading systems involved in the kana/romaji bridge (see module docstring).
 LANG_TOKYO = 10
 TS_HEPBURN = 30
 TS_KANA = 32
+
+# Korean reading systems involved in the Yale/Hangul bridge (see merge_korean_yale).
+LANG_KOREAN = 20
+TS_HANGUL = 41
+TS_YALE_KO = 42
 
 
 
@@ -243,6 +249,79 @@ def merge_japanese_romaji(cur: sqlite3.Cursor) -> int:
     return merged
 
 
+def merge_korean_yale(cur: sqlite3.Cursor) -> int:
+    """Bridge Unihan's Yale-only Korean readings onto their Hangul twins.
+
+    Unihan writes Korean readings as Yale romanization (ts 42, from kKorean) while
+    libhangul/kHangul write them as Hangul (ts 41). When Unihan's kKorean lists
+    more readings than kHangul, the surplus become Yale-only rows with no Hangul;
+    if libhangul then supplies that reading's Hangul, the two never share a
+    (ts, value) pair, so the generic merge leaves them as separate bullets even
+    though they are the same reading (e.g. 喝: Unihan 'ay' + libhangul '애').
+
+    This pass (the Korean analog of merge_japanese_romaji) romanizes each Hangul
+    to Yale and, within the same (etymology, kind, category, subcategory), folds a
+    Yale-only row onto the Hangul-bearing row whose romanization matches. The
+    Hangul row is the survivor (the native form, and what a romanization derives
+    from); the generic merge() moves the Yale transcription and attestations onto
+    it. Returns the number of readings merged away. Run after the generic merge so
+    it bridges already-collapsed survivors.
+    """
+    cur.execute(
+        """
+        SELECT r.id,
+               r.etymology_id,
+               r.kind,
+               IFNULL(r.category, ''),
+               IFNULL(r.subcategory, ''),
+               rt.transcription_system_id,
+               rt.value
+        FROM readings r
+        JOIN etymologies e ON e.id = r.etymology_id
+        JOIN reading_transcriptions rt ON rt.reading_id = r.id
+        WHERE e.language_id = ? AND rt.transcription_system_id IN (?, ?)
+        """,
+        (LANG_KOREAN, TS_HANGUL, TS_YALE_KO),
+    )
+
+    # Collect each reading's Hangul and Yale values (a row may carry both).
+    info: dict[int, dict] = {}
+    for rid, etym, kind, cat, sub, ts, value in cur.fetchall():
+        rec = info.setdefault(rid, {"group": (etym, kind, cat, sub),
+                                    "hangul": None, "yale": None})
+        if ts == TS_HANGUL:
+            rec["hangul"] = value
+        else:
+            rec["yale"] = value
+
+    # Per group: {yale bridge -> lowest Hangul-bearing reading id} and the
+    # Yale-only rows seeking a Hangul twin.
+    hangul_by_bridge: dict[tuple, dict[str, int]] = defaultdict(dict)
+    yale_only: dict[tuple, list[tuple[str, int]]] = defaultdict(list)
+
+    for rid, rec in info.items():
+        if rec["hangul"]:
+            bridge = hangul_to_yale(_norm(rec["hangul"])).lower()
+            if not bridge:
+                continue
+            hb = hangul_by_bridge[rec["group"]]
+            if bridge not in hb or rid < hb[bridge]:
+                hb[bridge] = rid
+        elif rec["yale"]:
+            yale_only[rec["group"]].append((_norm(rec["yale"]).lower(), rid))
+
+    merged = 0
+    for group, rows in yale_only.items():
+        hb = hangul_by_bridge.get(group, {})
+        for bridge, yid in rows:
+            survivor = hb.get(bridge)
+            if survivor is None or survivor == yid:
+                continue  # no Hangul twin: leave the Yale-only row as-is
+            merge(cur, survivor, [yid])  # keeps Hangul survivor, moves Yale onto it
+            merged += 1
+    return merged
+
+
 def dedup_senses(cur: sqlite3.Cursor) -> int:
     """Drop senses that became exact (reading, source, definition) duplicates."""
     cur.execute(
@@ -277,6 +356,7 @@ def main() -> None:
         for survivor, dups in components.items():
             merge(cur, survivor, dups)
         ja_merged = merge_japanese_romaji(cur)
+        ko_merged = merge_korean_yale(cur)
         removed_senses = dedup_senses(cur)
         con.commit()
     except Exception:
@@ -289,7 +369,8 @@ def main() -> None:
     print(
         f"Readings: {before:,} -> {after:,} "
         f"({merged_readings:,} merged into {len(components):,} survivors, "
-        f"{ja_merged:,} Japanese Hepburn rows bridged onto kana); "
+        f"{ja_merged:,} Japanese Hepburn rows bridged onto kana, "
+        f"{ko_merged:,} Korean Yale rows bridged onto Hangul); "
         f"{removed_senses:,} duplicate senses removed."
     )
 
