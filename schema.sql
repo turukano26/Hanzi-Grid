@@ -131,6 +131,10 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
 -- old COALESCE(kana, hepburn) + _kana_to_romaji path exactly, because kana_romaji
 -- only lowercases an already-romaji (orphan Unihan) value.
 UPDATE transcription_systems SET derived_from_ts_id = 32, transform = 'kana_romaji' WHERE id = 30;
+-- Korean Revised Romanization (40) is not stored; derive it from Hangul (41) via
+-- hangul_revised at render time, so every Hangul reading shows a romanization
+-- even where Unihan supplied no Yale (e.g. 두음법칙 forms like 女's 여).
+UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_revised' WHERE id = 40;
 -- Middle Chinese Stimson / kTang (ts 60) is created by import_unihan.py, which
 -- seeds its transform = 'lower' there (this schema seed does not define ts 60).
 

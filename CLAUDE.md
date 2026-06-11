@@ -136,6 +136,12 @@ Japanese readings are stored as kana and romanized to Hepburn at request time vi
 transform (`_kana_to_romaji` / `_ROMAJI` live in `romaji.py`, imported by `app.py`), preserving
 okurigana `.` and affix `-` markers — see `transcription_systems.derived_from_ts_id` / `transform`.
 
+Korean **Revised Romanization** (`revised_rom`, ts 40) is likewise not stored: it derives from Hangul
+(ts 41) via the `hangul_revised` transform (`hangul_roman.hangul_to_revised`, also imported by
+`app.py`). This means every Hangul reading shows a romanization even where Unihan supplied no Yale
+(e.g. 두음법칙 forms like 女's 여→"yeo"), and — being sort_order 1 — Revised Romanization is Korean's
+default-on primary transcription.
+
 ### Search (`/get_search_results`)
 
 `searchType` selects one of three branches, all returning `{"search": "<chars>"}`:

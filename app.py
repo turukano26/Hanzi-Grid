@@ -5,6 +5,7 @@ import sqlite3
 import regex
 
 from romaji import _kana_to_romaji
+from hangul_roman import hangul_to_revised
 
 
 
@@ -53,6 +54,7 @@ def _transform_kana_romaji(value):
 # COALESCE in _fetch_reading_rows.
 TRANSFORMS = {
     'kana_romaji': _transform_kana_romaji,
+    'hangul_revised': hangul_to_revised,
     'lower': str.lower,
 }
 
