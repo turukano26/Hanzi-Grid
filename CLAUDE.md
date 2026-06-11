@@ -30,26 +30,21 @@ static/styles.css               # Styles
 charactersets/*.json            # Character set definitions, generated from the DB
 omnihanzi.db                    # SQLite database — the primary data store (gitignored)
 schema.sql                      # Full DB schema + seed data (languages, transcription systems, sources)
-df.parquet                      # Legacy Kanjidic/Unihan data — still used by search routes
-mandarin_eng_dictionary.parquet # Legacy CC-CEDICT Mandarin data — still used by Pinyin search
 data/                           # Raw source dumps: unihan/, cedict/, kanjidic2/ (gitignored)
 scripts/                        # DB build pipeline (see below)
 info_sections/                  # WIP section-protocol framework — NOT imported by app.py yet
 ```
 
-### Data layer: hybrid SQLite + parquet
+### Data layer: SQLite
 
-The app is mid-migration from parquet to SQLite. Currently **both** are loaded at startup:
+**`omnihanzi.db`** (SQLite) is the single data store for everything the app serves — the
+character info sheet (`/process_click_on_character`) and search (`/get_search_results`, both
+Pinyin and Romaji). Opened once with `check_same_thread=False` and `PRAGMA journal_mode = WAL`.
+Schema in `schema.sql`.
 
-- **`omnihanzi.db`** (SQLite) is the source of truth for the character info sheet
-  (`/process_click_on_character`). Opened once with `check_same_thread=False` and
-  `PRAGMA journal_mode = WAL`. Schema in `schema.sql`.
-- **`df.parquet`** and **`mandarin_eng_dictionary.parquet`** are still loaded into
-  module-level DataFrames (`char_info_df`, `mand_def_df`) and used only by
-  `/get_search_results` (Pinyin and Romaji search). Only the columns the routes use are read.
-
-When extending search, the eventual goal is to query SQLite instead of parquet; for now the
-two stores coexist.
+The old parquet stage (`df.parquet`, `mandarin_eng_dictionary.parquet`, pandas) is gone — search
+now queries SQLite directly (see "Search" below). Their underlying data still enters the DB
+through the `scripts/` importers (Unihan, Kanjidic2, CC-CEDICT, CC-Canto).
 
 ### SQLite schema (key tables)
 
@@ -62,9 +57,10 @@ Normalized around characters → etymologies → readings → transcriptions/sen
 - Source attribution for readings is **not** on the reading row: it lives in the
   `reading_attestations(reading_id, source_id, notes)` junction (a reading can be attested by
   several sources), mirroring `etymology_sources`. `senses.source_id` stays inline.
-- Lookups in `app.py` are by `codepoint` + `language_id` + `transcription_system_id`. The relevant
-  IDs are hard-coded constants near the top of `app.py` (`LANG_MANDARIN`, `TS_PINYIN`, etc.) that
-  must match the seed data in `schema.sql`.
+- Lookups in `app.py` are by `codepoint` + `language_id` + `transcription_system_id`. Most of these
+  IDs are resolved dynamically from the DB while building the info-box menu tree (`_build_info_tree`);
+  the search helpers use a few hard-coded constants (`LANG_MANDARIN`, `LANG_JAPANESE`,
+  `TS_PINYIN_NUM`, `TS_HEPBURN`, `TS_KANA`) that must match the seed data in `schema.sql`.
 - Character sets live in `character_set_nodes` (self-referential tree via `parent_id`) +
   `character_set_members`. The JSON files in `charactersets/` are *generated* from these tables.
 
@@ -115,7 +111,25 @@ in `renderInfoBoxFromData()`:
 - Any language with no data returns `{error: "..."}`.
 
 Japanese readings are stored as kana and converted to Hepburn romaji at request time by
-`_kana_to_romaji()` / `_ROMAJI` in `app.py`, preserving okurigana `.` and affix `-` markers.
+`_kana_to_romaji()` / `_ROMAJI` (in `romaji.py`, imported by `app.py`), preserving okurigana `.`
+and affix `-` markers.
+
+### Search (`/get_search_results`)
+
+`searchType` selects one of three branches, all returning `{"search": "<chars>"}`:
+
+- **Character** — extracts Han characters from the query with a `\p{Script=Han}` regex.
+- **Pinyin** — `_search_pinyin()`: matches Mandarin readings whose numbered-pinyin transcription
+  (`TS_PINYIN_NUM`), with its tone digit stripped (`rtrim(value, '0123456789')`), equals the query —
+  i.e. toneless pinyin, so `sheng` hits `sheng1`/`sheng4`/…. Ordered by Unihan `grade_level` (a coarse
+  frequency proxy) then codepoint.
+- **Romaji** — `_search_romaji()`: pulls every Japanese reading's `COALESCE(hepburn, kana)` value and
+  romanizes it in Python via `_transform_kana_romaji` (the same path the info sheet uses, so
+  directly-stored and kana-derived readings match alike), strips okurigana/affix punctuation, and
+  compares to the query. Ordered by Kanjidic `frequency_rank` then Unihan `grade_level`.
+
+The ordering is approximate: the DB has no Unihan `kFrequency` or Kanjidic grade (what the old parquet
+search sorted on), so the available `frequency_rank` / `grade_level` attributes stand in.
 
 ### Key design points
 

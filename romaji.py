@@ -3,7 +3,7 @@
 Single shared home for `_kata_to_hira` / `_ROMAJI` / `_kana_to_romaji`, imported
 by both `app.py` (the `kana_romaji` TRANSFORM) and `scripts/dedup_readings.py`
 (the Japanese kana/romaji bridge). Kept import-light (stdlib only) so the build
-scripts can import it without pulling in Flask/parquet.
+scripts can import it without pulling in Flask.
 """
 
 

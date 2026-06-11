@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 import sqlite3
-import pandas as pd
 import regex
 
 from romaji import _kana_to_romaji
@@ -190,24 +189,73 @@ def _build_info_tree():
 TREE = _build_info_tree()
 
 # ---------------------------------------------------------------------------
-# Parquet DataFrames (still used by search routes)
+# Search (Pinyin / Romaji) — queried straight from SQLite.
+# IDs match the transcription_systems / languages seed data in schema.sql.
 # ---------------------------------------------------------------------------
-char_info_columns = [
-    'kFrequency',
-    'jd_freq',
-    'jd_grade',
-    'jd_romaji_kun',
-    'jd_romaji_on',
-]
+LANG_MANDARIN = 1
+LANG_JAPANESE = 10            # Tokyo Standard
+TS_PINYIN_NUM = 2            # numbered pinyin, e.g. "sheng1"
+TS_HEPBURN = 30             # romaji; derives from kana via the kana_romaji transform
+TS_KANA = 32
 
-mandarin_def_columns = [
-    'character',
-    'pinyin_num',
-]
+# Punctuation dropped from a romanized reading before matching (okurigana '.',
+# affix '-', and stray separators) — mirrors the old jd_romaji search.
+_ROMAJI_STRIP = {ord(c): None for c in ':..,-/_ ,'}
 
-char_info_df = pd.read_parquet('df.parquet', columns=char_info_columns)
-mand_def_df = pd.read_parquet('mandarin_eng_dictionary.parquet', columns=mandarin_def_columns)
-        
+
+def _search_pinyin(search_string):
+    """Characters with a Mandarin reading whose toneless numbered pinyin equals
+    the query (e.g. "sheng" matches sheng1/sheng4/…). Ordered by Unihan grade
+    level (a coarse frequency proxy) then codepoint."""
+    rows = db.execute(
+        "SELECT c.character FROM characters c "
+        "JOIN etymologies e ON e.codepoint = c.codepoint AND e.language_id = ? "
+        "JOIN readings r ON r.etymology_id = e.id "
+        "JOIN reading_transcriptions rt ON rt.reading_id = r.id "
+        "    AND rt.transcription_system_id = ? "
+        "LEFT JOIN character_attributes g ON g.codepoint = c.codepoint "
+        "    AND g.key = 'grade_level' "
+        "WHERE lower(rtrim(rt.value, '0123456789')) = ? "
+        "GROUP BY c.codepoint "
+        "ORDER BY (g.value IS NULL), CAST(g.value AS INTEGER), c.codepoint",
+        (LANG_MANDARIN, TS_PINYIN_NUM, search_string.lower())).fetchall()
+    return ''.join(r[0] for r in rows)
+
+
+def _search_romaji(search_string):
+    """Characters with a Japanese (on/kun) reading whose Hepburn romaji equals the
+    query. Romaji is resolved exactly as the info sheet does — COALESCE(hepburn,
+    kana) then the kana_romaji transform — so directly-stored and kana-derived
+    readings match alike. Ordered by Kanjidic frequency rank then Unihan grade."""
+    target = search_string.lower()
+    rows = db.execute(
+        "SELECT c.codepoint, COALESCE(h.value, k.value) AS reading, "
+        "  (SELECT value FROM character_attributes "
+        "     WHERE codepoint = c.codepoint AND key = 'frequency_rank') AS freq, "
+        "  (SELECT value FROM character_attributes "
+        "     WHERE codepoint = c.codepoint AND key = 'grade_level') AS grade "
+        "FROM characters c "
+        "JOIN etymologies e ON e.codepoint = c.codepoint AND e.language_id = ? "
+        "JOIN readings r ON r.etymology_id = e.id "
+        "LEFT JOIN reading_transcriptions h ON h.reading_id = r.id "
+        "    AND h.transcription_system_id = ? "
+        "LEFT JOIN reading_transcriptions k ON k.reading_id = r.id "
+        "    AND k.transcription_system_id = ? "
+        "WHERE h.value IS NOT NULL OR k.value IS NOT NULL",
+        (LANG_JAPANESE, TS_HEPBURN, TS_KANA)).fetchall()
+
+    # Romanize in Python (the transforms are Python), then dedupe to one sort key
+    # per matching character. Rows lacking the attribute sort last (None -> True).
+    matches = {}
+    for codepoint, reading, freq, grade in rows:
+        romaji = _transform_kana_romaji(reading).translate(_ROMAJI_STRIP).lower()
+        if romaji == target:
+            matches[codepoint] = (
+                freq is None, int(freq) if freq is not None else 0,
+                grade is None, int(grade) if grade is not None else 0)
+    ordered = sorted(matches, key=lambda cp: matches[cp] + (cp,))
+    return ''.join(chr(cp) for cp in ordered)
+
 
 @app.route('/')
 def index():
@@ -261,21 +309,11 @@ def get_search_results():
         pass
 
     elif search_type == 'Pinyin':
+        return jsonify({"search": _search_pinyin(search_string)})
 
-        matches = mand_def_df[mand_def_df['pinyin_num'].apply(lambda x: search_string.lower() == x.lower()[:-1].strip(": ,.-_"))]
-        matches = matches.merge(char_info_df, left_on='character', right_index=True).sort_values('kFrequency')
-        chars_to_return = ''.join(matches['character'].unique())
-        return jsonify({"search": chars_to_return})
-        
     elif search_type == 'Romaji':
-        #searchs the jd_romaji_kun and jd_romaji_on columns for matches, then returns the characters that match
-        exclude = {ord(x): None for x in ':..,-/_ ,'}
-        results_kun = char_info_df[char_info_df['jd_romaji_kun'].apply(lambda x: search_string.lower() in [s.translate(exclude).lower() for s in x])]
-        results_on = char_info_df[char_info_df['jd_romaji_on'].apply(lambda x: search_string.lower() in [s.translate(exclude).lower() for s in x])]
+        return jsonify({"search": _search_romaji(search_string)})
 
-        chars_to_return = ''.join(list(pd.concat([results_kun, results_on]).sort_values(['jd_freq', 'jd_grade']).index))
-        return jsonify({"search": chars_to_return})
-    
     else:
         return "wtf"
 
