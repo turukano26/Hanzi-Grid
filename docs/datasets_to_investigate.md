@@ -1,4 +1,26 @@
 # Datasets
 
-- HERITAGE Hanja NLP toolkit
 - wiktionary kakki.org
+- HERITAGE Hanja NLP toolkit
+- makemeahanzi
+- CHISE IDS (cjkvi-ids)
+- unused unihan fields
+- CODH Seal Script Dataset
+- Unicode Seal Script mapping data
+- ctext.org
+- rime-cantonese
+- beidasinitic
+- houchinese
+- KeSpeech
+- ZhuangBench
+- Wuming Zhuang speech data
+- chunom.org (Chunom Project)
+- votaquangnhat/standard-han-nom
+- kirbyj/vPhon
+- OMOLO somiyagawa/OMOLO
+- 沖縄語辞典 データ集 (Okinawago jiten dēta-shū) from NINJAL
+- 琉球語音声データベース (Ryukyuan Language Database, University of the Ryukyus)
+- Minamiryukyu Miyakogo Tarama Hōgen Jiten
+- kansai-accent-dictionary
+- JLect (jlect.com)
+- awesome-japanese-nlp-resources
