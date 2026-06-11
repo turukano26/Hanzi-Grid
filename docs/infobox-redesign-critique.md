@@ -5,18 +5,18 @@
 *plethora of future sources*, with the sources themselves added separately. Designing
 ahead of the data is therefore intentional, not premature.
 
-**Status of this review:** the plan has since been revised to **derive the reading menu
-from the DB** rather than from a hand-authored manifest. That revision resolved the entire
-first batch of findings — the redundancy and "second source of truth" issues, which were
-the heaviest ones. Those are listed under "Resolved" below and removed from the active list.
-What remains are forward-looking concerns the revision did **not** address.
+**Status of this review:** the plan has been revised twice since the original critique. The
+first pass **derived the reading menu from the DB** (resolving the redundancy and "second source
+of truth" issues — the heaviest ones); the second **added source provenance to the response
+contract** (resolving B1/B2). Those are listed under "Resolved" below and removed from the active
+list. Only one low-severity, forward-looking concern remains.
 
 All claims below were checked against `app.py`, `schema.sql`, `static/script.js`, and the
 live `omnihanzi.db`.
 
 ---
 
-## Resolved by the DB-derived revision (removed from the active list)
+## Resolved (removed from the active list)
 
 - **A1 — manifest as a second source of truth.** The plan now builds the reading tree by
   querying `language_families` / `languages` / `transcription_systems` (§2, §4), keeping only
@@ -36,71 +36,36 @@ live `omnihanzi.db`.
 - **C — cheap wins.** All four (collapse the `_get_*` bodies, surface existing senses, move
   toggles out of the color `localStorage` namespace, use `readings.tone`) are now part of the
   plan's build phases.
+- **B1 — no source provenance in the response.** Addressed. §5 now returns attribution at the two
+  levels the schema models: `"sources": [str]` per reading (`reading_attestations → sources.short_name`)
+  and `{ "text", "source" }` per definition (`senses.source_id`); `attributes` rows gained a
+  `source` too. A new §5 "Source provenance" subsection plus §7 (source badges) and §9 ("ordering
+  no longer discards attribution") carry it through to render. The `source` slot is reserved before
+  building, which was the ask.
+- **B2 — reading-group flattens cross-source disagreement.** Addressed and named. §3 now states the
+  reading group is the *display* unit, not a provenance-collapsing one: because `dedup_readings.py`
+  unions every attesting source onto the surviving reading, each reading carries its full source set,
+  and the "which source lists which reading" view is recoverable by inverting the per-reading source
+  sets. Nothing is lost by merging. (The one residue: attestation is per-reading, not
+  per-transcription — `reading_transcriptions` has no source column — so "which source supplied this
+  exact romanization" is still not expressible. The plan calls this granularity out explicitly, which
+  is the right move; it only matters if a future source disputes a transcription value rather than a
+  reading.)
 
----
-
-## Remaining concerns (still apply to the revised plan)
-
-### B1. The design surfaces no source provenance — in an explicitly multi-source app
-
-This is the biggest *omission* given the goal, and the revision did not touch it. Provenance is
-real, populated data:
-
-```
-reading_attestations rows            : 215907
-readings attested by >1 source       : 54810
-distinct sources (attestations/senses): 4
-```
-
-54,810 readings are already attested by multiple sources, and `senses.source_id` /
-`reading_attestations` exist precisely to answer "which dictionary said this." A system built to
-ingest a *plethora of sources* will inevitably need to show "reading per Unihan vs CC-CEDICT,"
-badge a definition with its source, or let users filter by source. The revised response shape is
-still `{ readings: [ { transcriptions, tone, definitions } ] }` (§5) — **no `source` field
-anywhere** — and §9 still orders definitions by `source_id` only to *discard* the attribution
-afterward. You are designing the forward-looking contract right now; not reserving a place for
-`source` in the response (`readings[].transcriptions[].source`, `senses[].source`) is cheap
-today and expensive to retrofit into 20 sources' worth of renderers later.
-
-**Severity: high for the stated goal. The plan optimizes for collapsing source multiplicity; the goal implies surfacing it.**
-
-### B2. Reading-group-as-query-unit can flatten cross-source disagreement
-
-Related to B1. The §3 modeling decision (definitions belong to a reading, not a transcription)
-is **correct** and worth keeping. But pushing the *query/response* unit up to the reading group,
-combined with "`dedup_readings.py` already merged duplicate readings," means the contract has no
-way to express *source-level* disagreement about the readings themselves — only about
-definitions. For two sources that attest *different* reading sets (not just different glosses),
-the merged-group response can't say "Source X lists ⟨a,b⟩, Source Y lists ⟨b,c⟩." If provenance
-display ever matters (B1), the unit-of-response choice forecloses it. Worth at least an explicit
-"we are deliberately collapsing source-level reading provenance; revisit if a source needs
-disjoint attribution."
-
-**Severity: medium. A design fork worth naming now rather than discovering at source #6.**
-
-### B3. No migration path when a persisted leaf id changes
-
-Enabled leaf ids become the persisted user state (§9, single `infoOptions` key — the move out of
-the color namespace is good and should ship). The revision improved this by deriving ids from the
-stable `code` columns (`cmn:pinyin`) instead of hand-authored strings, so ids are now *more*
-stable than before. But the plan still says renamed/orphaned ids "become harmless orphans — no
-migration needed; defaults apply." The day a `transcription_systems.code` is renamed or a node is
-renumbered, every affected user's selection silently resets to default with no alias map. Smaller
-risk than in the manifest design, but the "no migration" stance is still a deliberate choice worth
-stating as such while the id scheme (`:`-joined codes) is still young.
-
-**Severity: low. Cheap to address only while the id scheme is being fixed.**
+- **B3 — no migration path when a persisted leaf id changes.** Addressed. §9 now declares leaf ids a
+  **stable, append-only contract**: the `:`-joined `code` chain is frozen once shipped (add new
+  codes, never rename existing ones; label changes are fine because labels live in the overlay / DB
+  `name` columns, not the id). That keeps a saved `infoOptions` list valid for the life of the app
+  with no alias map, and the rule is adopted now while there is no user state in the wild. The one
+  escape hatch — a deliberate `{ old_id: new_id }` migration if a `code` ever truly must change — is
+  named explicitly.
 
 ---
 
 ## Bottom line
 
-The DB-derived revision did the heavy lifting: the redundancy and source-of-truth findings (A1,
-A2, A4, A5, B4) are genuinely resolved, not papered over. The remaining concerns are all about
-**source provenance**, which the revision left exactly where it was:
-
-1. **B1 / B2** — the contract still collapses source multiplicity. Reserve a `source` slot in the
-   response shape now; it is cheap today and expensive after 20 sources exist. This is the one
-   forward-looking decision the revision should still make before building.
-2. **B3** — decide id stability vs. a migration map deliberately, while the `:`-joined-code scheme
-   is still being fixed.
+All findings are resolved. The DB-derived rewrite closed the redundancy and source-of-truth issues
+(A1, A2, A4, A5, B4); the provenance pass closed B1/B2 by reserving `source` attribution at the
+reading and definition levels and stating the merge-preserves-provenance invariant; the id-stability
+decision closed B3. Nothing in this critique remains open against the current plan — it is ready to
+build.

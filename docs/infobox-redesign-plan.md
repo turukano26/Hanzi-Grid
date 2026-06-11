@@ -93,6 +93,14 @@ single per-group query. This:
 - Makes **definitions for any language** (e.g. Japanese) work with no new code:
   add a `definitions` toggle child under that language's group; the same handler
   fetches `senses` by `reading_id`, which is language-agnostic.
+- **Does not flatten source provenance.** The reading group is the *display* unit,
+  not a provenance-collapsing one. `dedup_readings.py` unions every attesting
+  source onto the surviving reading row (`reading_attestations`), so each reading
+  carries the full set of sources that list it, and each definition carries its own
+  `senses.source_id`. The "which source lists which reading" view is therefore
+  recoverable by inverting the per-reading source sets (CEDICT → its readings,
+  Unihan → its readings, …) — nothing is lost by merging. §5 returns both levels
+  of attribution on the wire.
 
 This matches the hierarchy requested: *Chinese → Mandarin / Cantonese →
 (Mandarin Definitions, Mandarin Readings) → the different transcription systems.*
@@ -210,28 +218,52 @@ def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None
     rows; each column resolves per reading as
     `COALESCE(stored[ts], stored[derived_from])` then applies `transform` — e.g.
     Japanese romaji (ts 30) COALESCEs its stored value with kana (ts 32) and then
-    applies `kana_romaji`."""
+    applies `kana_romaji`. Each row also carries its attesting sources
+    (`reading_attestations → sources.short_name`); when `definitions` is on, each
+    sense carries its own `sources.short_name` (`senses.source_id`)."""
 ```
 
 ### Handlers
 
 | handler | replaces | output shape |
 |---|---|---|
-| `readings` | `_get_mandarin`, `_get_cantonese`, `_get_japanese`, `_get_korean`, `_get_vietnamese`, `_get_tang` | `{ "readings": [ { "transcriptions": [...], "tone": str?, "definitions": [...]? } ] }` |
+| `readings` | `_get_mandarin`, `_get_cantonese`, `_get_japanese`, `_get_korean`, `_get_vietnamese`, `_get_tang` | `{ "readings": [ { "transcriptions": [...], "tone": str?, "sources": [str], "definitions": [ { "text": str, "source": str } ]? } ] }` |
 | `glyph_images` | *(new)* | `{ "images": [ { "url"\|"data": ..., "attribution": str } ] }` |
-| `attributes` | *(new)* | `{ "rows": [ { "key": str, "value": str } ] }` |
+| `attributes` | *(new)* | `{ "rows": [ { "key": str, "value": str, "source": str } ] }` |
 
 > **Naming note (the rename):** the unified handler is `readings`, **not**
 > `tonal_readings`. Tone is an *optional* per-reading attribute — present for
 > Mandarin/Cantonese, absent for Japanese/Korean/Vietnamese. The handler's job
-> is "fetch reading rows + optional senses + the enabled transcriptions,"
-> independent of whether tones exist. This is precisely why Japanese can reuse
-> it to carry definitions while having no tones.
+> is "fetch reading rows + their attesting sources + optional senses + the enabled
+> transcriptions," independent of whether tones exist. This is precisely why
+> Japanese can reuse it to carry definitions while having no tones.
 
 Middle Chinese (`tang`) is **not** a separate handler: it is `readings` for
 language 7. No `kind` filter is needed (every reading there is a reconstruction);
 the lowercase is `transcription_systems.transform = 'lower'` on ts 60 (§4),
 rendered inline.
+
+### Source provenance (every reading and definition is attributed)
+
+The data is multi-source — 54 810 readings are already attested by more than one
+source — so the contract **surfaces** provenance rather than collapsing it, at the
+two levels the schema already models:
+
+- **Per reading** — `reading_attestations(reading_id, source_id)` is the set of
+  sources that attest a reading. The handler joins it to `sources.short_name` and
+  returns `"sources": ["CEDICT", "Unihan"]` on each reading. Because
+  `dedup_readings.py` unions attestations onto the surviving row, a merged reading
+  lists *every* source that agrees on it.
+- **Per definition** — `senses.source_id` is inline (a gloss's wording is
+  source-specific), so each definition is returned as
+  `{ "text": "…", "source": "CEDICT" }`.
+
+`character_attributes.source_id` and `character_glyphs.attribution` feed the
+`source` / `attribution` fields of the `attributes` and `glyph_images` shapes the
+same way. Short names are resolved server-side from the `sources` table, so the
+client renders strings with no separate lookup. This is enough to badge a reading
+or gloss with its origin, and to filter by source later, with **no contract change
+when source #8 lands**.
 
 ### Language quirks live in the data, not in config
 
@@ -338,11 +370,12 @@ ids rather than every checkbox boolean.
 const RENDERERS = {
   readings:      (s) => /* per-reading rows: enabled transcriptions inline
                            (primary first, tone-colored from s.data tone),
-                           definitions listed once below; renders compactly
-                           when a reading has no definitions. When no
-                           transcription is enabled (definitions-only), there is
-                           no headword: render all definitions as one merged
-                           list. */,
+                           a source badge per reading from its `sources` array,
+                           definitions listed once below (each with its own
+                           `source`); renders compactly when a reading has no
+                           definitions. When no transcription is enabled
+                           (definitions-only), there is no headword: render all
+                           definitions as one merged list. */,
   image_gallery: (s) => ...,   // new — glyphs
   key_value:     (s) => ...,   // new — attributes (frequency, strokes…)
   // plain_text reserved for future free-form prose (e.g. etymology paragraphs).
@@ -488,6 +521,19 @@ ids into a **single dedicated key** (`infoOptions`, a JSON array of derived leaf
 `chineseMandarinCheckbox`-style keys become harmless orphans — no migration
 needed; the derived defaults (overlay `default_off` aside) apply on first load.
 
+**Decision: leaf ids are a stable, append-only contract.** A leaf id is the
+`:`-joined chain of `languages.code` / `transcription_systems.code` / `readings.category`
+values, and it is simultaneously the menu key, the POST request key, and this
+persisted `localStorage` key. Those `code`s are therefore frozen once shipped:
+**add new ones, never rename existing ones.** (A category-label change is fine —
+labels live in the overlay and the DB `name` columns, not in the id.) This keeps a
+saved `infoOptions` list valid for the life of the app with no alias/migration map.
+The cost of the rule is borne now, while there is no user state in the wild; the
+alternative — discovering after launch that a rename silently reset users'
+selections to default — is the only failure mode here, and this rule removes it. If
+a `code` ever *must* change, that is the one case that needs a deliberate
+`{ old_id: new_id }` migration applied when `infoOptions` is read.
+
 ### Edge cases to handle
 
 - **Only "Definitions" enabled, no romanization:** there is no transcription to
@@ -496,11 +542,13 @@ needed; the derived defaults (overlay `default_off` aside) apply on first load.
   any transcription leaf is enabled.) This keeps the §6 dispatch honest: it
   forwards only enabled leaves, so when no transcription leaf is on there is
   simply nothing to anchor by.
-- **Definition ordering:** `dedup_readings.py` already merges duplicate reading
-  rows at import, so there is no "which reading survives" decision left to make at
-  request time. Definitions are simply ordered by `source_id` (CEDICT before
-  Unihan); no `source_priority` knob is needed unless a future source wants a
-  non-id order, which would be a `sources.priority` column, not a manifest field.
+- **Definition ordering and attribution:** `dedup_readings.py` already merges
+  duplicate reading rows at import, so there is no "which reading survives" decision
+  left to make at request time. Definitions are ordered by `source_id` (CEDICT
+  before Unihan) and **each keeps its `source`** in the response (§5) — ordering no
+  longer discards attribution. No `source_priority` knob is needed unless a future
+  source wants a non-id order, which would be a `sources.priority` column, not a
+  manifest field.
 
 ---
 
