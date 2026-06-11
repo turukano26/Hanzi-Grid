@@ -84,18 +84,14 @@ function sectionHeader(title) {
     return '<hr><span style="color:#999999 ;font-size: 12px">' + escapeHtml(title) + '</span><p>';
 }
 
-function sourceBadge(source) {
-    if (!source) {
+// Source attribution is shown only on hover, via a native `title` tooltip —
+// invisible otherwise. Browsers fall back to an ancestor's title, so CJK spans
+// nested inside a titled element still surface the source on hover.
+function titleAttr(text) {
+    if (!text) {
         return '';
     }
-    return ' <span style="color:#bbbbbb; font-size: 11px">[' + escapeHtml(source) + ']</span>';
-}
-
-function readingSourceBadge(sources) {
-    if (!sources || !sources.length) {
-        return '';
-    }
-    return ' <span style="color:#bbbbbb; font-size: 11px">' + sources.map(escapeHtml).join(', ') + '</span>';
+    return ' title="' + escapeHtml(text) + '"';
 }
 
 // Renderer registry. A section's `type` (set server-side from the node's
@@ -112,7 +108,8 @@ var RENDERERS = {
         if (!anyTranscription) {
             readings.forEach(function (r) {
                 (r.definitions || []).forEach(function (d) {
-                    parts.push(' - ' + escapeHtml(d.text) + sourceBadge(d.source) + ' <br>');
+                    parts.push('<span class="info-source"' + titleAttr(d.source) + '> - ' +
+                        escapeHtml(d.text) + '</span> <br>');
                 });
             });
             return parts.join('');
@@ -122,11 +119,12 @@ var RENDERERS = {
             var toneColor = INFO_BOX_TONE_COLORS[r.tone] || '#333333';
             // Enabled transcriptions inline, primary first (server-ordered).
             var headword = tr.map(function (t) { return escapeHtml(t.value); }).join(' / ');
-            parts.push('<span style="color:' + toneColor + '; font-size: 30px "> • ' + headword + ' </span>');
-            parts.push(readingSourceBadge(r.sources));
-            parts.push('<br>');
+            var sourcesTitle = (r.sources || []).join(', ');
+            parts.push('<span class="info-source" style="color:' + toneColor +
+                '; font-size: 30px "' + titleAttr(sourcesTitle) + '> • ' + headword + ' </span><br>');
             (r.definitions || []).forEach(function (d) {
-                parts.push(' - ' + escapeHtml(d.text) + sourceBadge(d.source) + ' <br>');
+                parts.push('<span class="info-source"' + titleAttr(d.source) + '> - ' +
+                    escapeHtml(d.text) + '</span> <br>');
             });
             parts.push('<br>');
         });
@@ -155,9 +153,9 @@ var RENDERERS = {
         var parts = [sectionHeader(s.title)];
         var rows = (s.data && s.data.rows) || [];
         rows.forEach(function (row) {
-            parts.push('<span style="color:#333333; font-size:16px">' +
-                escapeHtml(row.key) + ': ' + escapeHtml(row.value) + '</span>' +
-                sourceBadge(row.source) + '<br>');
+            parts.push('<span class="info-source" style="color:#333333; font-size:16px"' +
+                titleAttr(row.source) + '>' +
+                escapeHtml(row.key) + ': ' + escapeHtml(row.value) + '</span><br>');
         });
         return parts.join('');
     }
@@ -362,8 +360,9 @@ function updateInfoBoxFadeState() {
     infoBox.classList.remove('show-top-fade', 'show-bottom-fade');
 }
 
-// Matches Han, Hiragana, Katakana, and Hangul syllables (CJK text in the info panel)
-var INFO_BOX_CJK_REGEX = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu;
+// Matches Han characters only (hanzi/kanji/hanja) — the clickable, grid-navigable
+// units. Kana and Hangul are deliberately excluded: they aren't grid characters.
+var INFO_BOX_CJK_REGEX = /[\p{Script=Han}]/gu;
 
 function wrapCjkCharactersInInfoBox(infoBox) {
     if (!infoBox) {
