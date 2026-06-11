@@ -82,11 +82,22 @@ def _build_info_tree():
             "JOIN etymologies e ON e.id = r.etymology_id"):
         lang_categories.setdefault(lang_id, set()).add(cat)
 
+    # Unihan's kDefinition is a generic per-character English gloss that the
+    # importer attaches to one primary reading — not a curated per-language
+    # definition set. So a Definitions leaf appears only where a language has
+    # senses from a *dedicated* dictionary (CEDICT, CC-Canto, KD2…): i.e. any
+    # source other than Unihan. This drops the incidental Unihan-only spillover
+    # on Korean/Vietnamese/Middle Chinese (rare compatibility/extension
+    # codepoints), and self-heals — a real dictionary importer for those
+    # languages makes the leaf reappear automatically.
+    unihan_row = db.execute("SELECT id FROM sources WHERE short_name = 'Unihan'").fetchone()
+    unihan_id = unihan_row[0] if unihan_row else -1
     sense_cats = set()
     for lang_id, cat in db.execute(
             "SELECT DISTINCT e.language_id, r.category FROM senses s "
             "JOIN readings r ON r.id = s.reading_id "
-            "JOIN etymologies e ON e.id = r.etymology_id"):
+            "JOIN etymologies e ON e.id = r.etymology_id "
+            "WHERE s.source_id IS NULL OR s.source_id != ?", (unihan_id,)):
         sense_cats.add((lang_id, cat))
 
     ts_by_lang = {}

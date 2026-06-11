@@ -9,6 +9,9 @@
 - add other scripts
 - witionary scraping?
 
+- move unihan definitions into own catagory outside of any language?
+- check how japanese defintions work, especially if theyre per reading
+
 ## colorings
 
 - fix saving character colorings
