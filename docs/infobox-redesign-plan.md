@@ -61,14 +61,13 @@ and that is **all** that stays hand-authored:
 2. **Non-reading sources** (`character_glyphs`, `character_attributes`, future
    free-text prose). These have no language→reading→transcription analogue, so
    they are declared explicitly — `id`, `label`, `default`, `handler`, `render`.
-   This is the only place a manifest entry still looks like the old proposal.
+   This is the only place a node is hand-declared.
 
-Behavioral quirks the first draft put in the manifest move to where the data
-lives (see §5): per-system value derivations onto two new `transcription_systems`
-columns, editorial-note filtering into the importer, tone into the existing
-`readings.tone` column. The net effect: the menu and its query parameters are
-**computed**, and hand-authoring shrinks to "what's on by default" plus "sources
-that aren't readings."
+Behavioral quirks live where their data lives (see §5): per-system value
+derivations on two new `transcription_systems` columns, editorial-note filtering in
+the importer, tone in the existing `readings.tone` column. The net effect: the menu
+and its query parameters are **computed**, and hand-authoring shrinks to "what's on
+by default" plus "sources that aren't readings."
 
 **Migration decision:** clean replacement. Once parity is verified, the seven
 `_get_*` functions, `create_character_info_sheet()`, the hardcoded menu
@@ -127,11 +126,11 @@ everywhere, Kunrei, Cantonese Yale…) are skipped automatically — the old "do
 add empty leaves by hand" rule becomes a data-driven filter on
 `DISTINCT reading_transcriptions.transcription_system_id`.
 
-### Two new `transcription_systems` columns absorb the per-leaf transforms
+### Two new `transcription_systems` columns carry per-system value derivations
 
-The first draft carried `value_transform` and `fallback_ts_id` on every Japanese
-leaf. Those are properties of the *transcription system*, not of a menu entry, so
-they move into the table that defines the system:
+A romanization derived from another system (Japanese romaji from kana, future IPA
+from pinyin) is a property of the *transcription system*, not of a menu entry, so it
+lives in the table that defines the system:
 
 ```sql
 ALTER TABLE transcription_systems ADD COLUMN derived_from_ts_id INTEGER
@@ -155,11 +154,10 @@ Seeded once in `schema.sql`:
 | 60 | Stimson (kTang) | — | `lower` | lowercase Middle Chinese |
 | 32 | Kana | — | — | stored kana only; correctly empty for orphans (no kana to reconstruct) |
 
-This is the **same merge §8 already shipped**, just expressed as system metadata
-instead of a per-leaf manifest knob. Future rule-based systems slot in identically
-— `ipa` derived from `pinyin` via a `pinyin_ipa` transform, `revised_rom` from
-`hangul` — with **zero** manifest involvement: add the row's two columns, write
-the transform once.
+This is the **same merge §8 already shipped**, expressed as system metadata. Future
+rule-based systems slot in identically — `ipa` derived from `pinyin` via a
+`pinyin_ipa` transform, `revised_rom` from `hangul` — touching only these two
+columns plus the transform itself, never the menu.
 
 ### The overlay (`overlay.json`) — the only hand-authored reading config
 
@@ -181,8 +179,8 @@ lookup table and the overlay loses even that — fully DB-derived.)
 
 ### Non-reading sources stay explicit
 
-Glyphs and attributes have no linguistic tree, so they are listed directly. This
-is the small residue of the original manifest:
+Glyphs and attributes have no linguistic tree, so they are listed directly — this
+is the only kind of node written by hand:
 
 ```jsonc
 { "id": "glyphs", "label": "Historical Glyphs", "default": false,
@@ -199,7 +197,7 @@ queries Yale only.
 ## 5. Handler set (server)
 
 The seven `_get_*` functions collapse into **one shared SQL core plus a small
-registry of handlers** dispatched by `query.handler`.
+registry of handlers** dispatched by each node's `handler`.
 
 ### Shared core (eliminates the duplication)
 
@@ -235,29 +233,29 @@ language 7. No `kind` filter is needed (every reading there is a reconstruction)
 the lowercase is `transcription_systems.transform = 'lower'` on ts 60 (§4),
 rendered inline.
 
-### Language quirks: relocated out of the manifest
+### Language quirks live in the data, not in config
 
-The first draft turned every quirk into a hand-authored manifest knob. Each one
-instead moves to where its data already lives:
+Every language quirk lives where its data already lives — none of them is a
+hand-authored config knob:
 
-| Quirk | First-draft knob | Now lives in |
-|---|---|---|
-| CEDICT-over-Unihan definitions | `source_priority: [1, 2]` | **nothing** — the default `ORDER BY source_id` already yields CEDICT (1) before Unihan (2); a `sources.priority` column is the DB home if a future source ever needs a non-id order |
-| Jyutping trailing tone digit | `tone_from: "trailing_digit"` | **nothing** — `readings.tone` is populated (34 876 / 34 886, 100% agreement with the digit) and read uniformly for every tonal language |
-| CC-Canto `#` editorial notes | `drop_hash_defs: true` | **the importer** — `import_cccanto.py` skips `#` lines instead of storing them as senses (equivalently a global `WHERE definition NOT LIKE '#%'`) |
-| Kana → Hepburn romaji | `value_transform` + `fallback_ts_id` on leaf | **`transcription_systems`** columns (ts 30: `derived_from_ts_id = 32`, `transform = kana_romaji`) |
-| Middle Chinese lowercase | `value_transform: "lower"` on leaf | **`transcription_systems`** column (ts 60: `transform = lower`) |
-| Reconstruction vs reading | `kind: "reconstruction"` | **nothing** — fetch all readings for the language; `kind` is descriptive data, not a filter the menu needs |
-| Primary / anchor transcription | `primary: true` on leaf | **derived** — the enabled transcription with the lowest `sort_order` |
+| Quirk | Where it lives |
+|---|---|
+| CEDICT-over-Unihan definitions | **nothing** — the default `ORDER BY source_id` already yields CEDICT (1) before Unihan (2); a `sources.priority` column is the DB home if a future source ever needs a non-id order |
+| Jyutping trailing tone digit | **nothing** — `readings.tone` is populated (34 876 / 34 886, 100% agreement with the digit) and read uniformly for every tonal language |
+| CC-Canto `#` editorial notes | **the importer** — `import_cccanto.py` skips `#` lines instead of storing them as senses (equivalently a global `WHERE definition NOT LIKE '#%'`) |
+| Kana → Hepburn romaji | **`transcription_systems`** columns (ts 30: `derived_from_ts_id = 32`, `transform = kana_romaji`) |
+| Middle Chinese lowercase | **`transcription_systems`** column (ts 60: `transform = lower`) |
+| Reconstruction vs reading | **nothing** — fetch all readings for the language; `kind` is descriptive data, not a filter the menu needs |
+| Primary / anchor transcription | **derived** — the enabled transcription with the lowest `sort_order` |
 
 `_kana_to_romaji` / `_ROMAJI` move into one importable module (`romaji.py`) so the
 `app.py` TRANSFORMS registry and `dedup_readings.py` share a single copy instead
 of the current duplicated mirror.
 
-### Parameter reference (now internal, not hand-authored)
+### Handler-call inputs (all derived)
 
-There is **no hand-authored parameter table for readings** anymore. The server
-derives each handler call from the node it built:
+Reading queries take **no hand-authored parameters**. The server derives each
+handler call from the node it built:
 
 | Handler-call input | Derived from |
 |---|---|
@@ -354,36 +352,35 @@ const RENDERERS = {
 // iterate response.sections in order; call RENDERERS[s.type](s)
 ```
 
-**Handler ≠ render type.** `query.handler` (server fetch) and `render.type`
+**Handler ≠ render type.** A node's `handler` (server fetch) and `render.type`
 (client renderer key) are independent namespaces — they coincide for `readings`
 only by coincidence. The `glyph_images` handler renders with `image_gallery`;
-the `attributes` handler renders with `key_value`. A manifest entry's
-`render.type` must name a `RENDERERS` key, never a handler.
+the `attributes` handler renders with `key_value`. A node's `render.type` must
+name a `RENDERERS` key, never a handler.
 
 Adding a source that fits an existing shape = **zero** new client code. A
 genuinely new visual = one new `RENDERERS` entry.
 
 ---
 
-## 8. Parity mapping (current → manifest)
+## 8. Parity mapping (current → derived)
 
 Nothing in this table is hand-authored — every row is *derived* from the DB rows
-shown. The "was a param" column records what the first draft would have written by
-hand and where it now comes from instead.
+shown. The middle column shows how each language's quirk is handled.
 
-| Current field | Derived from | Was a param → now | Render |
+| Current field | Derived from | Quirk handling | Render |
 |---|---|---|---|
-| `mandarin` | lang 1 | `source_priority` → default `ORDER BY source_id`; `primary` → Pinyin (lowest `sort_order`) | `readings` |
-| `cantonese` | lang 2 | `tone_from` → `readings.tone`; `drop_hash_defs` → importer | `readings` |
-| `tang` | lang 7 | `kind`/`value_transform:lower` → ts 60 `transform=lower` (DB) | `readings` (inline) |
-| `japanese_kun` | lang 10, `category=kun` | romaji/kana leaves → ts 30 (`derived_from 32`, `kana_romaji`) + ts 32, both from DB | `readings` |
+| `mandarin` | lang 1 | definition order = default `ORDER BY source_id`; primary = Pinyin (lowest `sort_order`) | `readings` |
+| `cantonese` | lang 2 | tone from `readings.tone`; `#` notes dropped at import | `readings` |
+| `tang` | lang 7 | ts 60 `transform = lower` (DB); no `kind` filter | `readings` (inline) |
+| `japanese_kun` | lang 10, `category=kun` | romaji = ts 30 (`derived_from 32`, `kana_romaji`); kana = ts 32 | `readings` |
 | `japanese_on` | lang 10, `category=on` | same | `readings` |
-| `korean` | lang 20 | Yale (ts 42) + Hangul (ts 41) → both surface as populated `transcription_systems` leaves | `readings` |
-| `vietnamese` | lang 30 | Quốc Ngữ (ts 50) → populated `transcription_systems` leaf | `readings` |
+| `korean` | lang 20 | Yale (ts 42) + Hangul (ts 41), both populated `transcription_systems` leaves | `readings` |
+| `vietnamese` | lang 30 | Quốc Ngữ (ts 50), populated `transcription_systems` leaf | `readings` |
 
 Japanese/Korean/Vietnamese gain a Definitions toggle for free — the implicit
 Definitions leaf appears wherever senses exist (Japanese already has 24 117).
-Adding **kana**, Zhùyīn, Wade-Giles, etc. needs **no manifest edit at all**: seed
+Adding **kana**, Zhùyīn, Wade-Giles, etc. needs **no config edit at all**: seed
 the `transcription_systems` row (and a `derived_from`/`transform` if it's
 rule-based) and it appears as a leaf. Korean **Hangul** — unreachable today
 because `_get_korean` queries Yale only — surfaces automatically for the same
@@ -433,8 +430,8 @@ attribute, but the EDRDG dump never populates it (every `<reading
 r_type="ja_on">` is bare), and Unihan's `kJapaneseOn` carries no subtype either.
 So this cannot be a derived `transform`; it **needs a Wiktionary-class source**
 that tags on-reading type (e.g. Wiktionary's Japanese kanji reading tables) —
-a new `data/` dump + importer writing `subcategory`. Until then a manifest leaf
-that filters or labels by on-subtype would be empty for every character.
+a new `data/` dump + importer writing `subcategory`. Until then a leaf that filters
+or labels by on-subtype would be empty for every character.
 
 ### Japanese kana/Hepburn duplication and its dedup merge (already shipped — context, not redesign work)
 
@@ -443,7 +440,7 @@ that filters or labels by on-subtype would be empty for every character.
 > `_absorb_hepburn` in `scripts/dedup_readings.py` (commit `964533a`). The live
 > DB is already in the post-merge state described below. The infobox redesign
 > consumes this state; it does **not** build it. This subsection is retained only
-> to explain *why* the Japanese manifest leaves look the way they do in §4.
+> to explain *why* the Japanese leaves look the way they do in §4.
 
 The "Hepburn (30, partial)" entry above reflects this merge: Unihan (`source_id` 2)
 and KANJIDIC2 (`source_id` 3) each emit the *same* Japanese pronunciations, but
