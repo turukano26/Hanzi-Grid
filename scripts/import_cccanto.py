@@ -160,9 +160,15 @@ def parse_cccanto(txt_path: Path) -> dict[int, list[dict]]:
 
                 tone = tone_from_jyutping(jyut_raw)
 
-                # Definitions (optional — readings-only file has none)
+                # Definitions (optional — readings-only file has none).
+                # CC-Canto prefixes editorial notes with '#'; these are not glosses,
+                # so drop them at import rather than storing them as senses.
                 defs_part = line[brace_close + 1 :].strip().strip("/")
-                definitions = [d.strip() for d in defs_part.split("/") if d.strip()]
+                definitions = [
+                    d.strip()
+                    for d in defs_part.split("/")
+                    if d.strip() and not d.strip().startswith("#")
+                ]
 
                 entry = {
                     "jyutping": jyut_raw,

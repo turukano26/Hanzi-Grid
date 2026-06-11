@@ -5,95 +5,8 @@ import sqlite3
 import pandas as pd
 import regex
 
+from romaji import _kana_to_romaji
 
-# ---------------------------------------------------------------------------
-# Kana → Hepburn romanization (used by _get_japanese for display)
-# ---------------------------------------------------------------------------
-
-def _kata_to_hira(text: str) -> str:
-    result = []
-    for ch in text:
-        cp = ord(ch)
-        if 0x30A1 <= cp <= 0x30F6:
-            result.append(chr(cp - 0x60))
-        else:
-            result.append(ch)
-    return ''.join(result)
-
-
-_ROMAJI: dict[str, str] = {
-    'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
-    'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
-    'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho',
-    'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
-    'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo',
-    'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
-    'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo',
-    'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo',
-    'じゃ': 'ja',  'じゅ': 'ju',  'じょ': 'jo',
-    'ぢゃ': 'ja',  'ぢゅ': 'ju',  'ぢょ': 'jo',
-    'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo',
-    'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo',
-    'ふぁ': 'fa',  'ふぃ': 'fi',  'ふぇ': 'fe',  'ふぉ': 'fo',
-    'てぃ': 'ti',  'でぃ': 'di',  'でゅ': 'dyu',
-    'あ': 'a',  'い': 'i',  'う': 'u',  'え': 'e',  'お': 'o',
-    'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
-    'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so',
-    'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
-    'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no',
-    'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
-    'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo',
-    'や': 'ya', 'ゆ': 'yu', 'よ': 'yo',
-    'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro',
-    'わ': 'wa', 'ゐ': 'i',  'ゑ': 'e',  'を': 'o',
-    'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge', 'ご': 'go',
-    'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo',
-    'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de', 'ど': 'do',
-    'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo',
-    'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
-    'ぁ': 'a',  'ぃ': 'i',  'ぅ': 'u',  'ぇ': 'e',  'ぉ': 'o',
-    'ゃ': 'ya', 'ゅ': 'yu', 'ょ': 'yo', 'ゎ': 'wa',
-}
-
-
-def _kana_to_romaji(kana: str) -> str:
-    """Convert kana to lowercase Hepburn, preserving okurigana '.' and affix '-' markers."""
-    hira = _kata_to_hira(kana)
-    if not hira:
-        return ''
-    out: list[str] = []
-    i = 0
-    while i < len(hira):
-        ch = hira[i]
-        if ch in ('.',  '-', '\u30fc'):   # preserve markers; drop long-vowel mark
-            if ch != '\u30fc':
-                out.append(ch)
-            i += 1
-            continue
-        if ch == 'っ':
-            if i + 1 < len(hira):
-                nxt = _ROMAJI.get(hira[i + 1: i + 3]) or _ROMAJI.get(hira[i + 1], '')
-                if nxt:
-                    out.append(nxt[0])
-            i += 1
-            continue
-        if ch == 'ん':
-            if i + 1 < len(hira) and hira[i + 1] in 'あいうえおやゆよぁぃぅぇぉゃゅょん':
-                out.append("n'")
-            else:
-                out.append('n')
-            i += 1
-            continue
-        if i + 1 < len(hira):
-            pair = hira[i: i + 2]
-            if pair in _ROMAJI:
-                out.append(_ROMAJI[pair])
-                i += 2
-                continue
-        rom = _ROMAJI.get(ch)
-        out.append(rom if rom is not None else ch)
-        i += 1
-    return ''.join(out)
 
 
 # Create a Flask application
@@ -122,24 +35,148 @@ DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'omnihanzi.db
 db = sqlite3.connect(DB_PATH, check_same_thread=False)
 db.execute("PRAGMA journal_mode = WAL")
 
-# Schema IDs (from schema.sql seed data)
-LANG_MANDARIN = 1
-LANG_CANTONESE = 2
-LANG_MIDDLE_CHINESE = 7
-LANG_TOKYO = 10
-LANG_KOREAN = 20
-LANG_VIETNAMESE = 30
 
-TS_PINYIN = 1
-TS_JYUTPING = 10
-TS_HEPBURN = 30
-TS_KANA = 32
-TS_STIMSON = 60
-TS_YALE_KO = 42
-TS_QUOC_NGU = 50
+# ---------------------------------------------------------------------------
+# Info-box: DB-derived menu tree + handler registry
+# (see docs/infobox-redesign-plan.md). The reading menu is built from the DB;
+# only the tiny overlay.json is hand-authored.
+# ---------------------------------------------------------------------------
 
-SOURCE_CEDICT = 1
-SOURCE_UNIHAN = 2
+def _transform_kana_romaji(value):
+    """Romanize a kana value to Hepburn; lowercase an already-romaji (orphan
+    Unihan) value. Reproduces the old _get_japanese kana/romaji branch."""
+    if any('\u3040' <= c <= '\u30ff' for c in value):
+        return _kana_to_romaji(value)
+    return value.lower()
+
+
+# Named by transcription_systems.transform; applied after the derived-value
+# COALESCE in _fetch_reading_rows.
+TRANSFORMS = {
+    'kana_romaji': _transform_kana_romaji,
+    'lower': str.lower,
+}
+
+# Hand-authored overlay: initial checked-state exceptions, category labels, and
+# non-reading sources. Everything else in the menu is derived from the DB.
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'overlay.json'),
+          'r', encoding='utf-8') as _ov:
+    OVERLAY = json.load(_ov)
+
+_DEFAULT_OFF = set(OVERLAY.get('default_off', []))
+_CATEGORY_LABELS = OVERLAY.get('category_labels', {})
+_NON_READING_SOURCES = OVERLAY.get('non_reading_sources', [])
+
+
+def _build_info_tree():
+    """Assemble the menu node tree from the DB plus the overlay's non-reading
+    sources, once at startup. Each node carries client fields (id, label, default,
+    render, children) and server-only fields (handler, language_id, category,
+    ts_id, derived_from_ts_id, transform, code) that /get_info_options strips."""
+    populated_ts = {row[0] for row in db.execute(
+        "SELECT DISTINCT transcription_system_id FROM reading_transcriptions")}
+
+    lang_categories = {}
+    for lang_id, cat in db.execute(
+            "SELECT DISTINCT e.language_id, r.category FROM readings r "
+            "JOIN etymologies e ON e.id = r.etymology_id"):
+        lang_categories.setdefault(lang_id, set()).add(cat)
+
+    sense_cats = set()
+    for lang_id, cat in db.execute(
+            "SELECT DISTINCT e.language_id, r.category FROM senses s "
+            "JOIN readings r ON r.id = s.reading_id "
+            "JOIN etymologies e ON e.id = r.etymology_id"):
+        sense_cats.add((lang_id, cat))
+
+    ts_by_lang = {}
+    for ts_id, lang_id, name, code, sort_order, derived_from, transform in db.execute(
+            "SELECT id, language_id, name, code, sort_order, derived_from_ts_id, transform "
+            "FROM transcription_systems ORDER BY language_id, sort_order"):
+        # A leaf renders only if its system is populated, or it derives from a
+        # populated one (e.g. Hepburn from Kana). Empty systems are skipped.
+        if ts_id not in populated_ts and derived_from not in populated_ts:
+            continue
+        ts_by_lang.setdefault(lang_id, []).append({
+            'ts_id': ts_id, 'name': name, 'code': code, 'sort_order': sort_order,
+            'derived_from_ts_id': derived_from, 'transform': transform,
+        })
+
+    langs_by_family = {}
+    for lang_id, family_id, name, code, sort_order in db.execute(
+            "SELECT id, family_id, name, code, sort_order FROM languages "
+            "ORDER BY family_id, sort_order"):
+        langs_by_family.setdefault(family_id, []).append(
+            {'id': lang_id, 'name': name, 'code': code, 'sort_order': sort_order})
+
+    def make_leaves(lang_code, lang_id, category):
+        prefix = lang_code + (':' + category if category else '')
+        leaves = []
+        for i, ts in enumerate(ts_by_lang.get(lang_id, [])):
+            leaves.append({
+                'id': prefix + ':' + ts['code'], 'label': ts['name'],
+                'default': (i == 0),   # primary = lowest sort_order, on by default
+                'code': ts['code'], 'ts_id': ts['ts_id'],
+                'derived_from_ts_id': ts['derived_from_ts_id'],
+                'transform': ts['transform'], 'sort_order': ts['sort_order'],
+            })
+        if (lang_id, category) in sense_cats:
+            leaves.append({'id': prefix + ':definitions', 'label': 'Definitions',
+                           'default': True, 'definitions': True})
+        for leaf in leaves:
+            if leaf['id'] in _DEFAULT_OFF:
+                leaf['default'] = False
+        return leaves
+
+    families = []
+    for fam_id, fam_name, _fam_sort in db.execute(
+            "SELECT id, name, sort_order FROM language_families ORDER BY sort_order"):
+        fam_children = []
+        for lang in langs_by_family.get(fam_id, []):
+            lang_id, lang_code = lang['id'], lang['code']
+            if not lang_code:        # no stable code -> can't form a leaf id
+                continue
+            real_cats = sorted(c for c in lang_categories.get(lang_id, set()) if c)
+            if real_cats and ts_by_lang.get(lang_id):
+                cat_groups = []
+                for cat in real_cats:
+                    leaves = make_leaves(lang_code, lang_id, cat)
+                    if not leaves:
+                        continue
+                    label = _CATEGORY_LABELS.get(cat, cat)
+                    cat_groups.append({
+                        'id': lang_code + ':' + cat, 'label': label,
+                        'handler': 'readings', 'language_id': lang_id, 'category': cat,
+                        'render': {'type': 'readings', 'title': lang['name'] + ' ' + label},
+                        'children': leaves,
+                    })
+                if cat_groups:
+                    fam_children.append({'id': lang_code, 'label': lang['name'],
+                                         'children': cat_groups})
+            else:
+                leaves = make_leaves(lang_code, lang_id, None)
+                if not leaves:
+                    continue
+                fam_children.append({
+                    'id': lang_code, 'label': lang['name'],
+                    'handler': 'readings', 'language_id': lang_id, 'category': None,
+                    'render': {'type': 'readings', 'title': lang['name']},
+                    'children': leaves,
+                })
+        if fam_children:
+            families.append({'id': 'fam:%d' % fam_id, 'label': fam_name,
+                             'children': fam_children})
+
+    # Non-reading sources are self-contained leaves that also fetch (handler).
+    for src in _NON_READING_SOURCES:
+        families.append({
+            'id': src['id'], 'label': src['label'], 'default': src.get('default', False),
+            'handler': src['handler'], 'render': src['render'],
+        })
+    return families
+
+
+TREE = _build_info_tree()
 
 # ---------------------------------------------------------------------------
 # Parquet DataFrames (still used by search routes)
@@ -166,10 +203,19 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/get_info_options', methods=['GET'])
+def get_info_options():
+    """The menu tree with all server-only fields stripped (handler, language_id,
+    ts ids, derived_from/transform). The client gets ids, labels, nesting,
+    render.type and default state only."""
+    return jsonify({'tree': [_strip_node(n) for n in TREE]})
+
+
 @app.route('/process_click_on_character', methods=['POST'])
 def process_click_on_character():
-    result = create_character_info_sheet(request.get_json())
-    return jsonify(result=result)
+    payload = request.get_json()
+    sections = build_sections(payload['character'], payload.get('options', []))
+    return jsonify({'sections': sections})
 
 
 @app.route('/get_character_set_names', methods=['POST'])
@@ -223,196 +269,168 @@ def get_search_results():
         return "wtf"
 
 
+# ---------------------------------------------------------------------------
+# Info-box dispatch + handlers
+# ---------------------------------------------------------------------------
 
-def create_character_info_sheet(json_data):
-    character = json_data['character']
-    codepoint = ord(character)
-    out = {}
+def _iter_groups(nodes):
+    """Yield every data-fetching node (one that carries a 'handler')."""
+    for node in nodes:
+        if 'handler' in node:
+            yield node
+        yield from _iter_groups(node.get('children', []))
 
-    if json_data.get('chineseMandarinCheckbox'):
-        out['mandarin'] = _get_mandarin(codepoint)
 
-    if json_data.get('chineseCantoneseCheckbox'):
-        out['cantonese'] = _get_cantonese(codepoint)
-
-    if json_data.get('chineseTangCheckbox'):
-        out['tang'] = _get_tang(codepoint)
-
-    if json_data.get('japaneseKunCheckbox'):
-        out['japanese_kun'] = _get_japanese(codepoint, 'kun')
-
-    if json_data.get('japaneseOnCheckbox'):
-        out['japanese_on'] = _get_japanese(codepoint, 'on')
-
-    if json_data.get('koreanCheckbox'):
-        out['korean'] = _get_korean(codepoint)
-
-    if json_data.get('vietnameseCheckbox'):
-        out['vietnamese'] = _get_vietnamese(codepoint)
-
+def _leaf_descendants(node):
+    """Leaf nodes under a group. A non-reading source has no children, so the
+    group node itself is its only leaf (its id is the toggle)."""
+    children = node.get('children')
+    if not children:
+        return [node]
+    out = []
+    for child in children:
+        out.extend(_leaf_descendants(child))
     return out
 
 
-def _get_mandarin(codepoint):
-    # Fetch all Mandarin readings with their source; prefer CEDICT (source 1) over Unihan (source 2)
-    rows = db.execute("""
-        SELECT r.id, r.tone, ra.source_id, rt.value AS pinyin
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        JOIN reading_attestations ra ON ra.reading_id = r.id
-        JOIN reading_transcriptions rt ON rt.reading_id = r.id
-        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY e.etymology_order, ra.source_id ASC, r.sort_order
-    """, (codepoint, LANG_MANDARIN, TS_PINYIN)).fetchall()
-
-    if not rows:
-        return {'error': 'No Mandarin readings found'}
-
-    # Deduplicate by NFC-normalised pinyin, preferring CEDICT rows (lower source_id)
-    seen: dict[str, dict] = {}  # pinyin → reading dict
-    import unicodedata
-    for reading_id, tone, source_id, pinyin in rows:
-        key = unicodedata.normalize("NFC", pinyin)
-        if key in seen:
-            continue  # already recorded a preferred (lower source_id) row
-
-        defs = db.execute("""
-            SELECT definition FROM senses
-            WHERE reading_id = ? AND source_id = ?
-            ORDER BY sort_order
-        """, (reading_id, source_id)).fetchall()
-
-        seen[key] = {
-            'pinyin_accent': pinyin,
-            'tone': tone or '5',
-            'definitions': [d[0] for d in defs],
-        }
-
-    return {'readings': list(seen.values())}
+def _strip_node(node):
+    """Client-facing projection of a tree node (server-only fields removed)."""
+    out = {}
+    for key in ('id', 'label', 'default', 'render'):
+        if key in node:
+            out[key] = node[key]
+    if 'children' in node:
+        out['children'] = [_strip_node(c) for c in node['children']]
+    return out
 
 
-def _get_cantonese(codepoint):
-    rows = db.execute("""
-        SELECT r.id, r.tone, rt.value AS jyutping
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        JOIN reading_transcriptions rt ON rt.reading_id = r.id
-        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY e.etymology_order, r.sort_order
-    """, (codepoint, LANG_CANTONESE, TS_JYUTPING)).fetchall()
+def build_sections(character, enabled_ids):
+    """Run each group whose subtree has an enabled leaf, in tree order. A group
+    with no enabled leaf is skipped entirely — so heavy handlers (glyph BLOBs)
+    only run when their option is toggled on."""
+    cp = ord(character)
+    enabled = set(enabled_ids)
+    sections = []
+    for group in _iter_groups(TREE):
+        active = [leaf for leaf in _leaf_descendants(group) if leaf['id'] in enabled]
+        if not active:
+            continue
+        if group['handler'] == 'readings':
+            transcriptions = [leaf for leaf in active if 'ts_id' in leaf]
+            want_defs = any(leaf.get('definitions') for leaf in active)
+            data = _handler_readings(cp, group, transcriptions=transcriptions,
+                                     definitions=want_defs)
+        else:
+            data = HANDLERS[group['handler']](cp, group)
+        if 'error' not in data:
+            sections.append({'id': group['id'], **group['render'], 'data': data})
+    return sections
 
-    if not rows:
-        return {'error': 'No Cantonese Reading Found'}
 
-    # Deduplicate by full jyutping (incl. tone digit); definitions come from
-    # CC-Canto senses unioned onto the surviving reading by dedup_readings.py.
-    seen: dict[str, dict] = {}  # jyutping → segment
-    for reading_id, tone, jyutping in rows:
-        if not jyutping or jyutping in seen:
+def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None,
+                        definitions=False):
+    """The single SELECT the seven old _get_* functions duplicated. Returns the
+    reading rows for one reading group, each resolving every enabled transcription
+    as COALESCE(stored[ts], stored[derived_from]) then applying its transform, and
+    carrying its attesting sources (+ senses when `definitions`)."""
+    ts_order = sorted(transcriptions, key=lambda t: t['sort_order'])
+
+    if category is None:
+        reading_rows = db.execute(
+            "SELECT r.id, r.tone FROM readings r "
+            "JOIN etymologies e ON e.id = r.etymology_id "
+            "WHERE e.codepoint = ? AND e.language_id = ? "
+            "ORDER BY e.etymology_order, r.sort_order",
+            (codepoint, language_id)).fetchall()
+    else:
+        reading_rows = db.execute(
+            "SELECT r.id, r.tone FROM readings r "
+            "JOIN etymologies e ON e.id = r.etymology_id "
+            "WHERE e.codepoint = ? AND e.language_id = ? AND r.category = ? "
+            "ORDER BY e.etymology_order, r.sort_order",
+            (codepoint, language_id, category)).fetchall()
+
+    out = []
+    for reading_id, tone in reading_rows:
+        stored = dict(db.execute(
+            "SELECT transcription_system_id, value FROM reading_transcriptions "
+            "WHERE reading_id = ?", (reading_id,)).fetchall())
+
+        trs = []
+        for ts in ts_order:
+            value = stored.get(ts['ts_id'])
+            if value is None and ts['derived_from_ts_id'] is not None:
+                value = stored.get(ts['derived_from_ts_id'])
+            if value is None:
+                continue
+            if ts['transform']:
+                value = TRANSFORMS[ts['transform']](value)
+            trs.append({'code': ts['code'], 'label': ts['label'], 'value': value})
+
+        # A reading with transcriptions requested but none resolving is empty.
+        # (When no transcription is enabled at all, ts_order is empty and we keep
+        # the row for its definitions — the definitions-only path.)
+        if ts_order and not trs:
             continue
 
-        # Strip trailing tone digit from jyutping for display
-        if jyutping[-1].isdigit():
-            text = jyutping[:-1]
-            disp_tone = jyutping[-1]
-        else:
-            text = jyutping
-            disp_tone = tone or '1'
+        sources = [row[0] for row in db.execute(
+            "SELECT src.short_name FROM reading_attestations ra "
+            "JOIN sources src ON src.id = ra.source_id "
+            "WHERE ra.reading_id = ? ORDER BY src.id", (reading_id,)).fetchall()]
 
-        defs = db.execute("""
-            SELECT definition FROM senses
-            WHERE reading_id = ?
-            ORDER BY source_id, sort_order
-        """, (reading_id,)).fetchall()
-        # CC-Canto prefixes editorial notes with '#'; these aren't glosses.
-        definitions = [d[0] for d in defs if not d[0].startswith('#')]
-
-        seen[jyutping] = {
-            'text': text,
-            'tone': str(disp_tone),
-            'definitions': definitions,
-        }
-
-    return {'segments': list(seen.values())}
+        row = {'transcriptions': trs, 'tone': tone, 'sources': sources}
+        if definitions:
+            row['definitions'] = [
+                {'text': d[0], 'source': d[1]} for d in db.execute(
+                    "SELECT s.definition, src.short_name FROM senses s "
+                    "JOIN sources src ON src.id = s.source_id "
+                    "WHERE s.reading_id = ? ORDER BY s.source_id, s.sort_order",
+                    (reading_id,)).fetchall()]
+        out.append(row)
+    return out
 
 
-def _get_tang(codepoint):
-    rows = db.execute("""
-        SELECT rt.value
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        JOIN reading_transcriptions rt ON rt.reading_id = r.id
-        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY r.sort_order
-    """, (codepoint, LANG_MIDDLE_CHINESE, TS_STIMSON)).fetchall()
-
+def _handler_readings(cp, group, *, transcriptions, definitions):
+    rows = _fetch_reading_rows(cp, group['language_id'], transcriptions=transcriptions,
+                               category=group['category'], definitions=definitions)
     if not rows:
-        return {'error': 'No Middle Chinese Readings'}
+        return {'error': 'no readings'}
+    return {'readings': rows}
 
-    return {'text': ', '.join(row[0].lower() for row in rows)}
+
+def _handler_glyph_images(cp, group):
+    rows = db.execute(
+        "SELECT image, image_path, attribution FROM character_glyphs "
+        "WHERE codepoint = ? ORDER BY sort_order", (cp,)).fetchall()
+    images = []
+    for image, image_path, attribution in rows:
+        if image_path:
+            images.append({'url': image_path, 'attribution': attribution or ''})
+        elif image is not None:
+            import base64
+            encoded = base64.b64encode(image).decode('ascii')
+            images.append({'data': 'data:image/png;base64,' + encoded,
+                           'attribution': attribution or ''})
+    if not images:
+        return {'error': 'no glyphs'}
+    return {'images': images}
 
 
-def _get_japanese(codepoint, category):
-    # Prefer kana (TS_KANA=32) as source so we can convert to romaji while
-    # preserving okurigana '.' and affix '-' markers. Fall back to stored
-    # Hepburn (TS_HEPBURN=30) for any readings that have no kana transcription.
-    rows = db.execute("""
-        SELECT COALESCE(kana.value, hep.value)
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        LEFT JOIN reading_transcriptions kana
-               ON kana.reading_id = r.id AND kana.transcription_system_id = ?
-        LEFT JOIN reading_transcriptions hep
-               ON hep.reading_id = r.id AND hep.transcription_system_id = ?
-        WHERE e.codepoint = ? AND e.language_id = ? AND r.category = ?
-          AND (kana.value IS NOT NULL OR hep.value IS NOT NULL)
-        ORDER BY r.sort_order
-    """, (TS_KANA, TS_HEPBURN, codepoint, LANG_TOKYO, category)).fetchall()
-
-    label = 'Kun' if category == 'kun' else 'On'
+def _handler_attributes(cp, group):
+    rows = db.execute(
+        "SELECT a.key, a.value, src.short_name FROM character_attributes a "
+        "LEFT JOIN sources src ON src.id = a.source_id "
+        "WHERE a.codepoint = ? ORDER BY a.key", (cp,)).fetchall()
     if not rows:
-        return {'error': f'No {label}-Readings'}
-
-    seen: set[str] = set()
-    items = []
-    for (val,) in rows:
-        romaji = _kana_to_romaji(val) if any('\u3040' <= c <= '\u30ff' for c in val) else val.lower()
-        if romaji not in seen:
-            seen.add(romaji)
-            items.append(romaji)
-    return {'items': items}
+        return {'error': 'no attributes'}
+    return {'rows': [{'key': k, 'value': v, 'source': s or ''} for k, v, s in rows]}
 
 
-def _get_korean(codepoint):
-    rows = db.execute("""
-        SELECT rt.value
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        JOIN reading_transcriptions rt ON rt.reading_id = r.id
-        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY r.sort_order
-    """, (codepoint, LANG_KOREAN, TS_YALE_KO)).fetchall()
-
-    if not rows:
-        return {'error': 'No Korean Readings'}
-
-    return {'items': [row[0] for row in rows]}
-
-
-def _get_vietnamese(codepoint):
-    rows = db.execute("""
-        SELECT rt.value
-        FROM readings r
-        JOIN etymologies e ON e.id = r.etymology_id
-        JOIN reading_transcriptions rt ON rt.reading_id = r.id
-        WHERE e.codepoint = ? AND e.language_id = ? AND rt.transcription_system_id = ?
-        ORDER BY r.sort_order
-    """, (codepoint, LANG_VIETNAMESE, TS_QUOC_NGU)).fetchall()
-
-    if not rows:
-        return {'error': 'No Vietnamese Readings'}
-
-    return {'items': [row[0] for row in rows]}
+HANDLERS = {
+    'readings': _handler_readings,
+    'glyph_images': _handler_glyph_images,
+    'attributes': _handler_attributes,
+}
 
 
 # Run the application

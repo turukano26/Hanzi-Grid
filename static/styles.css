@@ -297,6 +297,31 @@ body {
     display: block;
 }
 
+/* Dynamic info-options menu tree (built by renderLanguageTree) */
+#languageTree .menu-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+    cursor: pointer;
+}
+
+#languageTree .menu-row input {
+    cursor: pointer;
+}
+
+#languageTree .menu-children {
+    margin-left: 18px;
+}
+
+#languageTree .menu-depth-0 > .menu-row > span {
+    font-weight: 700;
+}
+
+#languageTree .menu-depth-1 > .menu-row > span {
+    font-weight: 600;
+}
+
 .slider-container {
     margin-bottom: 20px;
 }

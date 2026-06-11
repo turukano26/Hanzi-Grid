@@ -565,11 +565,13 @@ def import_middle_chinese(
     cur: sqlite3.Cursor, unihan: dict[int, dict[str, str]], primary_readings: dict[int, int]
 ) -> None:
     """Phase 7: Middle Chinese reconstructions from kTang."""
-    # Ensure the Stimson transcription system exists
+    # Ensure the Stimson transcription system exists. `transform = 'lower'`
+    # lowercases the reconstruction for display (see schema.sql derived-system note).
     cur.execute(
-        "INSERT OR IGNORE INTO transcription_systems (id, language_id, name, code, sort_order) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (TS_STIMSON, LANG_MIDDLE_CHINESE, "Stimson (kTang)", "stimson_ktang", 4),
+        "INSERT OR IGNORE INTO transcription_systems "
+        "(id, language_id, name, code, sort_order, transform) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (TS_STIMSON, LANG_MIDDLE_CHINESE, "Stimson (kTang)", "stimson_ktang", 4, "lower"),
     )
 
     count = _insert_readings_for_language(

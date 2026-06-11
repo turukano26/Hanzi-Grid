@@ -1,0 +1,26 @@
+{
+  "_comment": "The ONLY hand-authored reading config. The reading menu itself is derived from the DB (language_families / languages / transcription_systems); this overlay supplies only what the schema cannot: initial checked state and labels the schema lacks, plus non-reading sources that have no language->reading->transcription tree. Leaf ids are the ':'-joined chain of languages.code / readings.category / transcription_systems.code (e.g. 'cmn:pinyin', 'ja:on:kana', 'cmn:definitions'); they are an append-only contract (see plan section 9).",
+
+  "_default_off_comment": "Initial checked state is DERIVED: a language's primary transcription (lowest sort_order that renders) + its Definitions leaf are on, everything else off. List here only the ids that the derived rule would turn ON but should start OFF.",
+  "default_off": ["ja:on:definitions", "ja:kun:definitions"],
+
+  "category_labels": { "on": "On'yomi", "kun": "Kun'yomi" },
+
+  "_non_reading_sources_comment": "Sources with no reading tree, declared explicitly. `handler` selects the server fetch; `render.type` selects the client RENDERERS key (independent namespaces).",
+  "non_reading_sources": [
+    {
+      "id": "glyphs",
+      "label": "Historical Glyphs",
+      "default": false,
+      "handler": "glyph_images",
+      "render": { "type": "image_gallery", "title": "Historical Glyphs" }
+    },
+    {
+      "id": "attributes",
+      "label": "Character Attributes",
+      "default": false,
+      "handler": "attributes",
+      "render": { "type": "key_value", "title": "Attributes" }
+    }
+  ]
+}

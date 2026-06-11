@@ -37,46 +37,8 @@
 
                 <div class="submenu active" id="languagemenu">
                     <h2>Enable Languages</h2>
-
-                    <h3>Chinese</h3>
-                    <input type="checkbox" id="chineseMandarinCheckbox" onchange="toggleCursor()" checked>
-                    <label for="chineseMandarinCheckbox">Toggle Mandarin Definitions and Readings</label>
-                    <br>
-                    <!--<input type="checkbox" id="chineseSimpTradCheckbox" onchange="toggleCursor()" checked>
-                    <label for="chineseSimpTradCheckbox">Toggle Simplified/Traditional</label>
-                    <br>-->
-                    <input type="checkbox" id="chineseCantoneseCheckbox" onchange="toggleCursor()" checked>
-                    <label for="chineseCantoneseCheckbox">Toggle Cantonese Readings</label>
-                    <br>
-                    <input type="checkbox" id="chineseTangCheckbox" onchange="toggleCursor()" checked>
-                    <label for="chineseTangCheckbox">Toggle Middle-Chinese Reading</label>
-                    <br>
-
-
-                    <h3>Japanese</h3>
-                    <!--<input type="checkbox" id="japaneseMeaningCheckbox" onchange="toggleCursor()" checked>
-                    <label for="japaneseMeaningCheckbox">Toggle Japanese Meanings</label>
-                    <br>-->
-                    <input type="checkbox" id="japaneseKunCheckbox" onchange="toggleCursor()" checked>
-                    <label for="japaneseKunCheckbox">Toggle Japanese Kun-Readings</label>
-                    <br>
-                    <input type="checkbox" id="japaneseOnCheckbox" onchange="toggleCursor()" checked>
-                    <label for="japaneseOnCheckbox">Toggle Japanese On-Readings</label>
-                    <br>
-                    <!--<input type="checkbox" id="japaneseExtrasCheckbox" onchange="toggleCursor()" checked>
-                    <label for="japaneseExtrasCheckbox">Toggle Japanese Extra Info</label>
-                    <br>-->
-
-
-                    <h3>Korean</h3>
-                    <input type="checkbox" id="koreanCheckbox" onchange="toggleCursor()" checked>
-                    <label for="koreanCheckbox">Toggle Hanja Readings</label>
-                    <br>
-
-                    <h3>Vietnamese</h3>
-                    <input type="checkbox" id="vietnameseCheckbox" onchange="toggleCursor()" checked>
-                    <label for="vietnameseCheckbox">Toggle Chu Nom/Han Nom Readings</label>
-                    <br>
+                    <!-- Built dynamically from /get_info_options (see renderLanguageTree). -->
+                    <div id="languageTree"></div>
                 </div>
 
                 <div class="submenu" id="importexportmenu">

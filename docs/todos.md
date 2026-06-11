@@ -5,6 +5,7 @@
 - get rid of parquet files
 - selecting sources
 - fix cantonese duplicates in senses. ex. look at mandarin xing (to go)
+- readd cccanto editorial notes somewhere else besides new glosses
 - add other scripts
 - witionary scraping?
 

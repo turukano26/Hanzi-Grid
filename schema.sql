@@ -86,6 +86,13 @@ CREATE TABLE transcription_systems (
     name        TEXT    NOT NULL,
     code        TEXT    NOT NULL,
     sort_order  INTEGER NOT NULL DEFAULT 0,
+    -- When this system stores no value of its own for a reading, fall back to the
+    -- value stored under `derived_from_ts_id`, then apply `transform` (a key into
+    -- the app's TRANSFORMS registry, e.g. 'kana_romaji', 'lower'). This is how a
+    -- romanization derived from another system (Hepburn from Kana) is expressed
+    -- as system metadata rather than as menu/handler special-casing.
+    derived_from_ts_id INTEGER REFERENCES transcription_systems(id),
+    transform   TEXT,
     UNIQUE(language_id, code)
 );
 
@@ -117,6 +124,14 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     -- Northern Vietnamese
     (50, 30, 'Quốc Ngữ',           'quoc_ngu',        1),
     (51, 30, 'IPA',                 'ipa',             2);
+
+-- Per-system value derivations (see `derived_from_ts_id` / `transform` above).
+-- Hepburn (30) falls back to Kana (32) then romanizes it; this reproduces the
+-- old COALESCE(kana, hepburn) + _kana_to_romaji path exactly, because kana_romaji
+-- only lowercases an already-romaji (orphan Unihan) value.
+UPDATE transcription_systems SET derived_from_ts_id = 32, transform = 'kana_romaji' WHERE id = 30;
+-- Middle Chinese Stimson / kTang (ts 60) is created by import_unihan.py, which
+-- seeds its transform = 'lower' there (this schema seed does not define ts 60).
 
 
 -- ============================================================

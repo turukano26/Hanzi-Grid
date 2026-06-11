@@ -71,110 +71,287 @@ var INFO_BOX_TONE_COLORS = {
     '6': '#aa8f2f'
 };
 
-function renderInfoBoxFromData(data) {
-    if (!data || typeof data !== 'object') {
+function escapeHtml(str) {
+    if (str == null) {
         return '';
     }
-    var order = ['mandarin', 'cantonese', 'tang', 'japanese_kun', 'japanese_on', 'korean', 'vietnamese'];
-    var parts = [];
-    for (var oi = 0; oi < order.length; oi++) {
-        var key = order[oi];
-        if (!Object.prototype.hasOwnProperty.call(data, key)) {
-            continue;
+    return String(str).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+}
+
+function sectionHeader(title) {
+    return '<hr><span style="color:#999999 ;font-size: 12px">' + escapeHtml(title) + '</span><p>';
+}
+
+function sourceBadge(source) {
+    if (!source) {
+        return '';
+    }
+    return ' <span style="color:#bbbbbb; font-size: 11px">[' + escapeHtml(source) + ']</span>';
+}
+
+function readingSourceBadge(sources) {
+    if (!sources || !sources.length) {
+        return '';
+    }
+    return ' <span style="color:#bbbbbb; font-size: 11px">' + sources.map(escapeHtml).join(', ') + '</span>';
+}
+
+// Renderer registry. A section's `type` (set server-side from the node's
+// render.type) selects the renderer; handler and render.type are independent.
+var RENDERERS = {
+    readings: function (s) {
+        var parts = [sectionHeader(s.title)];
+        var readings = (s.data && s.data.readings) || [];
+        // Definitions-only (no transcription enabled anywhere): no headword to
+        // anchor by, so merge every definition into one flat list.
+        var anyTranscription = readings.some(function (r) {
+            return r.transcriptions && r.transcriptions.length;
+        });
+        if (!anyTranscription) {
+            readings.forEach(function (r) {
+                (r.definitions || []).forEach(function (d) {
+                    parts.push(' - ' + escapeHtml(d.text) + sourceBadge(d.source) + ' <br>');
+                });
+            });
+            return parts.join('');
         }
-        var section = data[key];
-        if (section.error) {
-            continue;
-        } else if (key === 'mandarin') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Mandarin</span><p>');
-            var readings = section.readings || [];
-            for (var ri = 0; ri < readings.length; ri++) {
-                var row = readings[ri];
-                var toneColor = INFO_BOX_TONE_COLORS[row.tone] || '#333333';
-                parts.push('<span style="color:' + toneColor + '; font-size: 30px "> • ' + row.pinyin_accent + ' </span><br>');
-                var defs = row.definitions || [];
-                for (var di = 0; di < defs.length; di++) {
-                    parts.push(' - ' + defs[di] + ' <br>');
-                }
-                parts.push('<br>');
+        readings.forEach(function (r) {
+            var tr = r.transcriptions || [];
+            var toneColor = INFO_BOX_TONE_COLORS[r.tone] || '#333333';
+            // Enabled transcriptions inline, primary first (server-ordered).
+            var headword = tr.map(function (t) { return escapeHtml(t.value); }).join(' / ');
+            parts.push('<span style="color:' + toneColor + '; font-size: 30px "> • ' + headword + ' </span>');
+            parts.push(readingSourceBadge(r.sources));
+            parts.push('<br>');
+            (r.definitions || []).forEach(function (d) {
+                parts.push(' - ' + escapeHtml(d.text) + sourceBadge(d.source) + ' <br>');
+            });
+            parts.push('<br>');
+        });
+        return parts.join('');
+    },
+
+    image_gallery: function (s) {
+        var parts = [sectionHeader(s.title)];
+        var images = (s.data && s.data.images) || [];
+        images.forEach(function (img) {
+            var src = img.url || img.data;
+            if (!src) {
+                return;
             }
-        } else if (key === 'cantonese') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Cantonese</span><p>');
-            var segments = section.segments || [];
-            for (var si = 0; si < segments.length; si++) {
-                var seg = segments[si];
-                var segToneColor = INFO_BOX_TONE_COLORS[seg.tone] || '#333333';
-                parts.push('<span style="color:' + segToneColor + '; font-size: 30px "> • ' + seg.text + ' </span><br>');
-                var cdefs = seg.definitions || [];
-                for (var cdi = 0; cdi < cdefs.length; cdi++) {
-                    parts.push(' - ' + cdefs[cdi] + ' <br>');
-                }
-                parts.push('<br>');
+            parts.push('<div style="display:inline-block; margin:4px; text-align:center; vertical-align:top">');
+            parts.push('<img src="' + escapeHtml(src) + '" style="max-height:90px; max-width:90px"><br>');
+            if (img.attribution) {
+                parts.push('<span style="color:#bbbbbb; font-size:10px">' + escapeHtml(img.attribution) + '</span>');
             }
-        } else if (key === 'tang') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Middle Chinese</span><p>');
-            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.text + '</span>');
-        } else if (key === 'japanese_kun') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Kun-Reading</span><p>');
-            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-        } else if (key === 'japanese_on') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">On-Reading</span><p>');
-            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-        } else if (key === 'korean') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Korean Reading</span><p>');
-            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
-        } else if (key === 'vietnamese') {
-            parts.push('<hr><span style="color:#999999 ;font-size: 12px">Vietnamese Reading</span><p>');
-            parts.push('<span style="color:#333333 ;font-size: 30px">' + section.items.join(', ') + '</span>');
+            parts.push('</div>');
+        });
+        return parts.join('');
+    },
+
+    key_value: function (s) {
+        var parts = [sectionHeader(s.title)];
+        var rows = (s.data && s.data.rows) || [];
+        rows.forEach(function (row) {
+            parts.push('<span style="color:#333333; font-size:16px">' +
+                escapeHtml(row.key) + ': ' + escapeHtml(row.value) + '</span>' +
+                sourceBadge(row.source) + '<br>');
+        });
+        return parts.join('');
+    }
+};
+
+function renderSections(sections) {
+    var parts = [];
+    (sections || []).forEach(function (s) {
+        var renderer = RENDERERS[s.type];
+        if (renderer) {
+            parts.push(renderer(s));
+        }
+    });
+    return parts.join('');
+}
+
+// ---------------------------------------------------------------------------
+// Info-box options: DB-derived menu tree + enabled-leaf state (single
+// `infoOptions` localStorage key — kept out of the colour namespace).
+// ---------------------------------------------------------------------------
+var INFO_TREE = [];
+var enabledOptions = new Set();
+
+function eachLeaf(nodes, fn) {
+    nodes.forEach(function (n) {
+        if (n.children && n.children.length) {
+            eachLeaf(n.children, fn);
+        } else {
+            fn(n);
+        }
+    });
+}
+
+function allLeafIds() {
+    var ids = [];
+    eachLeaf(INFO_TREE, function (n) { ids.push(n.id); });
+    return ids;
+}
+
+function defaultLeafIds() {
+    var ids = [];
+    eachLeaf(INFO_TREE, function (n) { if (n.default) { ids.push(n.id); } });
+    return ids;
+}
+
+function initEnabledOptions() {
+    var valid = new Set(allLeafIds());
+    var stored = localStorage.getItem('infoOptions');
+    if (stored !== null) {
+        var arr = null;
+        try { arr = JSON.parse(stored); } catch (e) { arr = null; }
+        if (Array.isArray(arr)) {
+            // Drop any stale ids (append-only contract: unknown ids are ignored).
+            enabledOptions = new Set(arr.filter(function (id) { return valid.has(id); }));
+            return;
         }
     }
-    return parts.join('');
+    enabledOptions = new Set(defaultLeafIds());
+}
+
+function saveEnabledOptions() {
+    localStorage.setItem('infoOptions', JSON.stringify(Array.from(enabledOptions)));
+}
+
+function fetchInfoOptions(callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/get_info_options', true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            INFO_TREE = JSON.parse(xhr.responseText).tree || [];
+            initEnabledOptions();
+            renderLanguageTree();
+        }
+        if (callback) {
+            callback();
+        }
+    };
+    xhr.send();
+}
+
+function refreshInfoBox() {
+    var largeBox = document.getElementById('largeBox');
+    if (largeBox && largeBox.textContent) {
+        fetchCharacterInfo(largeBox.textContent);
+    }
+}
+
+// Build the nested checkbox menu. Parents toggle their whole subtree and show an
+// indeterminate state for partial selection; only leaf ids are ever sent.
+function renderLanguageTree() {
+    var container = document.getElementById('languageTree');
+    if (!container) {
+        return;
+    }
+    container.innerHTML = '';
+    INFO_TREE.forEach(function (node) {
+        container.appendChild(buildMenuNode(node, 0));
+    });
+    refreshParentStates();
+}
+
+function buildMenuNode(node, depth) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'menu-node menu-depth-' + depth;
+    var isLeaf = !(node.children && node.children.length);
+
+    var row = document.createElement('label');
+    row.className = 'menu-row';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = isLeaf ? 'menu-leaf' : 'menu-parent';
+    var text = document.createElement('span');
+    text.textContent = node.label;
+    row.appendChild(cb);
+    row.appendChild(text);
+    wrapper.appendChild(row);
+
+    if (isLeaf) {
+        cb.checked = enabledOptions.has(node.id);
+        cb.addEventListener('change', function () {
+            if (cb.checked) {
+                enabledOptions.add(node.id);
+            } else {
+                enabledOptions.delete(node.id);
+            }
+            saveEnabledOptions();
+            refreshParentStates();
+            refreshInfoBox();
+        });
+        wrapper._leafIds = [node.id];
+    } else {
+        var childContainer = document.createElement('div');
+        childContainer.className = 'menu-children';
+        var leafIds = [];
+        node.children.forEach(function (child) {
+            var childEl = buildMenuNode(child, depth + 1);
+            childContainer.appendChild(childEl);
+            leafIds = leafIds.concat(childEl._leafIds || []);
+        });
+        wrapper.appendChild(childContainer);
+        wrapper._leafIds = leafIds;
+        cb._leafIds = leafIds;
+        cb.addEventListener('change', function () {
+            var on = cb.checked;
+            leafIds.forEach(function (id) {
+                if (on) { enabledOptions.add(id); } else { enabledOptions.delete(id); }
+            });
+            childContainer.querySelectorAll('input.menu-leaf').forEach(function (b) {
+                b.checked = on;
+            });
+            saveEnabledOptions();
+            refreshParentStates();
+            refreshInfoBox();
+        });
+    }
+    return wrapper;
+}
+
+function refreshParentStates() {
+    var parents = document.querySelectorAll('#languageTree input.menu-parent');
+    parents.forEach(function (cb) {
+        var ids = cb._leafIds || [];
+        var on = 0;
+        ids.forEach(function (id) { if (enabledOptions.has(id)) { on++; } });
+        cb.checked = ids.length > 0 && on === ids.length;
+        cb.indeterminate = on > 0 && on < ids.length;
+    });
 }
 
 function fetchCharacterInfo(character) {
     const infoBox = document.getElementById('infoBox');
+    var options = Array.from(enabledOptions);
 
-    // Make an AJAX request to the Flask endpoint
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/process_click_on_character', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            // Parse the JSON response from the server
-            var response = JSON.parse(xhr.responseText);
-            var resultFromPython = response.result;
-
-            infoBox.innerHTML = renderInfoBoxFromData(resultFromPython);
-            wrapCjkCharactersInInfoBox(infoBox);
-            updateInfoBoxFadeState();
-        }
-    };
-
-    // Create an object to hold the character and language options
-    const requestData = {
-        character: character
-    };
-
-    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
-    let anyLanguageEnabled = false;
-    // Loop through each checkbox and add its value to the requestData object
-    checkboxes.forEach(function (checkbox) {
-        requestData[checkbox.id] = checkbox.checked;
-        if (checkbox.checked) {
-            anyLanguageEnabled = true;
-        }
-    });
-
-    if (!anyLanguageEnabled) {
-        infoBox.innerHTML = '<span style="color:#666666;">Enable at least one language in Menu > Languages to see character info.</span>';
+    if (options.length === 0) {
+        infoBox.innerHTML = '<span style="color:#666666;">Enable at least one option in Menu &gt; Languages to see character info.</span>';
         infoBox.scrollTop = 0;
         wrapCjkCharactersInInfoBox(infoBox);
         updateInfoBoxFadeState();
         return;
     }
 
-    // Send the clicked character to the server
-    xhr.send(JSON.stringify(requestData));
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/process_click_on_character', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            infoBox.innerHTML = renderSections(response.sections || []);
+            wrapCjkCharactersInInfoBox(infoBox);
+            updateInfoBoxFadeState();
+        }
+    };
+
+    xhr.send(JSON.stringify({ character: character, options: options }));
 }
 
 function updateInfoBoxFadeState() {
@@ -466,16 +643,9 @@ function createMenu() {
     // Event listener to open the popup menu
     document.getElementById('open-popup-menu-btn').addEventListener('click', openPopupMenu);
 
-    // Loop through each checkbox inside the "languagemenu" div and update its state based on localStorage
-    if (localStorage.length != 0) {
-        const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
-        checkboxes.forEach(function (checkbox) {
-            const storedValue = localStorage.getItem(checkbox.id);
-            if (storedValue !== null) {
-                checkbox.checked = storedValue === 'true';
-            }
-        });
-    }
+    // The language menu is built dynamically from /get_info_options (see
+    // fetchInfoOptions / renderLanguageTree); enabled-leaf state lives in the
+    // single `infoOptions` localStorage key, not per-checkbox booleans.
 }
 
 
@@ -603,13 +773,19 @@ function highlightSearchResults(searchResults) {
 }
 
 function exportUserData() {
-    // Exports every key value pair in local storage into a json file
-    // Then downloads it for the user
+    // Exports the user's character colourings into a json file and downloads it.
+    // Only colour keys are exported — `infoOptions` (menu state) is a UI
+    // preference and is deliberately kept out of colour exports.
     var keys = Object.keys(localStorage);
 
     var dataObject = {};
 
     keys.forEach(function (key) {
+        // Colour keys are hex codepoints (e.g. "4e00"); skip everything else
+        // (infoOptions and any legacy per-checkbox orphans).
+        if (!/^[0-9a-f]+$/i.test(key)) {
+            return;
+        }
         dataObject[key] = localStorage.getItem(key);
     });
 
@@ -646,9 +822,13 @@ function addToLocalStorage(jsonFile) {
         if (error) {
             console.error('Error reading JSON file:', error);
         } else {
-            // Clear the current localStorage
+            // Importing colourings must not wipe the user's menu preferences.
+            var savedOptions = localStorage.getItem('infoOptions');
             localStorage.clear();
-            // Add each key-value pair to localStorage
+            if (savedOptions !== null) {
+                localStorage.setItem('infoOptions', savedOptions);
+            }
+            // Add each imported key-value pair (colour keys) to localStorage
             Object.keys(data).forEach(function (key) {
                 localStorage.setItem(key, data[key]);
             });
@@ -667,16 +847,8 @@ function openPopupMenu() {
 function closePopupMenu() {
     document.getElementById('popup-menu-container').style.display = 'none';
 
-    // Saves the values for the language options into localStorage
-    const checkboxes = document.querySelectorAll('#languagemenu input[type="checkbox"]');
-    checkboxes.forEach(function (checkbox) {
-        localStorage.setItem(checkbox.id, checkbox.checked);
-    });
-
-    // Updates the currently selected character's infobox
-    const largeBox = document.getElementById('largeBox');
-    const currentCharacter = largeBox.textContent;
-    fetchCharacterInfo(currentCharacter)
+    // Menu state is saved live as options are toggled; just refresh the infobox.
+    refreshInfoBox();
 }
 
 function showSubmenu(submenuId) {
@@ -780,7 +952,8 @@ fetchCharacterSetNames();
 createColorButtons();
 createMenu();
 initializeSearchBar();
-intializeInfoColumn();
+// Load the DB-derived menu tree + enabled options first, then seed the info column.
+fetchInfoOptions(intializeInfoColumn);
 initializeInfoBoxInteractions();
 initializeColumnResizers();
 

@@ -9,7 +9,7 @@ ahead of the data is therefore intentional, not premature.
 first pass **derived the reading menu from the DB** (resolving the redundancy and "second source
 of truth" issues — the heaviest ones); the second **added source provenance to the response
 contract** (resolving B1/B2). Those are listed under "Resolved" below and removed from the active
-list. Only one low-severity, forward-looking concern remains.
+list.
 
 All claims below were checked against `app.py`, `schema.sql`, `static/script.js`, and the
 live `omnihanzi.db`.
