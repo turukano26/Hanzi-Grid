@@ -24,3 +24,10 @@
 - kansai-accent-dictionary
 - JLect (jlect.com)
 - awesome-japanese-nlp-resources
+- JMDict
+- JMnedict
+- mhagiwara/cc-kedict
+- garfieldnate/kengdic
+- HERITAGE Hanja NLP toolkit
+- bekker/hanja-rs
+- hanzicraft
