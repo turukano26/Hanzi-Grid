@@ -42,7 +42,7 @@ Schema in `schema.sql`.
 
 The old parquet stage (`df.parquet`, `mandarin_eng_dictionary.parquet`, pandas) is gone — search
 now queries SQLite directly (see "Search" below). Their underlying data still enters the DB
-through the `scripts/` importers (Unihan, Kanjidic2, CC-CEDICT, CC-Canto).
+through the `scripts/` importers (Unihan, Kanjidic2, CC-CEDICT, CC-Canto, libhangul).
 
 ### SQLite schema (key tables)
 
@@ -72,9 +72,10 @@ python scripts/rebuild_db.py                 # (add real downloads by NOT passin
 ```
 
 It runs, in order: `create_db.py` (apply `schema.sql`) → `import_unihan.py` →
-`import_kanjidic2.py` → `import_cedict.py` → `import_cccanto.py` → `import_character_sets.py` →
-`dedup_readings.py`. Each importer can be run standalone with `--db` and `--skip-download`. Raw
-sources live under `data/` (Unihan, CC-CEDICT, CC-Canto, KANJIDIC2), which is gitignored along with
+`import_kanjidic2.py` → `import_cedict.py` → `import_cccanto.py` → `import_libhangul.py` →
+`import_character_sets.py` → `dedup_readings.py`. Each importer can be run standalone with `--db`
+and `--skip-download`. Raw
+sources live under `data/` (Unihan, CC-CEDICT, CC-Canto, KANJIDIC2, libhangul), which is gitignored along with
 the `.db`.
 
 `dedup_readings.py` is a post-import pass: each importer inserts readings independently, so the same
@@ -82,6 +83,16 @@ pronunciation under one etymology starts as several reading rows (one per source
 readings that share an identical `(transcription_system_id, value)` within the same
 `(etymology_id, kind, category, subcategory)`, unioning their `reading_attestations`,
 `reading_transcriptions` and `senses` onto the lowest-id survivor. It is idempotent.
+
+`import_libhangul.py` imports libhangul's `hanja.txt` (a colon-delimited `reading:hanja:eumhun`
+Korean→Hanja dictionary). It keeps only single-Hangul→single-Hanja entries and creates Korean
+readings mirroring Unihan's shape (`LANG_KOREAN`, `kind='reading'`, Hangul under `TS_HANGUL=41`),
+so `dedup_readings.py` merges them onto Unihan's identical Hangul readings. The optional eumhun
+(음훈) string is stored **verbatim** as a second transcription under the `eumhun` system
+(`TS_EUMHUN=44`). Eumhun is a transcription system but is rendered on its **own line like a
+definition** rather than inline in the headword: `_fetch_reading_rows` in `app.py` splits the
+eumhun value out of the inline `transcriptions` list and appends it to the row's `definitions`
+(see `TS_EUMHUN` / `LIBHANGUL_SHORT` there).
 
 ### Data flow (request lifecycle)
 

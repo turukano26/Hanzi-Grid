@@ -1,7 +1,6 @@
 # TODOs
 
 - option to merge simplified and traditional info + maybe also japanese versions if they exist?
-- redo how info box works
 - selecting sources
 - fix cantonese duplicates in senses. ex. look at mandarin xing (to go)
 - readd cccanto editorial notes somewhere else besides new glosses
@@ -19,6 +18,10 @@
 - create kana readings when missing them (unihan only)
 - add source options
 - add wade giles
+
+- does eunhum's catagory make sense?
+
+- how does vietnamese's different IPA transcriptions and 1 national script work?
 
 ## colorings
 

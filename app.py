@@ -197,6 +197,8 @@ LANG_JAPANESE = 10            # Tokyo Standard
 TS_PINYIN_NUM = 2            # numbered pinyin, e.g. "sheng1"
 TS_HEPBURN = 30             # romaji; derives from kana via the kana_romaji transform
 TS_KANA = 32
+TS_EUMHUN = 44             # Korean eumhun (음훈) — raw libhangul string, own line
+LIBHANGUL_SHORT = 'libhangul'  # sources.short_name, shown as the eumhun line's source
 
 # Punctuation dropped from a romanized reading before matching (okurigana '.',
 # affix '-', and stray separators) — mirrors the old jd_romaji search.
@@ -383,6 +385,10 @@ def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None
     as COALESCE(stored[ts], stored[derived_from]) then applying its transform, and
     carrying its attesting sources (+ senses when `definitions`)."""
     ts_order = sorted(transcriptions, key=lambda t: t['sort_order'])
+    # Eumhun is a transcription system, but renders on its own line (like a
+    # definition) rather than inline in the headword — split it out here.
+    inline_ts = [t for t in ts_order if t['ts_id'] != TS_EUMHUN]
+    eumhun_enabled = any(t['ts_id'] == TS_EUMHUN for t in ts_order)
 
     if category is None:
         reading_rows = db.execute(
@@ -406,7 +412,7 @@ def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None
             "WHERE reading_id = ?", (reading_id,)).fetchall())
 
         trs = []
-        for ts in ts_order:
+        for ts in inline_ts:
             value = stored.get(ts['ts_id'])
             if value is None and ts['derived_from_ts_id'] is not None:
                 value = stored.get(ts['derived_from_ts_id'])
@@ -416,10 +422,15 @@ def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None
                 value = TRANSFORMS[ts['transform']](value)
             trs.append({'code': ts['code'], 'label': ts['label'], 'value': value})
 
-        # A reading with transcriptions requested but none resolving is empty.
-        # (When no transcription is enabled at all, ts_order is empty and we keep
-        # the row for its definitions — the definitions-only path.)
-        if ts_order and not trs:
+        # Eumhun (raw libhangul string) is shown on its own line, appended to the
+        # reading's definitions so it renders like a gloss rather than inline.
+        eumhun = stored.get(TS_EUMHUN) if eumhun_enabled else None
+
+        # A reading with inline transcriptions requested but none resolving — and
+        # no eumhun to show — is empty. (When nothing inline is enabled, inline_ts
+        # is empty and we keep the row for its definitions/eumhun — the
+        # definitions-only path.)
+        if inline_ts and not trs and eumhun is None:
             continue
 
         sources = [row[0] for row in db.execute(
@@ -427,14 +438,25 @@ def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None
             "JOIN sources src ON src.id = ra.source_id "
             "WHERE ra.reading_id = ? ORDER BY src.id", (reading_id,)).fetchall()]
 
-        row = {'transcriptions': trs, 'tone': tone, 'sources': sources}
+        defs = []
         if definitions:
-            row['definitions'] = [
+            defs = [
                 {'text': d[0], 'source': d[1]} for d in db.execute(
                     "SELECT s.definition, src.short_name FROM senses s "
                     "JOIN sources src ON src.id = s.source_id "
                     "WHERE s.reading_id = ? ORDER BY s.source_id, s.sort_order",
                     (reading_id,)).fetchall()]
+        if eumhun is not None:
+            # Eumhun holds one or more comma-separated glosses ("별 성, 세월 성");
+            # render each on its own line. Stored value stays verbatim.
+            for part in eumhun.split(','):
+                part = part.strip()
+                if part:
+                    defs.append({'text': part, 'source': LIBHANGUL_SHORT})
+
+        row = {'transcriptions': trs, 'tone': tone, 'sources': sources}
+        if defs:
+            row['definitions'] = defs
         out.append(row)
     return out
 

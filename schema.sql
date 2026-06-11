@@ -121,6 +121,7 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     (42, 20, 'Yale Romanization',   'yale',            2),
     (41, 20, 'Hangul',              'hangul',          3),
     (43, 20, 'IPA',                 'ipa',             4),
+    (44, 20, 'Eumhun',              'eumhun',          5),
     -- Northern Vietnamese
     (50, 30, 'Quốc Ngữ',           'quoc_ngu',        1),
     (51, 30, 'IPA',                 'ipa',             2);
@@ -170,7 +171,8 @@ INSERT INTO sources (id, name, short_name, source_type, url) VALUES
     (10, 'Jōyō Kanji (2010)',         'Jōyō',    'standard',       NULL),
     (11, 'CantoDict',                  'CDict',    'dictionary',     'https://cantodict.org'),
     (12, 'Shuowen Jiezi',             'SWJZ',     'scholarly_work', NULL),
-    (13, 'CC-Canto',                   'CC-Canto', 'dictionary',     'https://cantonese.org');
+    (13, 'CC-Canto',                   'CC-Canto', 'dictionary',     'https://cantonese.org'),
+    (14, 'libhangul (hanja.txt)',      'libhangul','dictionary',     'https://github.com/libhangul/libhangul');
 
 
 -- Types of historical script images.
