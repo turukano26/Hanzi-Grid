@@ -17,8 +17,7 @@ python app.py          # runs on http://localhost:5000 with debug=True
 gunicorn app:app
 ```
 
-There are no live tests. `tests/` and `info_sections/` hold a not-yet-wired-up
-infobox-section framework (see "Caveats" below).
+There are no live tests.
 
 ## Architecture
 
@@ -32,7 +31,6 @@ omnihanzi.db                    # SQLite database — the primary data store (gi
 schema.sql                      # Full DB schema + seed data (languages, transcription systems, sources)
 data/                           # Raw source dumps: unihan/, cedict/, kanjidic2/ (gitignored)
 scripts/                        # DB build pipeline (see below)
-info_sections/                  # WIP section-protocol framework — NOT imported by app.py yet
 ```
 
 ### Data layer: SQLite
@@ -90,29 +88,36 @@ readings that share an identical `(transcription_system_id, value)` within the s
 1. On page load, `fetchCharacterSetNames()` → `/get_character_set_names` → populates the dropdown.
 2. Selecting a set calls `fetchCharacterSet()` → `/get_character_set` → `generateMacroGrid()` renders
    one `<h1>` + grid of `<span data-unicode="…">` cells per sub-node.
-3. Clicking a cell calls `fetchCharacterInfo()` → `/process_click_on_character` (POST JSON) →
-   `create_character_info_sheet()` queries SQLite and returns a flat dict whose keys
-   (`mandarin`, `cantonese`, `tang`, `japanese_kun`, `japanese_on`, `korean`, `vietnamese`) are
-   rendered client-side by `renderInfoBoxFromData()` in `script.js`. Each language is gated by a
-   checkbox flag in the POST body (e.g. `chineseMandarinCheckbox`).
+3. Clicking a cell calls `fetchCharacterInfo()` → `/process_click_on_character` (POST JSON
+   `{character, options: [enabled leaf ids]}`) → `build_sections()` queries SQLite and returns
+   `{sections: [...]}`, a list of section objects each rendered client-side by `renderSections()` in
+   `script.js`. `options` is the set of toggled-on menu leaves (persisted in `localStorage`); a group
+   whose subtree has no enabled leaf is skipped server-side.
 4. The search bar calls `/get_search_results` with `searchString` + `searchType` (Pinyin, Romaji,
    or Character); results are highlighted in the grid and shown in the search column.
 
-### Per-language info-sheet shapes
+### Info-sheet section shapes
 
-`create_character_info_sheet()` returns different sub-shapes per language, each matched by a branch
-in `renderInfoBoxFromData()`:
+The info sheet is **language-generic** since the infobox redesign: `build_sections()` emits a uniform
+list of sections rather than per-language keys. Each section is
+`{id, type, title, data}` (the `type`/`title` come from the group's `render`), where `type` selects a
+client renderer in `script.js`'s `RENDERERS` map. There are three `type`s / handlers:
 
-- `mandarin` → `{readings: [{pinyin_accent, tone, definitions: [...]}]}` — deduped by NFC-normalized
-  pinyin, preferring CC-CEDICT (`source_id` 1) over Unihan (2).
-- `cantonese` → `{segments: [{text, tone}]}`.
-- `tang` (Middle Chinese) → `{text: "..."}`.
-- `japanese_kun` / `japanese_on` / `korean` / `vietnamese` → `{items: [...]}`.
-- Any language with no data returns `{error: "..."}`.
+- `readings` (`_handler_readings`) → `{readings: [...]}`. Every Sinitic/Japonic/etc. reading group —
+  Mandarin, Cantonese, Middle Chinese, Japanese on/kun, Korean, Vietnamese — uses this one shape. Each
+  reading row is `{transcriptions: [{code, label, value}], tone, sources: [short_name…],
+  definitions?: [{text, source}]}`. `transcriptions` holds only the enabled systems (resolved as
+  `COALESCE(stored[ts], stored[derived_from])` then the system's `transform`); `definitions` is present
+  only when a Definitions leaf is enabled.
+- `image_gallery` (`_handler_glyph_images`) → `{images: [{url|data, attribution}]}` — historical glyphs.
+- `key_value` (`_handler_attributes`) → `{rows: [{key, value, source}]}` — `character_attributes`.
 
-Japanese readings are stored as kana and converted to Hepburn romaji at request time by
-`_kana_to_romaji()` / `_ROMAJI` (in `romaji.py`, imported by `app.py`), preserving okurigana `.`
-and affix `-` markers.
+A handler with nothing to return yields `{error: ...}`, and `build_sections()` drops that section
+entirely (errors are never serialized).
+
+Japanese readings are stored as kana and romanized to Hepburn at request time via the `kana_romaji`
+transform (`_kana_to_romaji` / `_ROMAJI` live in `romaji.py`, imported by `app.py`), preserving
+okurigana `.` and affix `-` markers — see `transcription_systems.derived_from_ts_id` / `transform`.
 
 ### Search (`/get_search_results`)
 
@@ -152,11 +157,3 @@ search sorted on), so the available `frequency_rank` / `grade_level` attributes 
 Each file in `charactersets/` follows this shape (one level of `{label, value:string}` nodes;
 `generateMacroGrid` renders exactly one level). The DB models a deeper tree, but the exported JSON is
 flattened to this shape. `character_sets.json` at the root is an older/alternate copy of the same data.
-
-## Caveats
-
-- **`info_sections/` and `tests/` are aspirational and not wired in.** `app.py` does **not** import
-  `info_sections`. The TypedDicts in `info_sections/definitions.py` describe a richer
-  section/group protocol (`SectionJson`, `CharacterInfoResponse`) that the live code does *not* use —
-  the actual contract is the flat dict described under "Per-language info-sheet shapes" above. Treat
-  `info_sections/` as a planned refactor, not the current source of truth.

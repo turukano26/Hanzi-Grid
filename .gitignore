@@ -21,4 +21,6 @@ __pycache__/
 
 # ignore data folder and database
 *.db
+*.db-wal
+*.db-shm
 data/
