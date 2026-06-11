@@ -118,8 +118,8 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     (33, 10, 'IPA',                 'ipa',             4),
     -- Standard Korean
     (40, 20, 'Revised Romanization','revised_rom',     1),
-    (41, 20, 'Hangul',              'hangul',          2),
-    (42, 20, 'Yale Romanization',   'yale',            3),
+    (42, 20, 'Yale Romanization',   'yale',            2),
+    (41, 20, 'Hangul',              'hangul',          3),
     (43, 20, 'IPA',                 'ipa',             4),
     -- Northern Vietnamese
     (50, 30, 'Quốc Ngữ',           'quoc_ngu',        1),

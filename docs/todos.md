@@ -12,6 +12,15 @@
 - move unihan definitions into own catagory outside of any language?
 - check how japanese defintions work, especially if theyre per reading
 
+- check out skip-downloads flag
+
+- remove / change option in languages menu for diabling entire groups
+- move korean hangul to default being after romanization
+- make it so menu entries can be dragged to change their order when rendering the info box
+- create kana readings when missing them (unihan only)
+- add source options
+- add wade giles
+
 ## colorings
 
 - fix saving character colorings
