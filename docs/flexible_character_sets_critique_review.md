@@ -10,8 +10,11 @@ Review of the earlier critique against the following decisions:
   converter are deleted.
 - `collapsed` state is now saved and persistent.
 - Fixing search is out of scope.
-- Multi-character word rendering is a preparatory step toward adding words as unique
-  elements in the DB and throughout the app.
+- ~~Multi-character word rendering is a preparatory step toward adding words as unique
+  elements in the DB and throughout the app.~~ **Reversed (third round):** treating a word
+  as a special unit — the `{word}` cell type and any dedicated `.word` render element — is
+  **out of scope** for this rewrite. Words-as-units remains a future goal but builds no
+  render elements now; grid cells stay **bare single characters** (today's behavior).
 
 ### Second round of decisions (storage)
 
@@ -56,93 +59,90 @@ watching when a whole text becomes a "set," but it doesn't change the answer.
 | 5 | Per-grid `columns`/`gap` fight responsive layout | **Resolved** — removed. |
 | 4 | YAGNI on recursion + text blocks | **Withdrawn** — deep nesting and classical-text strings are stated requirements. Generality now has a caller. |
 | 6 | Converter **and** runtime `_normalize_set` is redundant | **Partially stands** — "normalize once, then delete v1 + converter" means a one-time on-disk conversion. The runtime `_normalize_set` is still redundant and should be dropped. |
-| 7 | `{word}` dual-shape cell costs forever for cosmetic gain | **Softened, not gone** — accepted as prep for words-as-DB-elements. But see new issue #6: per-char spans likely aren't the end-state representation. |
+| 7 | `{word}` dual-shape cell costs forever for cosmetic gain | **Resolved by removal** — words-as-units (the `{word}` cell + `.word` element) are out of scope; cells stay bare strings, so the dual-shape cost never lands. |
 | 8 | Collapse state isn't persisted / re-render wipes it | **Now in scope** — persisting it resolves the re-render concern *provided* state is read on render. But it surfaces a new requirement: stable section identity (issue #2). |
 | 10 | Search single-match highlight | **Dropped** — out of scope. |
-
-The big one (#3, DB redundancy) is untouched by any decision and actually gets **more**
-pressing — see below.
 
 ---
 
 ## Unaddressed issues that still stand
 
-1. **DB redundancy — now sharper, not softer.** `character_set_nodes` (recursive
-   `parent_id` tree) + `character_set_members` already exist and are populated by the
-   importer, and were built for exactly the recursive nesting now being committed to.
-   Classical texts are large, structured, and DB-bound. Doubling down on recursive JSON
-   files while a recursive set-tree schema sits unread — plus the stale root
-   `character_sets.json` "alternate copy" — means 2–3 drifting representations. The
-   nesting + classical-text goals make "JSON files vs. the DB tree" a decision the plan
-   must now actually make, not defer.
+*(none — all resolved; see "Modifications the plan needs" below.)*
 
-2. **Persisted collapse needs a stable section identity.** Sections currently have only
-   `title`, which is neither unique nor stable (two "Level 1"s; rename breaks the key).
-   Persisting collapse state to localStorage requires a stable key scheme. A
-   positional/path index (`blocks.2.blocks.0`) breaks the moment a document is edited or
-   a classical text is inserted; explicit `id` fields are more robust. The plan
-   specifies none.
-
-3. **"Size variable" is undefined.** Allowed values (enum `sm/md/lg`? raw px? rem?),
-   where it applies (text blocks only, or also section headings / grid cells?), and how
-   it maps to CSS are all unspecified. Without bounds it becomes another free-form style
-   knob like the `columns` just removed.
-
-4. **Classical-text rendering is a genuine gap.** A classical text wants characters in
-   reading order, flowing, *still individually clickable/colorable*. That is neither
-   today's fixed-cell `.grid` (`minmax(50px,1fr)` — unusable for thousands of
-   reading-order chars) nor a non-interactive plain-`text` block. The plan's two block
-   types don't cover the headline use case. Need either a grid "flow" mode or a third
-   interactive-text block — decide which, or explicitly defer with the chosen approach
-   named.
-
-5. **Per-character scaling.** `generateCharacterElements` creates one `<span>` **and
-   attaches one click listener per character** (`script.js:570`). Fine for ~2,000-char
-   HSK; a classical text of thousands–tens of thousands of chars makes that a lot of DOM
-   nodes and listeners. The classical-text goal probably wants event delegation (one
-   listener on the grid). Worth flagging now since it's the stated direction.
-
-6. **The `{word}` "prep step" may be throwaway.** Words-as-unique-DB-elements will most
-   likely render as a *single* clickable/colorable unit with its own info sheet and its
-   own key — not as a `.word` wrapper of independent per-char spans. If so, the per-char-
-   span word rendering isn't a stepping stone toward that model; it's a different model
-   that gets ripped out. Confirm the end-state so the interim shape actually converges on
-   it.
-
-7. **Minor:** `collapsible`+`collapsed` as two fields is redundant (collapse one, tie to
-   persisted state); and "optionally validate/log unknown block types" should be made
-   concrete (skip-and-log, like `renderSections` already does) rather than optional.
+~~**Classical-text rendering is a genuine gap.**~~ **RESOLVED** — decision: no separate
+`passage`/flow type. A classical text is a **`text` block** containing a **raw string**,
+with an optional **`interactive` flag**. One renderer walks the string char-by-char; when
+`interactive: true`, Han chars (`\p{Han}`) become `<span data-unicode>` cells
+(coloring/click/search work unchanged) and everything else (punctuation, spaces, `\n`)
+passes through as inert text. A no-Han block renders identically with or without the flag,
+so `text` subsumes the old `passage` idea. See modifications #1 and #7.
 
 ---
 
 ## Modifications the plan needs
 
-1. **Strip all Markdown.** `text` block becomes
-   `{ "type": "text", "text": "...", "size"?: ... }`. State that text and descriptions
-   render via **`textContent`/escaped** (no `innerHTML`) — record this as the reason no
-   sanitizer/dependency is needed.
-2. **Define `size`:** enum of named sizes mapped to CSS classes (recommended) rather than
-   free-form values; state where it's allowed.
+1. **Strip all Markdown; one unified `text` block.** A `text` block is
+   `{ "type": "text", "text": "<raw string>", "size"?: …, "interactive"?: false }` — the
+   payload is a **raw string only** (no cells array, no nested structure). Default render
+   is **inert** prose via **`textContent`/escaped** (no `innerHTML`) — this is the reason
+   no Markdown parser / sanitizer / dependency is needed. With **`interactive: true`** the
+   same renderer walks the string char-by-char: Han chars (`\p{Han}`) become
+   `<span data-unicode>` cells (coloring/click/search unchanged), everything else
+   (punctuation, spaces, `\n`) passes through as inert text. This single type also covers
+   classical-text passages (see #7), so there is **no separate `passage`/flow type**.
+2. **Define `size`:** integer **1–5 heading-style scale** (`1` = largest, like one `#`;
+   `5` ≈ body), mapped to CSS classes `.cs-size-1`…`.cs-size-5` rendered on a **neutral
+   element** (not real `<h1>`–`<h5>`, to keep the heading outline / a11y tree intact).
+   Allowed on `text` blocks and `section` titles only — not grid cells. Clamp out-of-range
+   values; missing `size` falls back to a body-weight default. Decide whether `section`
+   titles take explicit `size` only, or `size` overrides a nesting-depth-derived default
+   (start explicit-only).
 3. **Remove `columns` and `gap`** from the grid schema, the renderer step, and the CSS
    step.
 4. **Drop runtime `_normalize_set`.** Keep only the one-time converter script. Note v1
    files + converter are deleted after the trial period; document that v1 detection is by
    shape (`value` key present), since v1 files carry no `version`.
-5. **Specify collapse persistence:** add stable section `id`s to the schema, define the
-   localStorage key (namespaced so the colour-export regex `^[0-9a-f]+$` won't pick it up
-   — like `infoOptions` is excluded), and read state on every render so re-renders
-   restore it. Collapse `collapsible`/`collapsed` into the persisted model.
-6. **Resolve the DB question explicitly:** either (a) generate v2 JSON from
-   `character_set_nodes` and treat the DB as source of truth, or (b) state why JSON files
-   stay authoritative and the DB tree is removed. Either way, address the stale root
-   `character_sets.json`.
-7. **Add a classical-text rendering decision:** specify whether classical texts are a
-   grid "flow" variant or a new interactive-text block, or defer with the chosen approach
-   named. This is the actual driver of the refactor and currently has no block type.
+5. **Specify collapse persistence:** add a **required `id`** to **every** `section` block
+   in the schema (string, unique within the document — `{ "type": "section", "id":
+   "level-1", "title": "Level 1", … }`; required on all sections, not just collapsible
+   ones, so the converter always emits it and it's available for any future per-section
+   state), generated by the v1→v2 converter (e.g. slugified title with a disambiguating
+   counter). It keys the persisted collapse state — stable across edits/renames, unlike
+   `title` or a positional path. Define the localStorage key as
+   `<set>:<id>`-namespaced (e.g. `csCollapse:<id>`) so the colour-export regex
+   `^[0-9a-f]+$` won't pick it up (like `infoOptions` is excluded), and read state on every
+   render so re-renders restore it. Collapse `collapsible`/`collapsed` into the persisted
+   model.
+6. **Storage = JSON only (decided).** Delete `character_set_nodes` +
+   `character_set_members` from `schema.sql` and drop their importer step
+   (`import_character_sets.py`); remove the stale root `character_sets.json`. Add **lazy
+   loading**: replace the startup load-all loop (`app.py:17-29`) with a `label → filepath`
+   index, reading + parsing each file on demand in `/get_character_set` (optional LRU
+   cache for large texts). Reserve **`localStorage`** as the future home for
+   user-uploaded sets — same v2 document, same renderer, no server storage.
+7. **Classical texts = interactive `text` block (decided).** No new `passage`/flow type
+   and no `grid` "flow" mode. A classical text is a `text` block with `interactive: true`
+   holding the verbatim text as a raw string (newlines preserved → line breaks). The
+   char-walk renderer (modification #1) makes Han chars interactive and passes punctuation
+   / whitespace through inertly. Distinguish from inert prose purely by the `interactive`
+   flag, not by content — a Han-rich caption stays inert with `interactive` omitted/false.
+   Reading-flow CSS (line-height, inline colored chars) differs from the grid's 50px cells.
 8. **Make unknown-type handling concrete:** skip + log, mirroring `renderSections`
    (`script.js:167-169`) — drop the word "optionally."
-9. **Note the scaling plan** (event delegation) for large interactive sets, even if
-   deferred, so the classical-text import doesn't dead-end on per-char listeners.
-10. **Pin down the word end-state** (single unit vs. per-char spans) so the interim
-    `{word}` rendering converges on the eventual DB word element instead of being
-    discarded.
+9. **Fix per-character scaling for large interactive sets.** `generateCharacterElements`
+   creates one `<span>` **and attaches one click listener per character**
+   (`script.js:570`). Fine for ~2,000-char HSK; a classical text of thousands–tens of
+   thousands of chars makes that a lot of DOM nodes and listeners. Move to event
+   delegation (one listener on the grid, derive the cell from `event.target`) so the
+   classical-text import doesn't dead-end on per-char listeners — even if the switch is
+   deferred, the plan should commit to it.
+10. **Drop the `{word}` cell type from the schema and renderer.** Words-as-units are out
+    of scope; the `grid.cells` entry is a **bare string only** (one character), and there
+    is no `.word` wrapper. Words-as-DB-units stay a noted future goal with no build now.
+11. **Collapse `collapsible` + `collapsed` into one field.** Two fields are redundant —
+    `collapsed` is meaningless without `collapsible`. Use a single optional `collapsed`
+    (`true`/`false`) on `section`: its presence makes the section collapsible, its value
+    sets the initial state; absent ⇒ a plain non-collapsible heading. Tie the live state to
+    the persisted model (modification #5), so the JSON value is only the *default*.
+    (Unknown block-type validation, the other half of the old "Minor" issue, is already
+    covered by modification #8.)
