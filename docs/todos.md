@@ -28,3 +28,11 @@
 - fix saving character colorings
 - add multiple colorings
 - add dynamically made colorings
+
+## character set rewrite
+
+- make collapsable
+- give recursive structure and layers to char sets
+- look at characters_sets.json
+- character set importers?
+- character sets can either be the boxes, or just be regular text

@@ -31,3 +31,5 @@
 - HERITAGE Hanja NLP toolkit
 - bekker/hanja-rs
 - hanzicraft
+
+Also, check out all already included datasets for information that is discarded / unsused
