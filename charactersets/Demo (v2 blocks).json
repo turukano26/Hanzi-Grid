@@ -1,0 +1,48 @@
+{
+  "version": 2,
+  "label": "Demo (v2 blocks)",
+  "blocks": [
+    {
+      "type": "text",
+      "text": "This demo set exercises every v2 block type: nested sections, a collapsible section, plain prose, and an interactive reading passage.",
+      "size": 4
+    },
+    {
+      "type": "section",
+      "id": "numbers",
+      "title": "Numbers",
+      "size": 2,
+      "blocks": [
+        { "type": "grid", "cells": "一二三四五六七八九十" },
+        {
+          "type": "section",
+          "id": "numbers-big",
+          "title": "Larger units",
+          "size": 3,
+          "blocks": [
+            { "type": "grid", "cells": "百千万億" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "poem",
+      "title": "靜夜思 (collapsible)",
+      "size": 2,
+      "collapsed": false,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "李白《靜夜思》— click any character below.",
+          "size": 5
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "床前明月光，\n疑是地上霜。\n舉頭望明月，\n低頭思故鄉。"
+        }
+      ]
+    }
+  ]
+}

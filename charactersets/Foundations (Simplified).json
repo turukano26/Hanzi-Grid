@@ -1,0 +1,249 @@
+{
+  "version": 2,
+  "label": "Foundations (Simplified)",
+  "blocks": [
+    {
+      "type": "text",
+      "text": "The most basic CJK characters — visually and conceptually. Most began as pictographs or ideographs you can almost read at a glance. Simplified Chinese forms.",
+      "size": 4
+    },
+    {
+      "type": "section",
+      "id": "numbers",
+      "title": "Numbers",
+      "blocks": [
+        { "type": "text", "text": "The building blocks of counting.", "size": 5 },
+        { "type": "section", "id": "numbers-digits", "title": "Digits", "size": 3, "blocks": [
+          { "type": "grid", "cells": "零一二三四五六七八九十" }
+        ] },
+        { "type": "section", "id": "numbers-units", "title": "Larger units", "size": 3, "blocks": [
+          { "type": "grid", "cells": "百千万億兆" }
+        ] },
+        { "type": "section", "id": "numbers-counting", "title": "Counting words", "size": 3, "blocks": [
+          { "type": "grid", "cells": "两几半双个" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "people",
+      "title": "People & Family",
+      "blocks": [
+        { "type": "text", "text": "The first relationships and the people around us.", "size": 5 },
+        { "type": "section", "id": "people-family", "title": "Family", "size": 3, "blocks": [
+          { "type": "grid", "cells": "父母兄弟姐妹子儿" }
+        ] },
+        { "type": "section", "id": "people-roles", "title": "People & roles", "size": 3, "blocks": [
+          { "type": "grid", "cells": "人大女男夫老民王友" }
+        ] },
+        { "type": "section", "id": "people-self", "title": "Self", "size": 3, "blocks": [
+          { "type": "grid", "cells": "自身" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "body",
+      "title": "The Body",
+      "blocks": [
+        { "type": "text", "text": "Parts you can point to — and what bodies are made of.", "size": 5 },
+        { "type": "section", "id": "body-head", "title": "Head & face", "size": 3, "blocks": [
+          { "type": "grid", "cells": "首头面目耳口牙舌鼻毛" }
+        ] },
+        { "type": "section", "id": "body-limbs", "title": "Body & limbs", "size": 3, "blocks": [
+          { "type": "grid", "cells": "身手足心力" }
+        ] },
+        { "type": "section", "id": "body-substance", "title": "Made of", "size": 3, "blocks": [
+          { "type": "grid", "cells": "肉骨血皮" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sky-weather",
+      "title": "Sky & Weather",
+      "blocks": [
+        { "type": "text", "text": "What's overhead.", "size": 5 },
+        { "type": "section", "id": "sky-light", "title": "Sky & light", "size": 3, "blocks": [
+          { "type": "grid", "cells": "日月星天光阴阳" }
+        ] },
+        { "type": "section", "id": "sky-weather-w", "title": "Weather", "size": 3, "blocks": [
+          { "type": "grid", "cells": "雨雪云风电雷冰" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "landscape",
+      "title": "Earth & Landscape",
+      "blocks": [
+        { "type": "text", "text": "The shape of the land.", "size": 5 },
+        { "type": "section", "id": "landscape-ground", "title": "Land & ground", "size": 3, "blocks": [
+          { "type": "grid", "cells": "土地田石沙谷野" }
+        ] },
+        { "type": "section", "id": "landscape-water", "title": "Water & waterways", "size": 3, "blocks": [
+          { "type": "grid", "cells": "水川河江湖海池泉" }
+        ] },
+        { "type": "section", "id": "landscape-hills", "title": "Hills & trees", "size": 3, "blocks": [
+          { "type": "grid", "cells": "山岛木林森" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "five-elements",
+      "title": "The Five Elements (五行)",
+      "blocks": [
+        { "type": "text", "text": "Classical Chinese cosmology: metal, wood, water, fire, earth.", "size": 5 },
+        { "type": "grid", "cells": "金木水火土" }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "four-elements",
+      "title": "The Four Elements (Western)",
+      "blocks": [
+        { "type": "text", "text": "The classical Greek set: fire, water, earth, air.", "size": 5 },
+        { "type": "grid", "cells": "火水土气" }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "directions",
+      "title": "Directions & Position",
+      "blocks": [
+        { "type": "text", "text": "Finding your way.", "size": 5 },
+        { "type": "section", "id": "directions-compass", "title": "Compass", "size": 3, "blocks": [
+          { "type": "grid", "cells": "东南西北中" }
+        ] },
+        { "type": "section", "id": "directions-relative", "title": "Relative position", "size": 3, "blocks": [
+          { "type": "grid", "cells": "上下左右前后内外" }
+        ] },
+        { "type": "section", "id": "directions-bounds", "title": "Bearing & bounds", "size": 3, "blocks": [
+          { "type": "grid", "cells": "方向间边里" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "size-quantity",
+      "title": "Size & Quantity",
+      "blocks": [
+        { "type": "text", "text": "Measuring the world.", "size": 5 },
+        { "type": "section", "id": "size-extent", "title": "Size & extent", "size": 3, "blocks": [
+          { "type": "grid", "cells": "大中小太高长短宽" }
+        ] },
+        { "type": "section", "id": "size-distance", "title": "Distance", "size": 3, "blocks": [
+          { "type": "grid", "cells": "远近" }
+        ] },
+        { "type": "section", "id": "size-amount", "title": "Amount & weight", "size": 3, "blocks": [
+          { "type": "grid", "cells": "多少空满重轻" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "time-seasons",
+      "title": "Time & Seasons",
+      "blocks": [
+        { "type": "text", "text": "The turning year and the parts of a day.", "size": 5 },
+        { "type": "section", "id": "time-seasons-s", "title": "Seasons", "size": 3, "blocks": [
+          { "type": "grid", "cells": "春夏秋冬" }
+        ] },
+        { "type": "section", "id": "time-day", "title": "Times of day", "size": 3, "blocks": [
+          { "type": "grid", "cells": "旦早朝午昼晚夜明" }
+        ] },
+        { "type": "section", "id": "time-age", "title": "Span & age", "size": 3, "blocks": [
+          { "type": "grid", "cells": "年今时古新旧" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "colors",
+      "title": "Colors",
+      "blocks": [
+        { "type": "text", "text": "The basic palette.", "size": 5 },
+        { "type": "grid", "cells": "色白黑赤红青黄绿蓝紫灰" }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "animals",
+      "title": "Animals",
+      "blocks": [
+        { "type": "text", "text": "Creatures in the oldest pictographs.", "size": 5 },
+        { "type": "section", "id": "animals-beasts", "title": "Beasts", "size": 3, "blocks": [
+          { "type": "grid", "cells": "虎象鹿兔鼠龙" }
+        ] },
+        { "type": "section", "id": "animals-farm", "title": "Farm animals", "size": 3, "blocks": [
+          { "type": "grid", "cells": "牛羊马犬猪鸡" }
+        ] },
+        { "type": "section", "id": "animals-birds", "title": "Birds & water creatures", "size": 3, "blocks": [
+          { "type": "grid", "cells": "鸟羽鱼龟贝虫" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plants",
+      "title": "Plants",
+      "blocks": [
+        { "type": "text", "text": "Things that grow.", "size": 5 },
+        { "type": "section", "id": "plants-grains", "title": "Plants & grains", "size": 3, "blocks": [
+          { "type": "grid", "cells": "木竹草禾米麦豆瓜" }
+        ] },
+        { "type": "section", "id": "plants-parts", "title": "Parts", "size": 3, "blocks": [
+          { "type": "grid", "cells": "根枝叶苗花果" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "verbs",
+      "title": "Basic Verbs & States",
+      "blocks": [
+        { "type": "text", "text": "The simplest actions and states.", "size": 5 },
+        { "type": "section", "id": "verbs-motion", "title": "Motion", "size": 3, "blocks": [
+          { "type": "grid", "cells": "行走来去入出飞" }
+        ] },
+        { "type": "section", "id": "verbs-posture", "title": "Posture", "size": 3, "blocks": [
+          { "type": "grid", "cells": "立坐休" }
+        ] },
+        { "type": "section", "id": "verbs-senses", "title": "Senses & speech", "size": 3, "blocks": [
+          { "type": "grid", "cells": "见看听说言食" }
+        ] },
+        { "type": "section", "id": "verbs-life", "title": "Life & living", "size": 3, "blocks": [
+          { "type": "grid", "cells": "生死" }
+        ] }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "shapes",
+      "title": "Shapes & Marks",
+      "blocks": [
+        { "type": "text", "text": "Lines and forms.", "size": 5 },
+        { "type": "grid", "cells": "方圆点线角" }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "opposites",
+      "title": "Opposites & Judgments",
+      "blocks": [
+        { "type": "text", "text": "Yes and no, good and bad.", "size": 5 },
+        { "type": "grid", "cells": "是不有无好坏" }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sensation",
+      "title": "Temperature & Sensation",
+      "blocks": [
+        { "type": "text", "text": "How things feel.", "size": 5 },
+        { "type": "grid", "cells": "冷热干湿" }
+      ]
+    }
+  ]
+}

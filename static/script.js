@@ -524,75 +524,186 @@ function fetchSearchResults(searchString, searchType) {
 }
 
 
-function generateMacroGrid(characterSet) {
+// ---------------------------------------------------------------------------
+// Character-set rendering: recursive typed-block documents (v2). renderBlock
+// dispatches on block.type via BLOCK_RENDERERS (mirroring the info sheet's
+// RENDERERS); an unknown type is skipped with a console.warn. Cell clicks are
+// handled by one delegated listener per container (attachCellDelegation) so a
+// large interactive text never attaches thousands of per-cell listeners.
+// See docs/flexible_character_sets_plan.md.
+// ---------------------------------------------------------------------------
+var COLLAPSE_PREFIX = 'csCollapse:';
+var HAN_RE = /\p{Script=Han}/u;
 
-    const macroGrid = document.getElementById('macroGrid');
+// Build one <span data-unicode> study cell, applying any saved colour. No
+// per-cell listener — click handling is delegated at the container level.
+function makeCharCell(character) {
+    var unicodeKey = character.codePointAt(0).toString(16);
+    var span = document.createElement('span');
+    span.textContent = character;
+    span.setAttribute('data-unicode', unicodeKey);
+    var saved = localStorage.getItem(unicodeKey);
+    if (saved) {
+        span.style.backgroundColor = saved;
+    }
+    return span;
+}
 
-    macroGrid.innerHTML = ''; // Clear the existing grid
-    currentInputString = characterSet; // Update the Global
+// Click behaviour for a study cell, shared by grids and interactive text.
+function handleCellClick(span) {
+    var largeBox = document.getElementById('largeBox');
+    var colorPicker = document.getElementById('colorPicker');
+    var character = span.textContent;
+    var unicodeKey = span.getAttribute('data-unicode');
 
-    for (let i = 0; i < characterSet.value.length; i++) {
+    // Single-click: show the character in the large box.
+    largeBox.textContent = character;
+    var cellColor = window.getComputedStyle(span).backgroundColor;
+    largeBox.style.backgroundColor = cellColor;
 
-        const gridDiv = document.createElement('div');
-        gridDiv.className = 'grid';
+    fetchCharacterInfo(character);
 
-        // Create a heading for the grid with the label of the inner value
-        const heading = document.createElement('h1');
-        heading.textContent = characterSet.value[i].label;
-
-        generateCharacterElements(gridDiv, characterSet.value[i].value);
-
-        // Append the heading and paragraph to the grid div
-        macroGrid.appendChild(heading);
-        // Append the grid div to the container
-        macroGrid.appendChild(gridDiv)
+    // In paint mode, colour the cell; otherwise copy its colour to the picker.
+    if (document.getElementById('toggleCheckbox').checked) {
+        var selectedColor = colorPicker.value;
+        localStorage.setItem(unicodeKey, selectedColor);
+        largeBox.style.backgroundColor = selectedColor;
+        span.style.backgroundColor = selectedColor;
+    } else {
+        colorPicker.value = rgbToHex(cellColor);
     }
 }
 
-
-function generateCharacterElements(parentGrid, inputString) {
-
-    const largeBox = document.getElementById('largeBox');
-    const colorPicker = document.getElementById('colorPicker');
-
-    for (const character of inputString) {
-        const unicodeKey = character.codePointAt(0).toString(16); // Get the Unicode representation
-        const span = document.createElement('span');
-        span.textContent = character;
-        span.setAttribute('data-unicode', unicodeKey); // Add data attribute for identification
-        parentGrid.appendChild(span);
-
-        // Check if the cell was previously colored and apply the class
-        if (localStorage.getItem(unicodeKey)) {
-            span.style.backgroundColor = localStorage.getItem(unicodeKey);
+// One delegated click listener per container, resolving the cell via closest().
+// Idempotent so reused containers (e.g. the search grid) aren't double-bound.
+function attachCellDelegation(container) {
+    if (container._cellDelegated) {
+        return;
+    }
+    container._cellDelegated = true;
+    container.addEventListener('click', function (event) {
+        var span = event.target.closest('span[data-unicode]');
+        if (span && container.contains(span)) {
+            handleCellClick(span);
         }
+    });
+}
 
-        span.addEventListener('click', () => {
-            // Single-click behavior: Display the character in the large box
-            largeBox.textContent = character;
-            // Get the color from the selected cell
-            const cellColor = window.getComputedStyle(span).backgroundColor;
-            // Update the background color of the large box
-            largeBox.style.backgroundColor = cellColor;
+// Optional 1-5 heading scale (1 = largest). Out-of-range clamps; missing -> ''.
+function sizeClass(size) {
+    if (typeof size !== 'number' || isNaN(size)) {
+        return '';
+    }
+    var n = Math.round(size);
+    if (n < 1) { n = 1; }
+    if (n > 5) { n = 5; }
+    return 'cs-size-' + n;
+}
 
-            fetchCharacterInfo(character);
+var BLOCK_RENDERERS = {
+    section: function (block, container) {
+        var bodyParent;
+        // `collapsed` present => collapsible <details>; its value is only the
+        // default. Live state comes from localStorage (csCollapse:<id>).
+        if (Object.prototype.hasOwnProperty.call(block, 'collapsed')) {
+            var details = document.createElement('details');
+            var summary = document.createElement('summary');
+            summary.textContent = block.title || '';
+            var summaryClass = sizeClass(block.size);
+            if (summaryClass) { summary.classList.add(summaryClass); }
+            details.appendChild(summary);
 
-            // If in paint mode, color the cell and update acordingly
-            if (document.getElementById('toggleCheckbox').checked) {
-
-                const selectedColor = colorPicker.value;
-                // Update the color for the most recent character in localStorage
-                localStorage.setItem(unicodeKey, selectedColor);
-                // Update the background color of the large box
-                largeBox.style.backgroundColor = selectedColor;
-                // Update the color of the clicked cell
-                span.style.backgroundColor = selectedColor;
-            }
-            else {
-                // otherwise copy the clicked on cell's color to the color picker
-                colorPicker.value = rgbToHex(cellColor);
-            }
+            var storageKey = COLLAPSE_PREFIX + block.id;
+            var saved = localStorage.getItem(storageKey);
+            var collapsedNow = saved !== null ? saved === 'true' : !!block.collapsed;
+            details.open = !collapsedNow;
+            details.addEventListener('toggle', function () {
+                localStorage.setItem(storageKey, (!details.open).toString());
+            });
+            container.appendChild(details);
+            bodyParent = details;
+        } else {
+            var heading = document.createElement('div');
+            heading.className = 'cs-heading';
+            var headingClass = sizeClass(block.size);
+            if (headingClass) { heading.classList.add(headingClass); }
+            heading.textContent = block.title || '';
+            container.appendChild(heading);
+            bodyParent = container;
+        }
+        (block.blocks || []).forEach(function (child) {
+            renderBlock(child, bodyParent);
         });
+    },
+
+    grid: function (block, container) {
+        var gridDiv = document.createElement('div');
+        gridDiv.className = 'grid';
+        for (var character of (block.cells || '')) {
+            gridDiv.appendChild(makeCharCell(character));
+        }
+        attachCellDelegation(gridDiv);
+        container.appendChild(gridDiv);
+    },
+
+    text: function (block, container) {
+        var el = document.createElement('div');
+        el.className = 'cs-text';
+        var textClass = sizeClass(block.size);
+        if (textClass) { el.classList.add(textClass); }
+        var text = block.text || '';
+        if (block.interactive) {
+            // Reading flow: Han chars become live cells; \n -> <br>; everything
+            // else (punctuation, spaces) passes through as inert text.
+            el.classList.add('cs-interactive');
+            for (var ch of text) {
+                if (ch === '\n') {
+                    el.appendChild(document.createElement('br'));
+                } else if (HAN_RE.test(ch)) {
+                    el.appendChild(makeCharCell(ch));
+                } else {
+                    el.appendChild(document.createTextNode(ch));
+                }
+            }
+            attachCellDelegation(el);
+        } else {
+            // Inert prose — textContent, never innerHTML (no parser/sanitizer).
+            el.textContent = text;
+        }
+        container.appendChild(el);
+    }
+};
+
+function renderBlock(block, container) {
+    if (!block || typeof block !== 'object') {
+        return;
+    }
+    var renderer = BLOCK_RENDERERS[block.type];
+    if (!renderer) {
+        console.warn('Unknown character-set block type:', block.type);
+        return;
+    }
+    renderer(block, container);
+}
+
+function generateMacroGrid(characterSet) {
+    const macroGrid = document.getElementById('macroGrid');
+    macroGrid.innerHTML = ''; // Clear the existing grid
+    currentInputString = characterSet; // Update the global
+    if (!characterSet) {
+        return;
+    }
+    (characterSet.blocks || []).forEach(function (block) {
+        renderBlock(block, macroGrid);
+    });
+}
+
+// Used by the search grid: append bare study cells to a (reused) container,
+// wiring up delegated click handling once.
+function generateCharacterElements(parentGrid, inputString) {
+    attachCellDelegation(parentGrid);
+    for (var character of inputString) {
+        parentGrid.appendChild(makeCharCell(character));
     }
 }
 

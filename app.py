@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 import sqlite3
+import functools
 import regex
 
 from romaji import _kana_to_romaji
@@ -13,20 +14,39 @@ from hangul_roman import hangul_to_revised
 app = Flask(__name__)
 
 
-# pre-loads all the json data for the character sets
-character_sets = []
-for character_set in os.listdir('charactersets'):
-    try:
-        with open('charactersets/' + character_set, 'r', encoding='utf-8') as file:
-            character_sets.append(json.load(file))
+# ---------------------------------------------------------------------------
+# Character sets (v2 typed-block JSON documents) — lazy loaded.
+# Startup builds only a `label -> filepath` index (parsing each file solely for
+# its `label`); each document is read + parsed on demand in /get_character_set
+# (LRU-cached). The document body is opaque to the server — it is returned
+# verbatim and rendered entirely client-side. See docs/flexible_character_sets_plan.md.
+# ---------------------------------------------------------------------------
+CHARSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'charactersets')
 
-    except FileNotFoundError:
-        print(f"File not found: {character_set}")
 
-    except Exception as e:
-        print(f"Error loading JSON file: {e}")
+def _build_charset_index():
+    index = {}
+    for fname in os.listdir(CHARSET_DIR):
+        if not fname.endswith('.json'):
+            continue
+        path = os.path.join(CHARSET_DIR, fname)
+        try:
+            with open(path, 'r', encoding='utf-8') as file:
+                label = json.load(file).get('label')
+            if label:
+                index[label] = path
+        except Exception as e:
+            print(f"Error loading character set {fname}: {e}")
+    return index
 
-character_sets.sort(key=lambda x: x['label'])
+
+character_set_index = _build_charset_index()
+
+
+@functools.lru_cache(maxsize=None)
+def _load_character_set(path):
+    with open(path, 'r', encoding='utf-8') as file:
+        return json.load(file)
 
 # ---------------------------------------------------------------------------
 # SQLite database (used by character info sheet)
@@ -283,18 +303,17 @@ def process_click_on_character():
 
 @app.route('/get_character_set_names', methods=['POST'])
 def get_character_set_names():
-    character_set_names = [i['label'] for i in character_sets]
+    character_set_names = sorted(character_set_index.keys())
     return jsonify({"charSetNames": character_set_names})
 
 
 @app.route('/get_character_set', methods=['POST'])
 def get_character_set():
     char_set_name = request.form['charSet']
-    for input_string in character_sets:
-        if input_string['label'] == char_set_name:
-            return jsonify({"inputString": input_string})
-        
-    return []
+    path = character_set_index.get(char_set_name)
+    if path is None:
+        return jsonify({"inputString": None})
+    return jsonify({"inputString": _load_character_set(path)})
 
 @app.route('/get_search_results', methods=['POST'])
 def get_search_results():

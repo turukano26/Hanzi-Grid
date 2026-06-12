@@ -142,6 +142,7 @@ body {
 
 .macro-grid {
     padding-right: 20px;
+    padding-top: 1.75em;
     display: flex;
     overflow-y: auto;
     min-height: 0;
@@ -166,6 +167,75 @@ body {
     box-sizing: border-box;
     height: 50px;
     width: 50px;
+    background-color: white;
+}
+
+/* Character-set typed-block documents (v2) ------------------------------- */
+
+/* Section headings: a neutral element (not real <h1>-<h5>) so the heading
+   outline / a11y tree stays intact. Default body-weight; `size` overrides. */
+.cs-heading,
+.macro-grid summary {
+    font-weight: bold;
+    font-size: 2em;
+}
+
+/* 1 = largest ... 5 ~ body. */
+.cs-size-1 { font-size: 2.2em; font-weight: bold; }
+.cs-size-2 { font-size: 1.7em; font-weight: bold; }
+.cs-size-3 { font-size: 1.4em; font-weight: bold; }
+.cs-size-4 { font-size: 1.15em; font-weight: bold; }
+.cs-size-5 { font-size: 1em; font-weight: normal; }
+
+/* Fixed, small separation above every section — independent of the section's
+   own collapsed state, so toggling a section never shifts its own title. The
+   extra room around an *expanded* section comes from its grid's bottom margin
+   below, which simply disappears when the section is collapsed. */
+.macro-grid details,
+.macro-grid .cs-heading {
+    margin-top: 0.3em;
+}
+
+/* A shown grid reserves space below it: an expanded section is separated from
+   the next one, while a collapsed section (no grid) stays tightly packed. */
+.macro-grid .grid {
+    margin-bottom: 1em;
+}
+
+/* Space between a title and the grid it introduces (shown content only —
+   a collapsed summary adds none). */
+.macro-grid .cs-heading {
+    margin-bottom: 0.55em;
+}
+
+.macro-grid details[open] > summary {
+    margin-bottom: 0.55em;
+}
+
+.macro-grid summary {
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+/* Plain prose: preserve authored newlines/whitespace, no grid. */
+.cs-text {
+    white-space: pre-wrap;
+    margin: 0.4em 0;
+    line-height: 1.5;
+}
+
+/* Reading flow: inline colourable Han cells amid inert punctuation. */
+.cs-interactive {
+    font-size: 24px;
+    line-height: 2;
+}
+
+.cs-interactive span[data-unicode] {
+    display: inline-block;
+    padding: 2px 4px;
+    margin: 1px;
+    text-align: center;
+    cursor: pointer;
     background-color: white;
 }
 

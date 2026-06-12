@@ -430,33 +430,10 @@ CREATE TABLE character_components (
 
 
 -- ============================================================
--- 6. CHARACTER SETS (replaces charactersets/*.json)
+-- 6. INDEXES
 -- ============================================================
-
--- Recursive adjacency list — any node can be a root (parent_id IS NULL)
--- or a child of another node, allowing arbitrary nesting depth.
--- user_id NULL = built-in set; non-NULL = user-uploaded set.
--- description is stored as Markdown and rendered on the frontend.
-CREATE TABLE character_set_nodes (
-    id          INTEGER PRIMARY KEY,
-    parent_id   INTEGER REFERENCES character_set_nodes(id),
-    name        TEXT    NOT NULL,
-    description TEXT,                       -- Markdown
-    sort_order  INTEGER NOT NULL DEFAULT 0,
-    user_id     INTEGER                     -- NULL = built-in
-);
-
-CREATE TABLE character_set_members (
-    node_id     INTEGER NOT NULL REFERENCES character_set_nodes(id),
-    codepoint   INTEGER NOT NULL REFERENCES characters(codepoint),
-    sort_order  INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (node_id, codepoint)
-);
-
-
--- ============================================================
--- 7. INDEXES
--- ============================================================
+-- (Character sets are stored as v2 JSON documents in charactersets/, not in
+--  the DB — see docs/flexible_character_sets_plan.md.)
 
 -- Character attributes
 CREATE INDEX idx_char_attrs_codepoint ON character_attributes(codepoint);
@@ -493,14 +470,9 @@ CREATE INDEX idx_glyphs_source            ON character_glyphs(source_id);
 CREATE INDEX idx_variants_source          ON character_variants(source_id);
 CREATE INDEX idx_components_source        ON character_components(source_id);
 
--- Character sets
-CREATE INDEX idx_charset_members_char     ON character_set_members(codepoint);
-CREATE INDEX idx_charset_nodes_parent     ON character_set_nodes(parent_id);
-CREATE INDEX idx_charset_nodes_user       ON character_set_nodes(user_id);
-
 
 -- ============================================================
--- 8. CONVENIENCE VIEWS
+-- 7. CONVENIENCE VIEWS
 -- ============================================================
 
 -- Flat view: character → family → language → reading → transcription → definitions
