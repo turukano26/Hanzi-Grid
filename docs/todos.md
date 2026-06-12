@@ -36,3 +36,5 @@
 - look at characters_sets.json
 - character set importers?
 - character sets can either be the boxes, or just be regular text
+
+-maybe move unihan defs into their own language section

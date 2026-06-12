@@ -2,6 +2,98 @@
 
 var currentInputString;
 
+// ---- Script variants (Traditional / Simplified / Japanese) ----------------
+// A grid's `cells` string may contain variant groups like "(東TJ东S)": one
+// glyph per group, each tagged with the scripts (T/S/J) it belongs to. Bare
+// characters are identical across all three. `currentScript` selects which
+// glyph is displayed; every cell still records all of its variants' codepoints
+// (data-variants) so search can match a form that isn't currently shown.
+var SCRIPT_KEYS = ['T', 'S', 'J'];
+var SCRIPT_FALLBACK = ['T', 'J', 'S']; // tried in order when the selection is absent
+var currentScript = localStorage.getItem('csScript') || 'T';
+
+// Split a cells string into tokens: a plain character string, or a variants
+// object {T,S,J} (absent scripts omitted). Characters outside any group pass
+// through unchanged, so existing sets parse exactly as before.
+function parseCells(str) {
+    var tokens = [];
+    var i = 0;
+    while (i < str.length) {
+        if (str[i] === '(') {
+            var end = str.indexOf(')', i);
+            if (end === -1) { tokens.push('('); i++; continue; } // malformed: literal '('
+            tokens.push(parseVariantGroup(str.slice(i + 1, end)));
+            i = end + 1;
+        } else {
+            var glyph = String.fromCodePoint(str.codePointAt(i));
+            tokens.push(glyph);
+            i += glyph.length; // step over astral surrogate pairs as one unit
+        }
+    }
+    return tokens;
+}
+
+// "東TJ东S" -> {T:'東', J:'東', S:'东'}. Each entry is one glyph followed by its
+// 1-3 script tags; an untagged glyph contributes nothing.
+function parseVariantGroup(inner) {
+    var variants = {};
+    var i = 0;
+    while (i < inner.length) {
+        var glyph = String.fromCodePoint(inner.codePointAt(i));
+        i += glyph.length;
+        while (i < inner.length && 'TSJ'.indexOf(inner[i]) !== -1) {
+            variants[inner[i]] = glyph;
+            i++;
+        }
+    }
+    return variants;
+}
+
+// The glyph to display for the current script, with fallback exact -> T -> J -> S.
+function glyphForToken(token) {
+    if (typeof token === 'string') { return token; }
+    if (token[currentScript]) { return token[currentScript]; }
+    for (var k = 0; k < SCRIPT_FALLBACK.length; k++) {
+        if (token[SCRIPT_FALLBACK[k]]) { return token[SCRIPT_FALLBACK[k]]; }
+    }
+    return '';
+}
+
+// Unique hex codepoints across every variant (or the single bare char).
+function variantKeys(token) {
+    var glyphs = typeof token === 'string'
+        ? [token]
+        : SCRIPT_KEYS.map(function (k) { return token[k]; }).filter(Boolean);
+    var keys = [];
+    glyphs.forEach(function (g) {
+        var key = g.codePointAt(0).toString(16);
+        if (keys.indexOf(key) === -1) { keys.push(key); }
+    });
+    return keys;
+}
+
+// Reflect `script` in state + the toggle UI; optionally persist the choice.
+function applyScript(script, persist) {
+    currentScript = script;
+    if (persist) { localStorage.setItem('csScript', script); }
+    var btns = document.querySelectorAll('#scriptToggle .script-btn');
+    btns.forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-script') === script);
+    });
+}
+
+function initScriptToggle() {
+    var toggle = document.getElementById('scriptToggle');
+    if (!toggle) { return; }
+    toggle.addEventListener('click', function (e) {
+        var btn = e.target.closest('.script-btn');
+        if (!btn) { return; }
+        applyScript(btn.getAttribute('data-script'), true);
+        generateMacroGrid(currentInputString); // re-render with the new forms
+    });
+    applyScript(currentScript, false); // reflect the initial state
+}
+
 function fetchCharacterSetNames() {
     // Make an AJAX request to the Flask endpoint
     var xhr = new XMLHttpRequest();
@@ -537,11 +629,16 @@ var HAN_RE = /\p{Script=Han}/u;
 
 // Build one <span data-unicode> study cell, applying any saved colour. No
 // per-cell listener — click handling is delegated at the container level.
-function makeCharCell(character) {
-    var unicodeKey = character.codePointAt(0).toString(16);
+// `token` is a plain character (search grid, bare cells) or a variants object
+// {T,S,J}; the displayed glyph follows the current script, while data-variants
+// records every form's codepoint so search can match a hidden variant.
+function makeCharCell(token) {
+    var glyph = glyphForToken(token);
+    var unicodeKey = glyph.codePointAt(0).toString(16);
     var span = document.createElement('span');
-    span.textContent = character;
+    span.textContent = glyph;
     span.setAttribute('data-unicode', unicodeKey);
+    span.setAttribute('data-variants', variantKeys(token).join(' '));
     var saved = localStorage.getItem(unicodeKey);
     if (saved) {
         span.style.backgroundColor = saved;
@@ -639,9 +736,9 @@ var BLOCK_RENDERERS = {
     grid: function (block, container) {
         var gridDiv = document.createElement('div');
         gridDiv.className = 'grid';
-        for (var character of (block.cells || '')) {
-            gridDiv.appendChild(makeCharCell(character));
-        }
+        parseCells(block.cells || '').forEach(function (token) {
+            gridDiv.appendChild(makeCharCell(token));
+        });
         attachCellDelegation(gridDiv);
         container.appendChild(gridDiv);
     },
@@ -692,6 +789,10 @@ function generateMacroGrid(characterSet) {
     currentInputString = characterSet; // Update the global
     if (!characterSet) {
         return;
+    }
+    // Honour a set's preferred script, but only until the user picks one.
+    if (!localStorage.getItem('csScript') && characterSet.defaultScript) {
+        applyScript(characterSet.defaultScript, false);
     }
     (characterSet.blocks || []).forEach(function (block) {
         renderBlock(block, macroGrid);
@@ -874,7 +975,10 @@ function highlightSearchResults(searchResults) {
     for (const character of searchResults) {
 
         var currentUnicodeKey = character.codePointAt(0).toString(16);
-        const clickedCell = document.querySelector(`span[data-unicode="${currentUnicodeKey}"]`);
+        // Match any variant of a cell, so a hit on a hidden form (e.g. 东 while
+        // the grid shows 東) still highlights it. ~= matches one space-separated
+        // word within data-variants.
+        const clickedCell = document.querySelector(`span[data-variants~="${currentUnicodeKey}"]`);
         if (clickedCell) {
             clickedCell.style.border = '4px solid #000';
             clickedCell.style.padding = '7px';
@@ -1058,6 +1162,7 @@ var colors = [
 ];
 
 // Call the functions to create UI elements when the page loads
+initScriptToggle();
 fetchCharacterSetNames();
 createColorButtons();
 createMenu();

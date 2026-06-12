@@ -445,6 +445,32 @@ body {
     padding: 5px;
 }
 
+.script-toggle {
+    display: inline-flex;
+    border: 1px solid #999;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.script-btn {
+    padding: 4px 10px;
+    border: none;
+    border-left: 1px solid #999;
+    background: #f2f2f2;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.script-btn:first-child {
+    border-left: none;
+}
+
+.script-btn.active {
+    background: #333;
+    color: #fff;
+}
+
 .popup-menu-btn {
     padding-top: 5px;
     padding-bottom: 5px;
