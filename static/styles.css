@@ -247,6 +247,25 @@ body.colorings-hidden span[data-unicode] {
     background-color: white;
 }
 
+/* Han characters made clickable inside non-interactive character-set text.
+   Intentionally no padding/margin/background so the surrounding text keeps its
+   exact spacing and the character is never coloured — only a transient hover. */
+.macro-grid .cjk-clickable {
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 90ms ease;
+}
+
+.macro-grid .cjk-clickable:hover,
+.macro-grid .cjk-clickable:focus {
+    background-color: rgba(125, 159, 211, 0.38);
+    outline: none;
+}
+
+.macro-grid .cjk-clickable:focus-visible {
+    box-shadow: 0 0 0 2px rgba(125, 159, 211, 0.9);
+}
+
 .search-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));

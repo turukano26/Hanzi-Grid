@@ -13,7 +13,7 @@
       "title": "1 · 靜夜思 - Quiet Night Thoughts",
       "size": 2,
       "blocks": [
-        { "type": "text", "interactive": true, "text": "李白 Lǐ Bái · 唐 Tang · c. 726 CE", "size": 4 },
+        { "type": "text", "text": "李白 Lǐ Bái · 唐 Tang · c. 726 CE", "size": 3 },
         { "type": "text", "interactive": true, "text": "床前明月光，\n疑是地上霜。\n舉頭望明月，\n低頭思故鄉。"},
         { "type": "text", "text": "\n"}
       ]

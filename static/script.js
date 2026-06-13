@@ -470,15 +470,20 @@ function updateInfoBoxFadeState() {
 // units. Kana and Hangul are deliberately excluded: they aren't grid characters.
 var INFO_BOX_CJK_REGEX = /[\p{Script=Han}]/gu;
 
-function wrapCjkCharactersInInfoBox(infoBox) {
-    if (!infoBox) {
+// Walk a subtree and wrap each Han character in its text nodes in a clickable
+// span (class `className`), skipping any text already inside `skipSelector`.
+// Used both for the info box and for non-interactive character-set text, so a
+// character anywhere can be clicked to view it. The spans carry no background
+// and no padding/margin, so they never colour or reflow the surrounding text.
+function wrapClickableCjk(root, className, skipSelector) {
+    if (!root) {
         return;
     }
     var textNodes = [];
-    var walker = document.createTreeWalker(infoBox, NodeFilter.SHOW_TEXT, null);
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
     var node;
     while ((node = walker.nextNode())) {
-        if (node.parentElement && node.parentElement.closest('.info-box-cjk')) {
+        if (node.parentElement && node.parentElement.closest(skipSelector)) {
             continue;
         }
         textNodes.push(node);
@@ -508,7 +513,7 @@ function wrapCjkCharactersInInfoBox(infoBox) {
                 fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)));
             }
             var span = document.createElement('span');
-            span.className = 'info-box-cjk';
+            span.className = className;
             span.textContent = ch;
             span.setAttribute('role', 'button');
             span.setAttribute('tabindex', '0');
@@ -521,6 +526,19 @@ function wrapCjkCharactersInInfoBox(infoBox) {
         }
         parent.replaceChild(fragment, textNode);
     }
+}
+
+function wrapCjkCharactersInInfoBox(infoBox) {
+    wrapClickableCjk(infoBox, 'info-box-cjk', '.info-box-cjk');
+}
+
+// Make Han characters in non-interactive character-set text (prose, headings)
+// clickable. Study cells ([data-unicode]) already handle their own clicks and
+// keep their colouring; <summary> is skipped so clicking a title still toggles
+// its section.
+function wrapMacroGridCjk() {
+    var macroGrid = document.getElementById('macroGrid');
+    wrapClickableCjk(macroGrid, 'cjk-clickable', '[data-unicode], .cjk-clickable, summary');
 }
 
 function activateCharacterFromInfoBox(character) {
@@ -608,6 +626,33 @@ function initializeInfoBoxInteractions() {
     });
 
     updateInfoBoxFadeState();
+}
+
+// Delegated handling for clickable Han characters in non-interactive
+// character-set text. Attached once to the persistent #macroGrid element, so it
+// survives every re-render. Mirrors the info box: click/Enter/Space activates
+// the character (large display box + info sheet) without colouring it.
+function initializeMacroGridCjkInteractions() {
+    const macroGrid = document.getElementById('macroGrid');
+    if (!macroGrid) {
+        return;
+    }
+    macroGrid.addEventListener('click', function (event) {
+        var target = event.target.closest('.cjk-clickable');
+        if (!target || !macroGrid.contains(target)) {
+            return;
+        }
+        event.preventDefault();
+        activateCharacterFromInfoBox(target.textContent);
+    });
+    macroGrid.addEventListener('keydown', function (event) {
+        if (event.target.classList && event.target.classList.contains('cjk-clickable')) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                activateCharacterFromInfoBox(event.target.textContent);
+            }
+        }
+    });
 }
 
 
@@ -811,6 +856,7 @@ function generateMacroGrid(characterSet) {
     (characterSet.blocks || []).forEach(function (block) {
         renderBlock(block, macroGrid);
     });
+    wrapMacroGridCjk();
 }
 
 // Used by the search grid: append bare study cells to a (reused) container,
@@ -1208,6 +1254,7 @@ initializeSearchBar();
 // Load the DB-derived menu tree + enabled options first, then seed the info column.
 fetchInfoOptions(intializeInfoColumn);
 initializeInfoBoxInteractions();
+initializeMacroGridCjkInteractions();
 initializeColumnResizers();
 
 
