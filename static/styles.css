@@ -299,11 +299,11 @@ body.colorings-hidden span[data-unicode] {
     margin-right: 10px;
 }
 
-/* Active-state highlight for the paint-mode / hide-colors toggle buttons. */
+/* Active-state highlight for the paint-mode / hide-colors toggle buttons,
+   matching the selected state of the 繁/简/日 script toggle. */
 #togglePaintBtn[aria-pressed="true"],
 #toggleColoringsBtn[aria-pressed="true"] {
-    background-color: #7d9fd3;
-    border-color: #5f82b8;
+    background: #333;
     color: #fff;
 }
 
