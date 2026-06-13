@@ -127,7 +127,7 @@
       "blocks": [
         { "type": "text", "text": "Measuring the world.", "size": 5 },
         { "type": "section", "id": "size-extent", "title": "Size & extent", "size": 3, "blocks": [
-          { "type": "grid", "cells": "小中大巨太高(長TJ长S)短(寬T宽S寛J)(廣T广S広J)" }
+          { "type": "grid", "cells": "小中大巨太高(長TJ长S)短(寬T宽S寛J)(細TJ细S)(廣T广S広J)" }
         ] },
         { "type": "section", "id": "size-distance", "title": "Distance", "size": 3, "blocks": [
           { "type": "grid", "cells": "(遠TJ远S)近" }

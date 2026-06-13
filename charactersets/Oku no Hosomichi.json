@@ -1,0 +1,1261 @@
+{
+  "version": 2,
+  "label": "Oku no Hosomichi (Bashō)",
+  "blocks": [
+    {
+      "type": "text",
+      "text": "Every hokku Matsuo Bashō (松尾芭蕉) composed in Oku no Hosomichi (奥の細道, “The Narrow Road to the Deep North”, 1689) — fifty haiku in the order of the journey, from his departure at Fukagawa (深川) to its end at Ōgaki (大垣).\nClick any character in a verse to see its readings and meaning. The place name, season word (季語), and an English rendering accompany each haiku.",
+      "size": 4
+    },
+    {
+      "type": "section",
+      "id": "h01-fukagawa",
+      "title": "1 · 深川 Fukagawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 旅立ち — leaving Edo · 季語 雛（春）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "草の戸も\n住替る代ぞ\n雛の家"
+        },
+        {
+          "type": "text",
+          "text": "“Even this grass-thatched hut / will know a change of dwellers— / a house of dolls.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h02-senju",
+      "title": "2 · 千住 Senju",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 別離 — the parting · 季語 行春（春）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "行春や\n鳥啼魚の\n目は泪"
+        },
+        {
+          "type": "text",
+          "text": "“Spring is passing— / the birds cry, and in the eyes / of the fish are tears.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h03-nikko",
+      "title": "3 · 日光 Nikkō",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 東照宮 — the shrine · 季語 若葉（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "あらたふと\n青葉若葉の\n日の光"
+        },
+        {
+          "type": "text",
+          "text": "“How holy it is!— / over green leaves and young leaves, / the light of the sun.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h04-urami",
+      "title": "4 · 日光 Nikkō",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 裏見の滝 — Urami Falls · 季語 夏の初（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "暫時は\n滝に籠るや\n夏の初"
+        },
+        {
+          "type": "text",
+          "text": "“For a little while / I shut myself behind the falls— / the start of summer.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h05-kurobane",
+      "title": "5 · 黒羽 Kurobane",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 光明寺行者堂 — the ascetics' hall · 季語 夏山（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "夏山に\n足駄を拝む\n首途哉"
+        },
+        {
+          "type": "text",
+          "text": "“Toward the summer hills / I bow before En-no-Gyōja's clogs— / setting out at last.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h06-unganji",
+      "title": "6 · 雲巌寺 Unganji",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 仏頂和尚の旧庵 — Butchō's hermitage · 季語 夏木立（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "木啄も\n庵は破らず\n夏木立"
+        },
+        {
+          "type": "text",
+          "text": "“Even the woodpeckers / leave this hermitage unharmed— / a grove in summer.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h07-nasu",
+      "title": "7 · 那須 Nasu",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 殺生石への道 — the moor · 季語 ほととぎす（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "野を横に\n馬牽向よ\nほとゝぎす"
+        },
+        {
+          "type": "text",
+          "text": "“Across the open field / turn the horse's head this way!— / a cuckoo is calling.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h08-ashino",
+      "title": "8 · 蘆野 Ashino",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 遊行柳 — the Yūgyō willow · 季語 田植（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "田一枚\n植て立去る\n柳かな"
+        },
+        {
+          "type": "text",
+          "text": "“A whole rice paddy / planted, and I take my leave— / the willow tree.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h09-sukagawa",
+      "title": "9 · 須賀川 Sukagawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 等窮宅 — at Tōkyū's · 季語 田植歌（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "風流の\n初やおくの\n田植歌"
+        },
+        {
+          "type": "text",
+          "text": "“My first taste of elegance / in the far north of the land— / a rice-planting song.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h10-sukagawa-kuri",
+      "title": "10 · 須賀川 Sukagawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 可伸庵の栗 — the chestnut hermit · 季語 栗の花（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "世の人の\n見付ぬ花や\n軒の栗"
+        },
+        {
+          "type": "text",
+          "text": "“A blossom unnoticed / by the people of the world— / chestnut by the eaves.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h11-shinobu",
+      "title": "11 · 信夫 Shinobu",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 文知摺石 — the Mojizuri stone · 季語 早苗（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "早苗とる\n手もとや昔\nしのぶ摺"
+        },
+        {
+          "type": "text",
+          "text": "“Hands plucking rice seedlings— / they bring back the olden days / of Shinobu cloth-prints.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h12-iizaka",
+      "title": "12 · 飯塚 Iizaka",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 佐藤庄司旧跡 — the Satō warriors · 季語 帋幟（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "笈も太刀も\n五月にかざれ\n帋幟"
+        },
+        {
+          "type": "text",
+          "text": "“Pannier and sword too— / display them this Fifth Month, / with the paper banners.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h13-kasajima",
+      "title": "13 · 笠島 Kasajima",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 藤中将実方の墓 — Sanekata's grave · 季語 五月（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "笠島は\nいづこ五月の\nぬかり道"
+        },
+        {
+          "type": "text",
+          "text": "“Where is Kasajima?— / lost somewhere on this muddy road / of the rainy month.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h14-takekuma",
+      "title": "14 · 武隈 Takekuma",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 武隈の松 — the twin pine · 季語 桜・松（春夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "桜より\n松は二木を\n三月越し"
+        },
+        {
+          "type": "text",
+          "text": "“Since the cherry blossoms, / three months to the twin-trunked pine— / a long road indeed.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h15-sendai",
+      "title": "15 · 仙台 Sendai",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 宮城野 — Miyagino · 季語 あやめ草（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "あやめ草\n足に結ばん\n草鞋の緒"
+        },
+        {
+          "type": "text",
+          "text": "“Sweet-flag iris blades / I will bind upon my feet— / as straw-sandal cords.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h16-hiraizumi",
+      "title": "16 · 平泉 Hiraizumi",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 高館 — Yoshitsune's fort · 季語 夏草（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "夏草や\n兵どもが\n夢の跡"
+        },
+        {
+          "type": "text",
+          "text": "“Summer grasses— / all that now remains / of the warriors' dreams.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h17-hikarido",
+      "title": "17 · 平泉 Hiraizumi",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 金色堂 — the Golden Hall · 季語 五月雨（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "五月雨の\n降残してや\n光堂"
+        },
+        {
+          "type": "text",
+          "text": "“Have the summer rains / spared this one alone?— / the Hall of Light.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h18-shitomae",
+      "title": "18 · 尿前の関 Shitomae",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 国境の番所 — the barrier · 季語 蚤（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "蚤虱\n馬の尿する\n枕もと"
+        },
+        {
+          "type": "text",
+          "text": "“Fleas and lice— / and a horse pissing / right by my pillow.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h19-obanazawa",
+      "title": "19 · 尾花沢 Obanazawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 清風宅 — at Seifū's · 季語 涼しさ（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "涼しさを\n我宿にして\nねまる也"
+        },
+        {
+          "type": "text",
+          "text": "“Making this coolness / into a dwelling of my own, / I settle right in.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h20-obanazawa-hiki",
+      "title": "20 · 尾花沢 Obanazawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 養蚕の里 — the silkworm village · 季語 蟾（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "這出よ\n飼屋が下の\n蟾の声"
+        },
+        {
+          "type": "text",
+          "text": "“Come crawling out!— / from beneath the silkworm shed, / the voice of a toad.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h21-obanazawa-beni",
+      "title": "21 · 尾花沢 Obanazawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 紅花 — the safflower · 季語 紅粉の花（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "眉掃を\n俤にして\n紅粉の花"
+        },
+        {
+          "type": "text",
+          "text": "“Calling to mind / the shape of an eyebrow-brush— / the safflower blooms.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h22-yamadera",
+      "title": "22 · 立石寺 Risshakuji",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 山寺 — Yamadera · 季語 蝉の声（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "閑さや\n岩にしみ入\n蝉の声"
+        },
+        {
+          "type": "text",
+          "text": "“Such stillness— / sinking into the rocks, / the cry of the cicadas.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h23-mogamigawa",
+      "title": "23 · 最上川 Mogami River",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 舟下り — the river run · 季語 五月雨（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "五月雨を\nあつめて早し\n最上川"
+        },
+        {
+          "type": "text",
+          "text": "“Gathering up / all the summer rains, and swift— / the Mogami River.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h24-minamidani",
+      "title": "24 · 羽黒山 Haguro-san",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 南谷 — the South Valley · 季語 南薫（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "有難や\n雪をかをらす\n南谷"
+        },
+        {
+          "type": "text",
+          "text": "“How blessed it is!— / it makes the very snow smell sweet, / this South Valley.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h25-haguro",
+      "title": "25 · 羽黒山 Haguro-san",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 出羽三山 — the Three Mountains · 季語 涼しさ（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "涼しさや\nほの三日月の\n羽黒山"
+        },
+        {
+          "type": "text",
+          "text": "“Such coolness— / a faint crescent moon above / Mount Haguro.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h26-gassan",
+      "title": "26 · 月山 Gassan",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 月山登拝 — the Moon Mountain · 季語 雲の峰（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "雲の峰\n幾つ崩て\n月の山"
+        },
+        {
+          "type": "text",
+          "text": "“How many peaks of cloud / have crumbled and dissolved away— / into the Moon Mountain.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h27-yudono",
+      "title": "27 · 湯殿山 Yudono-san",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 語るを禁ず — the unspoken shrine · 季語 湯殿詣（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "語られぬ\n湯殿にぬらす\n袂かな"
+        },
+        {
+          "type": "text",
+          "text": "“Of Yudono none may speak— / and so I only wet / my sleeves with tears.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h28-atsumi",
+      "title": "28 · 鶴岡 Tsuruoka",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 温海山と吹浦 — sea and mountain · 季語 夕涼み（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "あつみ山や\n吹浦かけて\n夕涼み"
+        },
+        {
+          "type": "text",
+          "text": "“From Mount Atsumi / all the way to Fukuura— / the cool of evening.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h29-sakata",
+      "title": "29 · 酒田 Sakata",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 河口の港 — the river mouth · 季語 暑き日（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "暑き日を\n海にいれたり\n最上川"
+        },
+        {
+          "type": "text",
+          "text": "“It has poured the blazing sun / down into the sea— / the Mogami River.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h30-kisakata",
+      "title": "30 · 象潟 Kisakata",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 雨の潟 — the lagoon · 季語 合歓の花（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "象潟や\n雨に西施が\n合歓の花"
+        },
+        {
+          "type": "text",
+          "text": "“Kisakata— / Xishi in the rain, asleep: / the silk-tree blossoms.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h31-shiogoshi",
+      "title": "31 · 象潟 Kisakata",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 汐越 — the tideflats · 季語 涼し（夏）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "汐越や\n鶴脛ぬれて\n海涼し"
+        },
+        {
+          "type": "text",
+          "text": "“At Shiogoshi / the cranes wet their slender legs— / cool over the sea.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h32-echigo",
+      "title": "32 · 越後 Echigo",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 七夕の前夜 — eve of Tanabata · 季語 文月（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "文月や\n六日も常の\n夜には似ず"
+        },
+        {
+          "type": "text",
+          "text": "“The Seventh Month— / even its sixth night is unlike / the ordinary nights.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h33-izumozaki",
+      "title": "33 · 出雲崎 Izumozaki",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 佐渡を望む — facing Sado · 季語 天河（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "荒海や\n佐渡によこたふ\n天河"
+        },
+        {
+          "type": "text",
+          "text": "“A wild and stormy sea— / and stretching out toward Sado, / the River of Heaven.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h34-ichiburi",
+      "title": "34 · 市振 Ichiburi",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 遊女との宿 — the courtesans' inn · 季語 萩（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "一家に\n遊女もねたり\n萩と月"
+        },
+        {
+          "type": "text",
+          "text": "“Beneath one roof / even courtesans lay asleep— / bush clover and moon.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h35-nago",
+      "title": "35 · 那古 Nago",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 有磯海 — the rugged shore · 季語 早稲（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "早稲の香や\n分入右は\n有磯海"
+        },
+        {
+          "type": "text",
+          "text": "“The scent of early rice— / pushing through, off to my right / the Ariso Sea.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h36-kanazawa-issho",
+      "title": "36 · 金沢 Kanazawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 一笑の追悼 — mourning Isshō · 季語 秋の風（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "塚も動け\n我泣声は\n秋の風"
+        },
+        {
+          "type": "text",
+          "text": "“Tremble, O grave-mound!— / the sound of my own weeping / is the autumn wind.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h37-kanazawa-uri",
+      "title": "37 · 金沢 Kanazawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 草庵の会 — a gathering · 季語 秋涼し（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "秋涼し\n手毎にむけや\n瓜茄子"
+        },
+        {
+          "type": "text",
+          "text": "“Cool of autumn— / let every hand peel its own / melon and eggplant.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h38-kanazawa-aka",
+      "title": "38 · 金沢 Kanazawa",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 小松への道 — the road on · 季語 秋の風（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "あかあかと\n日は難面も\nあきの風"
+        },
+        {
+          "type": "text",
+          "text": "“Red and burning red / the sun shines on, pitiless— / yet the wind is autumn's.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h39-komatsu",
+      "title": "39 · 小松 Komatsu",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 小松の地名 — the town's name · 季語 萩すすき（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "しほらしき\n名や小松吹\n萩すゝき"
+        },
+        {
+          "type": "text",
+          "text": "“What a charming name— / 'Little Pine,' where the wind sways / bush clover and plume grass.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h40-tada",
+      "title": "40 · 多太神社 Tada Shrine",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 実盛の甲 — Sanemori's helmet · 季語 きりぎりす（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "むざんやな\n甲の下の\nきりぎりす"
+        },
+        {
+          "type": "text",
+          "text": "“How pitiful it is!— / from beneath the warrior's helmet / a cricket is chirping.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h41-natadera",
+      "title": "41 · 那谷寺 Natadera",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 石山の奇岩 — the white rocks · 季語 秋の風（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "石山の\n石より白し\n秋の風"
+        },
+        {
+          "type": "text",
+          "text": "“Whiter even / than the stones of Stone Mountain— / the autumn wind.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h42-yamanaka",
+      "title": "42 · 山中温泉 Yamanaka Onsen",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 霊泉 — the hot spring · 季語 菊（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "山中や\n菊はたをらぬ\n湯の匂"
+        },
+        {
+          "type": "text",
+          "text": "“Here at Yamanaka / no need to pluck chrysanthemums— / the fragrance of the springs.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h43-yamanaka-sora",
+      "title": "43 · 山中温泉 Yamanaka Onsen",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 曾良との別れ — parting with Sora · 季語 露（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "今日よりや\n書付消さん\n笠の露"
+        },
+        {
+          "type": "text",
+          "text": "“From this day onward / the writing shall be wiped away— / dew upon my hat.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h44-zenshoji",
+      "title": "44 · 全昌寺 Zenshōji",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 宿坊を発つ — leaving the temple · 季語 柳散る（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "庭掃て\n出ばや寺に\n散柳"
+        },
+        {
+          "type": "text",
+          "text": "“I'll sweep the garden / before I leave the temple— / falling willow leaves.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h45-tenryuji",
+      "title": "45 · 天龍寺 Tenryūji",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 北枝との別れ — parting with Hokushi · 季語 扇（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "物書て\n扇引さく\n余波哉"
+        },
+        {
+          "type": "text",
+          "text": "“Writing a verse on it, / then tearing the fan in two— / the ache of parting.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h46-kehi",
+      "title": "46 · 敦賀 Tsuruga",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 気比神宮 — Kehi Shrine · 季語 月（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "月清し\n遊行のもてる\n砂の上"
+        },
+        {
+          "type": "text",
+          "text": "“How clear the moon / upon the sand the Pilgrim Saint / once carried to this place.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h47-tsuruga",
+      "title": "47 · 敦賀 Tsuruga",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 仲秋の名月 — the harvest moon · 季語 名月（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "名月や\n北国日和\n定なき"
+        },
+        {
+          "type": "text",
+          "text": "“The harvest moon— / but in the northern provinces / the weather will not hold.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h48-irohama",
+      "title": "48 · 種の浜 Iro-no-hama",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · 侘しき浜辺 — the lonely beach · 季語 秋（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "寂しさや\n須磨にかちたる\n浜の秋"
+        },
+        {
+          "type": "text",
+          "text": "“A loneliness / surpassing even Suma's— / autumn on this shore.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h49-irohama-kai",
+      "title": "49 · 種の浜 Iro-no-hama",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · ますほの小貝 — the little shells · 季語 萩（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "波の間や\n小貝にまじる\n萩の塵"
+        },
+        {
+          "type": "text",
+          "text": "“Between the waves— / mingled in with tiny shells, / dust of bush-clover bloom.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "h50-ogaki",
+      "title": "50 · 大垣 Ōgaki",
+      "size": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "松尾芭蕉 Matsuo Bashō · むすびの地 — journey's end · 季語 行く秋（秋）"
+        },
+        {
+          "type": "text",
+          "interactive": true,
+          "text": "蛤の\nふたみにわかれ\n行秋ぞ"
+        },
+        {
+          "type": "text",
+          "text": "“Like a clam its shell, / I am torn away toward Futami— / autumn departing.”"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        }
+      ]
+    }
+  ]
+}

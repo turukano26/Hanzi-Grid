@@ -23,6 +23,8 @@
 
 - how does vietnamese's different IPA transcriptions and 1 national script work?
 
+- add simp/trad/jap switching for interactive sections too, plus regular text sections
+
 ## colorings
 
 - fix saving character colorings
@@ -62,3 +64,5 @@ add back pronouns?
         ] }
       ]
     },
+
+add special japanese rendering,has a toggle of furigana and romaji,  makes kanji stand out.

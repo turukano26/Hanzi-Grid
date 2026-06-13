@@ -31,5 +31,7 @@
 - HERITAGE Hanja NLP toolkit
 - bekker/hanja-rs
 - hanzicraft
+- CUHK 漢語多功能字庫 / chifreq
+- jun da
 
 Also, check out all already included datasets for information that is discarded / unsused
