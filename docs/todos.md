@@ -38,3 +38,27 @@
 - character sets can either be the boxes, or just be regular text
 
 -maybe move unihan defs into their own language section
+
+- possible to add to Foundations: 画开井元也工士车爪打用動公文引计认甘世史囚永发存岁回吃同 伞次字安纪布平声余这朋周波品美洲区历止乐店识步爱
+
+add back pronouns?
+{
+      "type": "section",
+      "id": "pronouns",
+      "title": "Pronouns",
+      "blocks": [
+        { "type": "text", "text": "Words for I, you, and them.", "size": 5 },
+        { "type": "section", "id": "pronouns-first", "title": "First person (I)", "size": 3, "blocks": [
+          { "type": "grid", "cells": "私我僕俺" }
+        ] },
+        { "type": "section", "id": "pronouns-second", "title": "Second person (you)", "size": 3, "blocks": [
+          { "type": "grid", "cells": "君你您" }
+        ] },
+        { "type": "section", "id": "pronouns-third", "title": "Third person", "size": 3, "blocks": [
+          { "type": "grid", "cells": "他她它" }
+        ] },
+        { "type": "section", "id": "pronouns-plural", "title": "Plural marker", "size": 3, "blocks": [
+          { "type": "grid", "cells": "(們TJ们S)" }
+        ] }
+      ]
+    },
