@@ -120,18 +120,26 @@ function fetchCharacterSetNames() {
                 inputStringsDropdown.appendChild(option);
             });
 
-            inputStringsDropdown.selectedIndex = 0;
+            // Pick the initial set: the user's last choice if still present,
+            // otherwise "Foundations" on a first-ever visit, otherwise the
+            // first available set.
+            const savedSet = localStorage.getItem('csSelectedSet');
+            let initialIndex = inputStrings.indexOf(savedSet);
+            if (initialIndex < 0) { initialIndex = inputStrings.indexOf('Foundations'); }
+            if (initialIndex < 0) { initialIndex = 0; }
+            inputStringsDropdown.selectedIndex = initialIndex;
 
             // Event listener to handle input string changes
             inputStringsDropdown.addEventListener('change', handleInputChange);
             function handleInputChange() {
                 const selectedIndex = inputStringsDropdown.value;
                 const selectedInputString = inputStrings[selectedIndex];
+                localStorage.setItem('csSelectedSet', selectedInputString);
                 fetchCharacterSet(selectedInputString);
             }
 
-            // Initialize with the first input string
-            fetchCharacterSet(inputStrings[0]);
+            // Initialize with the chosen set
+            fetchCharacterSet(inputStrings[initialIndex]);
         }
     };
     xhr.send('simptrad=0');
