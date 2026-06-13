@@ -125,7 +125,9 @@ body {
 }
 
 .charsetmenu {
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .grid-column {
@@ -278,6 +280,19 @@ body.colorings-hidden span[data-unicode] {
     margin-right: 10px;
 }
 
+/* Active-state highlight for the paint-mode / hide-colors toggle buttons. */
+#togglePaintBtn[aria-pressed="true"],
+#toggleColoringsBtn[aria-pressed="true"] {
+    background-color: #7d9fd3;
+    border-color: #5f82b8;
+    color: #fff;
+}
+
+/* Extra gap before the final Menu button (adds to the 10px container margin). */
+#open-popup-menu-btn {
+    margin-left: 34px;
+}
+
 
 body {
     cursor: default;
@@ -404,6 +419,7 @@ body {
 
 .top-menu {
     padding: 10px;
+    padding-top: 15px;
     background-color: #e2e2e2;
 }
 
@@ -451,11 +467,12 @@ body {
     padding: 5px;
 }
 
-.script-toggle {
+.top-menu .script-toggle {
     display: inline-flex;
     border: 1px solid #999;
     border-radius: 4px;
     overflow: hidden;
+    margin-right: 50px;
 }
 
 .script-btn {
@@ -482,6 +499,14 @@ body {
     padding-bottom: 5px;
     padding-right: 10px;
     padding-left: 10px;
+}
+
+/* Menu button at the bottom of the scrollable info-box content. */
+#info-popup-menu-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 16px;
 }
 
 .search-bar {

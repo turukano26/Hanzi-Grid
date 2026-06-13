@@ -425,12 +425,18 @@ function refreshParentStates() {
     });
 }
 
+// Appended to the info-box content so the Menu button scrolls with it and sits
+// at the very bottom. The inline onclick is part of the markup, so it survives
+// each innerHTML re-render with no rebinding needed.
+var INFO_BOX_MENU_BUTTON =
+    '<button id="info-popup-menu-btn" class="popup-menu-btn" onclick="openPopupMenu()">Menu</button>';
+
 function fetchCharacterInfo(character) {
     const infoBox = document.getElementById('infoBox');
     var options = Array.from(enabledOptions);
 
     if (options.length === 0) {
-        infoBox.innerHTML = '<span style="color:#666666;">Enable at least one option in Menu &gt; Languages to see character info.</span>';
+        infoBox.innerHTML = '<span style="color:#666666;">Enable at least one option in Menu &gt; Languages to see character info.</span>' + INFO_BOX_MENU_BUTTON;
         infoBox.scrollTop = 0;
         wrapCjkCharactersInInfoBox(infoBox);
         updateInfoBoxFadeState();
@@ -443,7 +449,7 @@ function fetchCharacterInfo(character) {
     xhr.onload = function () {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
-            infoBox.innerHTML = renderSections(response.sections || []);
+            infoBox.innerHTML = renderSections(response.sections || []) + INFO_BOX_MENU_BUTTON;
             wrapCjkCharactersInInfoBox(infoBox);
             updateInfoBoxFadeState();
         }
@@ -537,7 +543,7 @@ function activateCharacterFromInfoBox(character) {
 
     fetchCharacterInfo(character);
 
-    if (document.getElementById('toggleCheckbox').checked) {
+    if (document.body.classList.contains('paintbrush-cursor')) {
         var selectedColor = colorPicker.value;
         localStorage.setItem(unicodeKey, selectedColor);
         largeBox.style.backgroundColor = selectedColor;
@@ -669,7 +675,7 @@ function handleCellClick(span) {
     fetchCharacterInfo(character);
 
     // In paint mode, colour the cell; otherwise copy its colour to the picker.
-    if (document.getElementById('toggleCheckbox').checked) {
+    if (document.body.classList.contains('paintbrush-cursor')) {
         var selectedColor = colorPicker.value;
         localStorage.setItem(unicodeKey, selectedColor);
         largeBox.style.backgroundColor = selectedColor;
@@ -927,10 +933,15 @@ function changeColor(color) {
     });
 }
 
-// Function to toggle the cursor when the paintbrush mode is on
+// Function to toggle the paintbrush mode (cursor + click-to-colour behaviour).
+// The `paintbrush-cursor` body class is the single source of truth.
 function toggleCursor() {
-    const body = document.body;
-    body.classList.toggle('paintbrush-cursor', document.getElementById('toggleCheckbox').checked);
+    const on = document.body.classList.toggle('paintbrush-cursor');
+    const btn = document.getElementById('togglePaintBtn');
+    if (btn) {
+        btn.textContent = on ? 'Disable Paint Mode' : 'Enable Paint Mode';
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
 }
 
 // Show/hide all cell colourings. The colours stay in localStorage and on the
