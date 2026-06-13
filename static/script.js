@@ -933,6 +933,24 @@ function toggleCursor() {
     body.classList.toggle('paintbrush-cursor', document.getElementById('toggleCheckbox').checked);
 }
 
+// Show/hide all cell colourings. The colours stay in localStorage and on the
+// cells' inline styles; a body class just overrides them in CSS, so toggling
+// back reveals them unchanged. The hidden/shown choice itself is persisted.
+function applyColoringsVisibility(hidden) {
+    document.body.classList.toggle('colorings-hidden', hidden);
+    const btn = document.getElementById('toggleColoringsBtn');
+    if (btn) {
+        btn.textContent = hidden ? 'Show Colors' : 'Hide Colors';
+        btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    }
+}
+
+function toggleColorings() {
+    const hidden = !document.body.classList.contains('colorings-hidden');
+    localStorage.setItem('coloringsHidden', hidden ? 'true' : 'false');
+    applyColoringsVisibility(hidden);
+}
+
 function intializeInfoColumn() {
     const largeBox = document.getElementById('largeBox');
 
@@ -1171,6 +1189,7 @@ var colors = [
 
 // Call the functions to create UI elements when the page loads
 initScriptToggle();
+applyColoringsVisibility(localStorage.getItem('coloringsHidden') === 'true');
 fetchCharacterSetNames();
 createColorButtons();
 createMenu();
