@@ -108,6 +108,7 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     (10, 2,  'Jyutping',            'jyutping',        1),
     (11, 2,  'Yale',                'yale',            2),
     (12, 2,  'IPA',                 'ipa',             3),
+    (13, 2,  'IPA (with tones)',    'ipa_tones',       4),
     -- Middle Chinese
     (20, 7,  'Baxter-Sagart',       'baxter_sagart',   1),
     (21, 7,  'Zhengzhang',          'zhengzhang',      2),
@@ -141,6 +142,10 @@ UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_re
 -- phonemes only; 'IPA (with tones)' (6) appends a Chao tone letter per syllable.
 UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_ipa' WHERE id = 5;
 UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_ipa_tones' WHERE id = 6;
+-- Cantonese IPA, likewise derived from Jyutping (10): 'IPA' (12) phonemes only,
+-- 'IPA (with tones)' (13) with a Chao tone letter per syllable.
+UPDATE transcription_systems SET derived_from_ts_id = 10, transform = 'jyutping_ipa' WHERE id = 12;
+UPDATE transcription_systems SET derived_from_ts_id = 10, transform = 'jyutping_ipa_tones' WHERE id = 13;
 -- Middle Chinese Stimson / kTang (ts 60) is created by import_unihan.py, which
 -- seeds its transform = 'lower' there (this schema seed does not define ts 60).
 

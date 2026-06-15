@@ -149,6 +149,12 @@ transcription (tie-bar affricates, syllabic z̩/ʐ̩). There are two variants, b
 (`ipa_tones`, ts 6, transform `pinyin_ipa_tones`) additionally appends a Chao tone letter per
 syllable. Neither is the primary (sort_order 5/6), so both appear in the menu but start off.
 
+Cantonese has the same pair, derived from Jyutping (ts 10) via `transcriptions/jyutping_ipa.py`:
+**IPA** (`ipa`, ts 12, transform `jyutping_ipa`, phonemes only) and **IPA (with tones)**
+(`ipa_tones`, ts 13, transform `jyutping_ipa_tones`). The Cantonese converter looks up the whole
+final against a closed rime table (so vowel-length and i/u→ɪ/ʊ-before-velar allophony is tabulated,
+not computed) and uses Jyutping's trailing tone digit.
+
 ### Search (`/get_search_results`)
 
 `searchType` selects one of three branches, all returning `{"search": "<chars>"}`:

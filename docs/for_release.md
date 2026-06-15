@@ -1,7 +1,6 @@
 # For Release TODOs
 
 - fix saving color sets
-- add IPA mandarin
 - add IPA cantonese
 - add IPA japanese
 - add IPA vietnamese, plus fix dialect situation
@@ -11,3 +10,9 @@
 - add four character idioms
 - pop on open explaining how to use
 - about me page, changelog page
+- fix character attributes
+- add basic radical support
+
+## DONE
+
+- add IPA mandarin
