@@ -49,8 +49,8 @@ DEFAULT_DB = ROOT / "omnihanzi.db"
 
 # Shared romanizers (single home in their own modules, also used by app.py).
 sys.path.insert(0, str(ROOT))
-from romaji import _kana_to_romaji  # noqa: E402
-from hangul_roman import hangul_to_yale  # noqa: E402
+from transcriptions.romaji import _kana_to_romaji  # noqa: E402
+from transcriptions.hangul_roman import hangul_to_yale  # noqa: E402
 
 # Japanese reading systems involved in the kana/romaji bridge (see module docstring).
 LANG_TOKYO = 10

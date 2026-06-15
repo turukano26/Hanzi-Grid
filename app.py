@@ -5,8 +5,9 @@ import sqlite3
 import functools
 import regex
 
-from romaji import _kana_to_romaji
-from hangul_roman import hangul_to_revised
+from transcriptions.romaji import _kana_to_romaji
+from transcriptions.hangul_roman import hangul_to_revised
+from transcriptions.pinyin_ipa import pinyin_to_ipa, pinyin_to_ipa_tones
 
 
 
@@ -75,6 +76,8 @@ def _transform_kana_romaji(value):
 TRANSFORMS = {
     'kana_romaji': _transform_kana_romaji,
     'hangul_revised': hangul_to_revised,
+    'pinyin_ipa': pinyin_to_ipa,
+    'pinyin_ipa_tones': pinyin_to_ipa_tones,
     'lower': str.lower,
 }
 

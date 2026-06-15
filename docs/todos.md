@@ -38,8 +38,9 @@
 - look at characters_sets.json
 - character set importers?
 - character sets can either be the boxes, or just be regular text
+- make character sets lazy load if they open collapsed
 
--maybe move unihan defs into their own language section
+- anki export
 
 - possible to add to Foundations: 画开井元也工士车爪打用動公文引计认甘世史囚永发存岁回吃同 伞次字安纪布平声余这朋周波品美洲区历止乐店识步爱
 

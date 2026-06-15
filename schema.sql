@@ -103,6 +103,7 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     (3,  1,  'Wade-Giles',          'wade_giles',      3),
     (4,  1,  'Zhùyīn (Bopomofo)',   'zhuyin',          4),
     (5,  1,  'IPA',                 'ipa',             5),
+    (6,  1,  'IPA (with tones)',    'ipa_tones',       6),
     -- Cantonese
     (10, 2,  'Jyutping',            'jyutping',        1),
     (11, 2,  'Yale',                'yale',            2),
@@ -135,6 +136,11 @@ UPDATE transcription_systems SET derived_from_ts_id = 32, transform = 'kana_roma
 -- hangul_revised at render time, so every Hangul reading shows a romanization
 -- even where Unihan supplied no Yale (e.g. 두음법칙 forms like 女's 여).
 UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_revised' WHERE id = 40;
+-- Mandarin IPA is not stored; derive it from Pīnyīn (1) at render time, so every
+-- Mandarin reading with a Pinyin shows a broad IPA. Two variants: 'IPA' (5) is
+-- phonemes only; 'IPA (with tones)' (6) appends a Chao tone letter per syllable.
+UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_ipa' WHERE id = 5;
+UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_ipa_tones' WHERE id = 6;
 -- Middle Chinese Stimson / kTang (ts 60) is created by import_unihan.py, which
 -- seeds its transform = 'lower' there (this schema seed does not define ts 60).
 

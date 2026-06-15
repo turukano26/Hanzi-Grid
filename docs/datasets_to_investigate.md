@@ -33,5 +33,8 @@
 - hanzicraft
 - CUHK 漢語多功能字庫 / chifreq
 - jun da
+- SUBTLEX-CH
+- kanjidatabase.com
+- https://www.edrdg.org/projects/yojijukugo.html
 
 Also, check out all already included datasets for information that is discarded / unsused

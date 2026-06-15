@@ -133,7 +133,7 @@ A handler with nothing to return yields `{error: ...}`, and `build_sections()` d
 entirely (errors are never serialized).
 
 Japanese readings are stored as kana and romanized to Hepburn at request time via the `kana_romaji`
-transform (`_kana_to_romaji` / `_ROMAJI` live in `romaji.py`, imported by `app.py`), preserving
+transform (`_kana_to_romaji` / `_ROMAJI` live in `transcriptions/romaji.py`, imported by `app.py`), preserving
 okurigana `.` and affix `-` markers — see `transcription_systems.derived_from_ts_id` / `transform`.
 
 Korean **Revised Romanization** (`revised_rom`, ts 40) is likewise not stored: it derives from Hangul
@@ -141,6 +141,13 @@ Korean **Revised Romanization** (`revised_rom`, ts 40) is likewise not stored: i
 `app.py`). This means every Hangul reading shows a romanization even where Unihan supplied no Yale
 (e.g. 두음법칙 forms like 女's 여→"yeo"), and — being sort_order 1 — Revised Romanization is Korean's
 default-on primary transcription.
+
+Mandarin **IPA** is similarly not stored: it derives from Pīnyīn (ts 1) via
+`transcriptions/pinyin_ipa.py` (imported by `app.py`), a broad *Help:IPA/Mandarin*-style
+transcription (tie-bar affricates, syllabic z̩/ʐ̩). There are two variants, both deriving from ts 1:
+**IPA** (`ipa`, ts 5, transform `pinyin_ipa`) is phonemes only, and **IPA (with tones)**
+(`ipa_tones`, ts 6, transform `pinyin_ipa_tones`) additionally appends a Chao tone letter per
+syllable. Neither is the primary (sort_order 5/6), so both appear in the menu but start off.
 
 ### Search (`/get_search_results`)
 
