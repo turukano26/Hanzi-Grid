@@ -6,7 +6,7 @@ import functools
 import regex
 
 from transcriptions.romaji import _kana_to_romaji
-from transcriptions.hangul_roman import hangul_to_revised
+from transcriptions.hangul_roman import hangul_to_revised, hangul_to_ipa
 from transcriptions.pinyin_ipa import pinyin_to_ipa, pinyin_to_ipa_tones
 from transcriptions.jyutping_ipa import jyutping_to_ipa, jyutping_to_ipa_tones
 
@@ -81,6 +81,7 @@ TRANSFORMS = {
     'pinyin_ipa_tones': pinyin_to_ipa_tones,
     'jyutping_ipa': jyutping_to_ipa,
     'jyutping_ipa_tones': jyutping_to_ipa_tones,
+    'hangul_ipa': hangul_to_ipa,
     'lower': str.lower,
 }
 

@@ -1,8 +1,8 @@
-"""Hangul romanization (Yale and Revised).
+"""Hangul transcription (Yale, Revised Romanization, and IPA).
 
 A precomposed Hangul syllable (U+AC00–U+D7A3) decomposes algorithmically into an
-initial (초성), medial (중성) and optional final (종성) jamo. Both romanizations
-here are fixed per-jamo mappings applied syllable-by-syllable, with no
+initial (초성), medial (중성) and optional final (종성) jamo. All three mappings
+here are fixed per-jamo tables applied syllable-by-syllable, with no
 inter-syllable liaison — which is what we want for character readings, where each
 reading is a lone syllable shown in isolation.
 
@@ -15,10 +15,15 @@ reading is a lone syllable shown in isolation.
                           app.py as a derived transcription (revised_rom from
                           Hangul), so every Hangul reading shows a romanization
                           even when Unihan supplied no Yale.
+  * `hangul_to_ipa`     — broad IPA for Standard (Seoul) Korean: 갈→"kal", 여→"jʌ",
+                          성→"sʌŋ", 꽃→"k͈ot̚". Tense consonants take U+0348 (k͈ t͈
+                          p͈ s͈ t͡ɕ͈); lenis onset stops are voiceless in isolation.
+                          Used by app.py as the derived Korean IPA (from Hangul).
 
-Syllable-final consonants in RR take their representative (unreleased) sound,
-since a lone syllable has no following vowel to trigger liaison: 학→"hak",
-국→"guk". Kept dependency-free and importable on its own.
+Syllable-final consonants take their representative sound (RR romanized, or an
+unreleased stop in IPA), since a lone syllable has no following vowel to trigger
+liaison: 학→"hak"/"hak̚", 국→"guk"/"kuk̚". Kept dependency-free and importable on
+its own.
 """
 
 # Jamo indices follow the Unicode Hangul syllable composition algorithm.
@@ -59,6 +64,24 @@ _RR_FINALS = [
     "t", "ng", "t", "t", "k", "t", "p", "t",
 ]
 
+# --- IPA (broad, Standard/Seoul Korean) -------------------------------------
+# Onset lenis stops are voiceless in isolation (no intervocalic voicing); tense
+# consonants carry U+0348; ㅇ is a null onset. Codas take the representative
+# (unreleased) sound, with the 27 finals collapsing to the seven [k̚ n t̚ l m p̚ ŋ].
+_IPA_INITIALS = [
+    "k", "k͈", "n", "t", "t͈", "ɾ", "m", "p", "p͈", "s",
+    "s͈", "", "t͡ɕ", "t͡ɕ͈", "t͡ɕʰ", "kʰ", "tʰ", "pʰ", "h",
+]
+_IPA_MEDIALS = [
+    "a", "ɛ", "ja", "jɛ", "ʌ", "e", "jʌ", "je", "o", "wa",
+    "wɛ", "ø", "jo", "u", "wʌ", "we", "y", "ju", "ɯ", "ɰi", "i",
+]
+_IPA_FINALS = [
+    "", "k̚", "k̚", "k̚", "n", "n", "n", "t̚", "l", "k̚",
+    "m", "l", "l", "l", "p̚", "l", "m", "p̚", "p̚", "t̚",
+    "t̚", "ŋ", "t̚", "t̚", "k̚", "t̚", "p̚", "t̚",
+]
+
 
 def _romanize(text, initials, medials, finals):
     out = []
@@ -82,3 +105,8 @@ def hangul_to_yale(text: str) -> str:
 def hangul_to_revised(text: str) -> str:
     """Romanize a Hangul string to Revised Romanization (RR)."""
     return _romanize(text, _RR_INITIALS, _RR_MEDIALS, _RR_FINALS)
+
+
+def hangul_to_ipa(text: str) -> str:
+    """Broad IPA for a Hangul string (Standard/Seoul Korean, syllable in isolation)."""
+    return _romanize(text, _IPA_INITIALS, _IPA_MEDIALS, _IPA_FINALS)

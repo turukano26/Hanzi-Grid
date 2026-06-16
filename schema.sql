@@ -137,6 +137,10 @@ UPDATE transcription_systems SET derived_from_ts_id = 32, transform = 'kana_roma
 -- hangul_revised at render time, so every Hangul reading shows a romanization
 -- even where Unihan supplied no Yale (e.g. 두음법칙 forms like 女's 여).
 UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_revised' WHERE id = 40;
+-- Korean IPA (43) is also derived from Hangul (41), via hangul_ipa — a broad
+-- Standard/Seoul transcription. Not tonal, so (unlike Mandarin/Cantonese) there
+-- is a single IPA system, not a tones/no-tones pair.
+UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_ipa' WHERE id = 43;
 -- Mandarin IPA is not stored; derive it from Pīnyīn (1) at render time, so every
 -- Mandarin reading with a Pinyin shows a broad IPA. Two variants: 'IPA' (5) is
 -- phonemes only; 'IPA (with tones)' (6) appends a Chao tone letter per syllable.

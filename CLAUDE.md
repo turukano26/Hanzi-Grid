@@ -140,7 +140,11 @@ Korean **Revised Romanization** (`revised_rom`, ts 40) is likewise not stored: i
 (ts 41) via the `hangul_revised` transform (`hangul_roman.hangul_to_revised`, also imported by
 `app.py`). This means every Hangul reading shows a romanization even where Unihan supplied no Yale
 (e.g. 두음법칙 forms like 女's 여→"yeo"), and — being sort_order 1 — Revised Romanization is Korean's
-default-on primary transcription.
+default-on primary transcription. Korean **IPA** (`ipa`, ts 43) derives from the same Hangul (ts 41)
+via the `hangul_ipa` transform (`hangul_roman.hangul_to_ipa`) — a broad Standard/Seoul transcription
+sharing the module's jamo-decomposition machinery (tense consonants with U+0348, representative
+unreleased codas). Korean isn't tonal, so it's a single IPA system (no tones/no-tones pair), default
+off.
 
 Mandarin **IPA** is similarly not stored: it derives from Pīnyīn (ts 1) via
 `transcriptions/pinyin_ipa.py` (imported by `app.py`), a broad *Help:IPA/Mandarin*-style
