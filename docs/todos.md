@@ -67,3 +67,4 @@ add back pronouns?
     },
 
 add special japanese rendering,has a toggle of furigana and romaji,  makes kanji stand out.
+make special rendering toggles only appear in the top menu bar if theyre needed
