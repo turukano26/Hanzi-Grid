@@ -7,7 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python scripts/rebuild_db.py --skip-downloads
+# Build the DB at image-build time, downloading sources fresh (default).
+RUN python scripts/rebuild_db.py
 
 EXPOSE 8081
 

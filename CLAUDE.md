@@ -67,8 +67,8 @@ Normalized around characters → etymologies → readings → transcriptions/sen
 `scripts/rebuild_db.py` deletes and rebuilds `omnihanzi.db` end to end:
 
 ```bash
-python scripts/rebuild_db.py                 # use cached data/ dumps
-python scripts/rebuild_db.py                 # (add real downloads by NOT passing --skip-downloads internally)
+python scripts/rebuild_db.py                 # download all sources fresh (default)
+python scripts/rebuild_db.py --skip-downloads  # reuse cached data/ dumps instead
 ```
 
 It runs, in order: `create_db.py` (apply `schema.sql`) → `import_unihan.py` →

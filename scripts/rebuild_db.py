@@ -71,7 +71,7 @@ def main() -> None:
             print(f"Deleted {path}")
 
     for label, script_args in STEPS:
-        run_step(label, script_args, download=args.skip_downloads, db=args.db)
+        run_step(label, script_args, download=not args.skip_downloads, db=args.db)
 
     print(f"\n{'='*60}")
     print("  Rebuild complete.")

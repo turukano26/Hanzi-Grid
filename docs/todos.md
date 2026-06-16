@@ -10,7 +10,7 @@
 - move unihan definitions into own catagory outside of any language?
 - check how japanese defintions work, especially if theyre per reading
 
-- check out skip-downloads flag
+- [x] check out skip-downloads flag — fixed inverted flag (see docs/production-readiness.md)
 
 - remove / change option in languages menu for diabling entire groups
 - move korean hangul to default being after romanization

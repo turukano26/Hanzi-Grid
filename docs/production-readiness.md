@@ -1,6 +1,6 @@
 # Production Readiness Assessment
 
-_Assessed 2026-06-16. Overall: **close, but not quite** — the app logic is production-ready; the gaps are in the deploy story and some uncommitted work._
+_Assessed 2026-06-16. Overall: **shippable** — no blockers. The app logic and the Docker deploy are production-ready; what remains are polish items (dead deps, an inverted build flag, route validation, pinned versions)._
 
 ## Blockers
 
@@ -8,14 +8,6 @@ _None._
 
 ## Should-fix before shipping
 
-- **`--skip-downloads` flag is inverted (footgun).** In `rebuild_db.py`,
-  `download=args.skip_downloads`, and `run_step` *strips* each importer's
-  `--skip-download` when `download` is true. Net effect: `rebuild_db.py
-  --skip-downloads` makes the importers **download fresh**, while `rebuild_db.py`
-  with no flag uses cached `data/`. The `Dockerfile` only works because of this
-  inversion (its `--skip-downloads` triggers the downloads that build the DB).
-  It works today, but the flag does the opposite of its name — fix the logic or
-  rename it before someone "corrects" it and breaks the image build.
 - **No `.dockerignore`.** `Dockerfile` does `COPY . .` with no `.dockerignore`,
   so the image pulls in `venv/`, `.git/`, the 96 MB local `.db`, and `data/`.
   The build still works (the DB is rebuilt via fresh downloads), but the image is
@@ -57,5 +49,11 @@ _None._
   (`import_unihan.py` etc.) download their own sources (Unihan.zip, CC-CEDICT,
   KANJIDIC2, CC-Canto, libhangul) into `data/` at build time and fill the DB from
   them. So neither the gitignored `omnihanzi.db` nor a committed `data/` is
-  required for the Docker image. (See the inverted-flag note under Should-fix for
-  why `--skip-downloads` is what triggers the downloads.)
+  required for the Docker image.
+- **`--skip-downloads` flag de-inverted.** ✅ Previously the flag did the
+  opposite of its name: `rebuild_db.py --skip-downloads` downloaded fresh and the
+  bare command used cache. Fixed the inverted argument at the call site
+  (`download=not args.skip_downloads`), so now no flag = download fresh and
+  `--skip-downloads` = reuse cached `data/`, matching the docstring. The
+  `Dockerfile` was updated to drop the flag so it still downloads fresh at build,
+  and `CLAUDE.md`'s usage block was corrected.
