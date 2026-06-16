@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 import sqlite3
+import threading
 import functools
 import regex
 
@@ -54,8 +55,34 @@ def _load_character_set(path):
 # SQLite database (used by character info sheet)
 # ---------------------------------------------------------------------------
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'omnihanzi.db')
-db = sqlite3.connect(DB_PATH, check_same_thread=False)
-db.execute("PRAGMA journal_mode = WAL")
+
+
+# A single shared sqlite3.Connection is not safe to use from more than one thread
+# at a time: the dev server (and gunicorn's thread workers) handle requests on
+# multiple threads, so overlapping clicks would corrupt the shared connection's
+# cursor state and raise sqlite3.InterfaceError / IndexError (intermittent 500s
+# that look like the UI "hanging" on a click). Hand out one lazily-opened
+# connection per thread instead; every query is a read and WAL already allows
+# concurrent readers across connections. The proxy keeps the module-level `db`
+# name and its `db.execute(...)` call sites unchanged.
+class _ThreadLocalDB:
+    def __init__(self, path):
+        self._path = path
+        self._local = threading.local()
+
+    def _conn(self):
+        conn = getattr(self._local, 'conn', None)
+        if conn is None:
+            conn = sqlite3.connect(self._path, check_same_thread=False)
+            conn.execute("PRAGMA journal_mode = WAL")
+            self._local.conn = conn
+        return conn
+
+    def execute(self, *args, **kwargs):
+        return self._conn().execute(*args, **kwargs)
+
+
+db = _ThreadLocalDB(DB_PATH)
 
 
 # ---------------------------------------------------------------------------
