@@ -1,0 +1,35 @@
+# Docker ignores .gitignore, so the exclusions there must be repeated here or
+# `COPY . .` would pull venv/, .git/, the 96 MB DB, and data/ into the image.
+
+# Virtualenv and Python caches
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git metadata
+.git/
+.gitignore
+
+# Database — rebuilt from scratch by `rebuild_db.py` during the image build
+*.db
+*.db-wal
+*.db-shm
+
+# Raw source dumps — re-downloaded fresh by the importers during the build
+data/
+
+# Editor / env / tooling
+.vscode/
+.claude/
+.env
+.env.*
+*.ipynb
+
+# Docs and dev-only files not needed at build or runtime
+docs/
+*.md
+schema_example.sql
+Dockerfile
+.dockerignore

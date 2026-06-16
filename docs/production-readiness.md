@@ -1,6 +1,6 @@
 # Production Readiness Assessment
 
-_Assessed 2026-06-16. Overall: **shippable** — no blockers. The app logic and the Docker deploy are production-ready; what remains are polish items (dead deps, an inverted build flag, route validation, pinned versions)._
+_Assessed 2026-06-16 (last updated 2026-06-16). Overall: **shippable** — no blockers, and all should-fix items have been addressed. See Resolved._
 
 ## Blockers
 
@@ -8,21 +8,7 @@ _None._
 
 ## Should-fix before shipping
 
-- **No `.dockerignore`.** `Dockerfile` does `COPY . .` with no `.dockerignore`,
-  so the image pulls in `venv/`, `.git/`, the 96 MB local `.db`, and `data/`.
-  The build still works (the DB is rebuilt via fresh downloads), but the image is
-  needlessly bloated. Add a `.dockerignore`.
-- **Dead dependencies:** `requirements.txt` lists `pandas` + `pyarrow` (the
-  heaviest installs) but the parquet stage is gone — zero imports in `app.py` /
-  `scripts/` / `transcriptions/`. Drop them; the image shrinks a lot.
-- **No input validation on routes.** `process_click_on_character` does
-  `payload['character']` on raw `request.get_json()` → a malformed/empty body is
-  an unhandled 500. Same for `request.form['searchString']`. A public endpoint
-  should 400 gracefully. There's also a literal `return "wtf"` for an unknown
-  `searchType`.
-- **`runtime.txt` is missing** — no pinned Python version for Heroku, and
-  `requirements.txt` is fully unpinned (`flask`, `gunicorn`, …). A surprise
-  major-version bump can break a deploy silently. Pin them.
+_None — all addressed; see Resolved._
 
 ## Non-issues (these are fine)
 
@@ -45,7 +31,7 @@ _None._
   committed rather than a dirty working-tree change.
 - **The Docker deploy rebuilds the DB from scratch — no DB or `data/` in git
   needed.** ✅ Originally flagged as a blocker ("DB won't exist"); that was wrong.
-  `Dockerfile` runs `rebuild_db.py --skip-downloads`, and the importers
+  `Dockerfile` runs `rebuild_db.py` at build, and the importers
   (`import_unihan.py` etc.) download their own sources (Unihan.zip, CC-CEDICT,
   KANJIDIC2, CC-Canto, libhangul) into `data/` at build time and fill the DB from
   them. So neither the gitignored `omnihanzi.db` nor a committed `data/` is
@@ -57,3 +43,28 @@ _None._
   `--skip-downloads` = reuse cached `data/`, matching the docstring. The
   `Dockerfile` was updated to drop the flag so it still downloads fresh at build,
   and `CLAUDE.md`'s usage block was corrected.
+- **Dead dependencies removed.** ✅ `pandas` and `pyarrow` (the heaviest
+  installs, left over from the retired parquet stage — zero imports anywhere in
+  the repo) were dropped from `requirements.txt`. Remaining: `flask`, `wheel`,
+  `gunicorn`, `regex`.
+- **`.dockerignore` added.** ✅ `COPY . .` no longer pulls `venv/`, `.git/`, the
+  96 MB local `.db`, or `data/` into the image — the DB is rebuilt and the
+  sources re-downloaded during the build, so those local copies were pure bloat.
+  Kept what the build/runtime actually need (`charactersets/`, `overlay.json`,
+  `templates/`, `static/`, `scripts/`, `schema.sql`, `transcriptions/`).
+- **Route input validation added.** ✅ A shared `_bad_request()` helper now
+  returns clean JSON 400s. `process_click_on_character` validates the body is a
+  JSON object, `character` is a single-codepoint string, and `options` is a list;
+  `get_character_set` and `get_search_results` check their required form fields.
+  Also fixed two latent 500s/quirks: the `return "wtf"` for an unknown
+  `searchType` is now a 400, and the unimplemented `Radical` branch (which fell
+  through to a `None` return → 500) now returns empty results. Verified via the
+  Flask test client across malformed and valid inputs.
+- **Dependencies pinned.** ✅ `requirements.txt` now pins exact versions
+  (`flask==3.1.3`, `wheel==0.46.3`, `gunicorn==25.1.0`, `regex==2026.2.28`) so a
+  surprise upstream release can't silently change a build. The Python version is
+  pinned separately by the `Dockerfile` base image (`python:3.11-slim`), so a
+  Heroku-style `runtime.txt` isn't needed for the Docker deploy. (Note: the local
+  venv is Python 3.12; the image is 3.11. All pins support both. Optionally
+  tighten the base tag to an exact patch, e.g. `python:3.11.x-slim`, for fully
+  reproducible builds.)

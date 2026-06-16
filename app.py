@@ -328,10 +328,24 @@ def get_info_options():
     return jsonify({'tree': [_strip_node(n) for n in TREE]})
 
 
+def _bad_request(message):
+    """A uniform JSON 400 so malformed input is a clean error, not a 500."""
+    return jsonify({'error': message}), 400
+
+
 @app.route('/process_click_on_character', methods=['POST'])
 def process_click_on_character():
-    payload = request.get_json()
-    sections = build_sections(payload['character'], payload.get('options', []))
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return _bad_request('expected a JSON object body')
+    character = payload.get('character')
+    # build_sections() does ord(character), so it must be exactly one codepoint.
+    if not isinstance(character, str) or len(character) != 1:
+        return _bad_request("'character' must be a single-character string")
+    options = payload.get('options', [])
+    if not isinstance(options, list):
+        return _bad_request("'options' must be a list")
+    sections = build_sections(character, options)
     return jsonify({'sections': sections})
 
 
@@ -343,7 +357,9 @@ def get_character_set_names():
 
 @app.route('/get_character_set', methods=['POST'])
 def get_character_set():
-    char_set_name = request.form['charSet']
+    char_set_name = request.form.get('charSet')
+    if not char_set_name:
+        return _bad_request("missing 'charSet'")
     path = character_set_index.get(char_set_name)
     if path is None:
         return jsonify({"inputString": None})
@@ -351,8 +367,10 @@ def get_character_set():
 
 @app.route('/get_search_results', methods=['POST'])
 def get_search_results():
-    search_string = request.form['searchString']
-    search_type = request.form['searchType']
+    search_string = request.form.get('searchString')
+    search_type = request.form.get('searchType')
+    if search_string is None or search_type is None:
+        return _bad_request("missing 'searchString' or 'searchType'")
 
     if search_type == 'Character':
          # Use regex to find CJK characters in the input string
@@ -362,17 +380,18 @@ def get_search_results():
 
         return jsonify({"search": chars_to_return})
 
-    elif search_type == 'Radical':
-        pass
-
     elif search_type == 'Pinyin':
         return jsonify({"search": _search_pinyin(search_string)})
 
     elif search_type == 'Romaji':
         return jsonify({"search": _search_romaji(search_string)})
 
+    elif search_type == 'Radical':
+        # Not implemented yet — return no matches rather than a 500.
+        return jsonify({"search": ""})
+
     else:
-        return "wtf"
+        return _bad_request(f"unknown searchType: {search_type!r}")
 
 
 # ---------------------------------------------------------------------------
