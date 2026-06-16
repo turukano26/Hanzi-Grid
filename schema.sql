@@ -141,6 +141,10 @@ UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_re
 -- Standard/Seoul transcription. Not tonal, so (unlike Mandarin/Cantonese) there
 -- is a single IPA system, not a tones/no-tones pair.
 UPDATE transcription_systems SET derived_from_ts_id = 41, transform = 'hangul_ipa' WHERE id = 43;
+-- Japanese IPA (33) is derived from Kana (32) via kana_ipa — a broad
+-- Help:IPA/Japanese transcription (same Kana the Hepburn fallback uses). Not
+-- tonal, so (like Korean) a single IPA system, not a tones/no-tones pair.
+UPDATE transcription_systems SET derived_from_ts_id = 32, transform = 'kana_ipa' WHERE id = 33;
 -- Mandarin IPA is not stored; derive it from Pīnyīn (1) at render time, so every
 -- Mandarin reading with a Pinyin shows a broad IPA. Two variants: 'IPA' (5) is
 -- phonemes only; 'IPA (with tones)' (6) appends a Chao tone letter per syllable.
