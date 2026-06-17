@@ -17,7 +17,28 @@ python app.py          # runs on http://localhost:5000 with debug=True
 gunicorn app:app
 ```
 
-There are no live tests.
+## Tests
+
+```bash
+source venv/bin/activate
+python -m unittest discover -s tests -t .     # run everything
+python -m unittest tests.test_zhuyin -v       # one module
+```
+
+`tests/` covers the `transcriptions/` converters (one `test_<module>.py` per
+system), using stdlib `unittest` only — no extra dependency, and the files are
+also collectable by `pytest tests/` if it's installed. Each holds a table of
+`input → expected` cases; the romanization/Bopomofo expectations are
+ground-truth (checked against the standards), the IPA ones follow each module's
+documented scheme.
+
+`test_resolve_end_to_end.py` is the one DB-backed test: it drives
+`build_sections()` for a character click through the real resolve chain
+(`_iter_groups`/`_handler_readings`/`_fetch_reading_rows`/`_resolve_ts_value`/
+`TRANSFORMS`), checking a Pīnyīn-only Mandarin reading fans out to its derived
+systems. It needs the locally-built `omnihanzi.db` (gitignored) and **skips
+cleanly when the DB is absent**, so a fresh checkout / CI stays green. The Flask
+routes themselves (request parsing, JSON envelopes) are still untested.
 
 ## Architecture
 
