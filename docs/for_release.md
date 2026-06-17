@@ -8,7 +8,8 @@
 - about me page, changelog page
 - fix character attributes
 - add basic radical support
-- add wade-giles
+- fix search
+- add history
 
 ## DONE
 
@@ -17,3 +18,4 @@
 - add IPA korean
 - merge HSK files
 - add IPA japanese
+- add wade-giles
