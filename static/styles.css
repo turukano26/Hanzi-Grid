@@ -1,9 +1,57 @@
+/* Rare CJK supplementary-plane ideographs (Ext B and beyond) that no OS ships a
+   default glyph for. These are SUBSETS of the Plangothic font (a Source-Han-
+   shaped sans), cut down to exactly the supplementary-plane characters used
+   across charactersets/ — see scripts/build_ext_font_subset.py to regenerate
+   when new ones are added. We subset rather than ship the full font for two
+   reasons: (1) the full files are ~12 MB, and (2) the full Plangothic cmap has
+   an invalid format-12 group (codepoints 0x110000-0x110002, beyond Unicode's
+   U+10FFFF max), which Chrome's font sanitiser (OTS) rejects — so the browser
+   discards the whole font and these glyphs render blank. Subsetting rebuilds a
+   spec-valid cmap, which OTS accepts. Plangothic has no Ext A glyphs by design
+   (Source Han /
+   Noto / YaHei / PingFang already cover that BMP block), so Ext A is left to
+   the system font. The two source files cover disjoint planes, so each subset
+   gets the unicode-range it actually contains: file 1 = Ext B–F + Ext I +
+   Compat-Supplement (U+20000–2FFFF), file 2 = Ext G–H (U+30000–3FFFF). */
+/* Plangothic ships its own vertical metrics as hhea 880/-120 (88%/12%), which
+   is a smaller ascent than the system CJK fonts (Source Han / Noto / PingFang /
+   YaHei use ~1160/-288). In the grid/info cells the glyph is baseline-
+   positioned, so that smaller ascent makes these fallback glyphs ride higher
+   than the surrounding BMP characters. The metric overrides restore the Source
+   Han metrics Plangothic is designed to pair with (116% / 28.8%), dropping the
+   baseline so the rare glyphs line up — and this touches ONLY Plangothic, so
+   the common characters keep their exact original placement. */
+@font-face {
+    font-family: 'PlangothicP1';
+    src: url('fonts/plangothic-sip-1.woff2') format('woff2');
+    unicode-range: U+20000-2FFFF;
+    ascent-override: 116%;
+    descent-override: 28.8%;
+    line-gap-override: 0%;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'PlangothicP2';
+    src: url('fonts/plangothic-sip-2.woff2') format('woff2');
+    unicode-range: U+30000-3FFFF;
+    ascent-override: 116%;
+    descent-override: 28.8%;
+    line-gap-override: 0%;
+    font-display: swap;
+}
+
 html,
 body {
     height: 100%;
     margin: 0;
     padding: 0;
     overflow: hidden;
+    /* ONLY the range-restricted Plangothic faces — no primary font. Their
+       unicode-range (U+20000-3FFFF) means they never match Latin text or
+       common (BMP) Han, so everything else falls back to the browser default
+       exactly as before; only the rare supplementary-plane ideographs that no
+       OS ships a glyph for get Plangothic. */
+    font-family: 'PlangothicP1', 'PlangothicP2';
 }
 
 /* styles.css */
