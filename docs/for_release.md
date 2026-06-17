@@ -1,10 +1,7 @@
 # For Release TODOs
 
 - fix saving color sets
-- add IPA cantonese
-- add IPA japanese
 - add IPA vietnamese, plus fix dialect situation
-- merge HSK files
 - move unihan to interlanguage
 - move japanese defs so theyre not under kun or on
 - add four character idioms
@@ -16,3 +13,7 @@
 ## DONE
 
 - add IPA mandarin
+- add IPA cantonese
+- add IPA korean
+- merge HSK files
+- add IPA japanese
