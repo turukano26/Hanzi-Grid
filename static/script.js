@@ -552,8 +552,8 @@ function activateCharacterFromInfoBox(character) {
     var cellColor;
     if (matchingCells.length) {
         cellColor = window.getComputedStyle(matchingCells[0]).backgroundColor;
-    } else if (localStorage.getItem(unicodeKey)) {
-        cellColor = localStorage.getItem(unicodeKey);
+    } else if (getCellColor(unicodeKey)) {
+        cellColor = getCellColor(unicodeKey);
     } else {
         cellColor = '#ffffff';
     }
@@ -561,9 +561,9 @@ function activateCharacterFromInfoBox(character) {
 
     fetchCharacterInfo(character);
 
-    if (document.body.classList.contains('paintbrush-cursor')) {
+    if (document.body.classList.contains('paintbrush-cursor') && isColoringEditable()) {
         var selectedColor = colorPicker.value;
-        localStorage.setItem(unicodeKey, selectedColor);
+        setCellColor(unicodeKey, selectedColor);
         largeBox.style.backgroundColor = selectedColor;
         matchingCells.forEach(function (span) {
             span.style.backgroundColor = selectedColor;
@@ -571,8 +571,8 @@ function activateCharacterFromInfoBox(character) {
     } else {
         if (matchingCells.length) {
             colorPicker.value = rgbToHex(window.getComputedStyle(matchingCells[0]).backgroundColor);
-        } else if (localStorage.getItem(unicodeKey)) {
-            colorPicker.value = localStorage.getItem(unicodeKey);
+        } else if (getCellColor(unicodeKey)) {
+            colorPicker.value = getCellColor(unicodeKey);
         }
     }
 }
@@ -698,7 +698,7 @@ function makeCharCell(token) {
     span.textContent = glyph;
     span.setAttribute('data-unicode', unicodeKey);
     span.setAttribute('data-variants', variantKeys(token).join(' '));
-    var saved = localStorage.getItem(unicodeKey);
+    var saved = getCellColor(unicodeKey);
     if (saved) {
         span.style.backgroundColor = saved;
     }
@@ -720,9 +720,9 @@ function handleCellClick(span) {
     fetchCharacterInfo(character);
 
     // In paint mode, colour the cell; otherwise copy its colour to the picker.
-    if (document.body.classList.contains('paintbrush-cursor')) {
+    if (document.body.classList.contains('paintbrush-cursor') && isColoringEditable()) {
         var selectedColor = colorPicker.value;
-        localStorage.setItem(unicodeKey, selectedColor);
+        setCellColor(unicodeKey, selectedColor);
         largeBox.style.backgroundColor = selectedColor;
         span.style.backgroundColor = selectedColor;
     } else {
@@ -895,21 +895,39 @@ function createMenu() {
         }
     });
 
-    // Event listener and function to clear all a user's colorings
+    // Event listener and function to clear the active color set's colorings.
     const clearButton = document.getElementById('clear')
     clearButton.addEventListener('click', () => {
-        var isConfirmed = confirm('Are you sure you want to clear all your data?');
-        // Check the user's response
-        if (isConfirmed) {
-            // User clicked "OK," proceed with clearing data
-            localStorage.clear();
+        var name = getActiveSetName();
+        if (name === BLANK_SET_NAME) {
+            alert('The "' + BLANK_SET_NAME + '" set is always empty.');
+            return;
+        }
+        if (confirm('Clear all colorings in "' + name + '"?')) {
+            var store = loadColorSets();
+            store.sets[name] = {};
+            saveColorSets();
             generateMacroGrid(currentInputString);
-            alert('Data cleared successfully!');
-        } else {
-            // User clicked "Cancel," do nothing
-            alert('Data clearing canceled.');
+            alert('Color set "' + name + '" cleared.');
         }
     });
+
+    // ----- Color-set switcher + management controls --------------------------
+    refreshColorSetSelect();
+    const colorSetSelect = document.getElementById('colorSetSelect');
+    if (colorSetSelect) {
+        colorSetSelect.addEventListener('change', function () {
+            switchColorSet(this.value);
+        });
+    }
+    const newColorSetBtn = document.getElementById('newColorSetBtn');
+    if (newColorSetBtn) { newColorSetBtn.addEventListener('click', promptCreateColorSet); }
+    const newColorSetMenuBtn = document.getElementById('newColorSet');
+    if (newColorSetMenuBtn) { newColorSetMenuBtn.addEventListener('click', promptCreateColorSet); }
+    const renameColorSetBtn = document.getElementById('renameColorSet');
+    if (renameColorSetBtn) { renameColorSetBtn.addEventListener('click', promptRenameColorSet); }
+    const deleteColorSetBtn = document.getElementById('deleteColorSet');
+    if (deleteColorSetBtn) { deleteColorSetBtn.addEventListener('click', promptDeleteColorSet); }
 
     // Event listener to open the popup menu
     document.getElementById('open-popup-menu-btn').addEventListener('click', openPopupMenu);
@@ -962,12 +980,15 @@ function changeColor(color) {
     // Set the value to the selected color
     colorPicker.value = color;
 
+    // The Blank set is read-only — picking a colour does nothing.
+    if (!isColoringEditable()) { return; }
+
     // Get the current character from the large box
     const currentCharacter = largeBox.textContent;
     const currentUnicodeKey = currentCharacter.codePointAt(0).toString(16);
 
-    // Update the color for the most recent character in localStorage
-    localStorage.setItem(currentUnicodeKey, color);
+    // Update the color for the most recent character in the active color set
+    setCellColor(currentUnicodeKey, color);
 
     // Update the background color of the large box
     largeBox.style.backgroundColor = color;
@@ -990,24 +1011,6 @@ function toggleCursor() {
     }
 }
 
-// Show/hide all cell colourings. The colours stay in localStorage and on the
-// cells' inline styles; a body class just overrides them in CSS, so toggling
-// back reveals them unchanged. The hidden/shown choice itself is persisted.
-function applyColoringsVisibility(hidden) {
-    document.body.classList.toggle('colorings-hidden', hidden);
-    const btn = document.getElementById('toggleColoringsBtn');
-    if (btn) {
-        btn.textContent = hidden ? 'Show Colors' : 'Hide Colors';
-        btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-    }
-}
-
-function toggleColorings() {
-    const hidden = !document.body.classList.contains('colorings-hidden');
-    localStorage.setItem('coloringsHidden', hidden ? 'true' : 'false');
-    applyColoringsVisibility(hidden);
-}
-
 function intializeInfoColumn() {
     const largeBox = document.getElementById('largeBox');
 
@@ -1016,8 +1019,8 @@ function intializeInfoColumn() {
 
     fetchCharacterInfo('一');
 
-    if (localStorage.getItem(unicodeKey)) {
-        largeBox.style.backgroundColor = localStorage.getItem(unicodeKey);
+    if (getCellColor(unicodeKey)) {
+        largeBox.style.backgroundColor = getCellColor(unicodeKey);
     }
     else {
         largeBox.style.backgroundColor = '#ffffff'
@@ -1069,29 +1072,218 @@ function highlightSearchResults(searchResults) {
     }
 }
 
-function exportUserData() {
-    // Exports the user's character colourings into a json file and downloads it.
-    // Only colour keys are exported — `infoOptions` (menu state) is a UI
-    // preference and is deliberately kept out of colour exports.
-    var keys = Object.keys(localStorage);
+// ===== Named color sets ====================================================
+// Colourings are organised into named sets; exactly one is "active" and drawn
+// on the grid. Everything lives under a single localStorage key, `colorSets`:
+//   { active: "Default", sets: { "Default": {<codepoint>: <hex>}, ... } }
+// Legacy installs stored each colouring as a flat hex-codepoint key; the first
+// load migrates those into a "Default" set (see loadColorSets). `_colorSets` is
+// the cached single source of truth — flat keys are never written again.
+//
+// "Blank" is a permanent, uneditable, always-empty set: switching to it shows
+// the grid with no colourings (it replaces the old Hide Colors toggle). It
+// can't be painted into, renamed, or deleted.
+var COLOR_SETS_KEY = 'colorSets';
+var DEFAULT_SET_NAME = 'Default';
+var BLANK_SET_NAME = 'Blank';
+var _colorSets = null;
 
-    var dataObject = {};
+function loadColorSets() {
+    if (_colorSets) { return _colorSets; }
 
-    keys.forEach(function (key) {
-        // Colour keys are hex codepoints (e.g. "4e00"); skip everything else
-        // (infoOptions and any legacy per-checkbox orphans).
-        if (!/^[0-9a-f]+$/i.test(key)) {
-            return;
-        }
-        dataObject[key] = localStorage.getItem(key);
+    var raw = localStorage.getItem(COLOR_SETS_KEY);
+    if (raw) {
+        try {
+            var parsed = JSON.parse(raw);
+            if (parsed && parsed.sets && typeof parsed.sets === 'object') {
+                _colorSets = parsed;
+            }
+        } catch (e) { /* corrupt store: fall through and rebuild */ }
+    }
+
+    if (!_colorSets) {
+        // First run on this profile: migrate any legacy flat hex-codepoint
+        // colour keys into a Default set. Reserved keys (csScript, infoOptions,
+        // …) contain non-hex letters and so fail this test, staying untouched.
+        var colors = {};
+        Object.keys(localStorage).forEach(function (key) {
+            if (/^[0-9a-f]+$/i.test(key)) {
+                colors[key] = localStorage.getItem(key);
+                localStorage.removeItem(key);
+            }
+        });
+        _colorSets = { active: DEFAULT_SET_NAME, sets: {} };
+        _colorSets.sets[DEFAULT_SET_NAME] = colors;
+        saveColorSets();
+    }
+
+    // Invariants. The uneditable Blank set always exists and stays empty.
+    _colorSets.sets[BLANK_SET_NAME] = {};
+    // There must always be at least one editable set to work in.
+    var editable = colorSetNames().filter(function (n) { return n !== BLANK_SET_NAME; });
+    if (editable.length === 0) {
+        _colorSets.sets[DEFAULT_SET_NAME] = {};
+    }
+    // `active` must point at a real set.
+    if (!_colorSets.sets[_colorSets.active]) {
+        _colorSets.active = DEFAULT_SET_NAME;
+    }
+    return _colorSets;
+}
+
+// The Blank set is read-only: it can't be painted, renamed, or deleted.
+function isColoringEditable() {
+    return getActiveSetName() !== BLANK_SET_NAME;
+}
+
+function saveColorSets() {
+    localStorage.setItem(COLOR_SETS_KEY, JSON.stringify(_colorSets));
+}
+
+function getActiveColors() {
+    var store = loadColorSets();
+    return store.sets[store.active];
+}
+
+function getCellColor(codepoint) {
+    return getActiveColors()[codepoint] || null;
+}
+
+function setCellColor(codepoint, color) {
+    if (!isColoringEditable()) { return; }  // Blank set stays empty
+    getActiveColors()[codepoint] = color;
+    saveColorSets();
+}
+
+function colorSetNames() {
+    return Object.keys(loadColorSets().sets);
+}
+
+function getActiveSetName() {
+    return loadColorSets().active;
+}
+
+// Make `name` the active set and reflect the change everywhere: the switcher,
+// the grid, and the large-box preview (recoloured to this set's colour for the
+// character it's currently showing).
+function switchColorSet(name) {
+    var store = loadColorSets();
+    if (store.sets[name]) {
+        store.active = name;
+        saveColorSets();
+    }
+    refreshColorSetSelect();
+    generateMacroGrid(currentInputString);
+
+    var largeBox = document.getElementById('largeBox');
+    var character = largeBox && largeBox.textContent;
+    if (character) {
+        var key = character.codePointAt(0).toString(16);
+        largeBox.style.backgroundColor = getCellColor(key) || '#ffffff';
+    }
+}
+
+// Returns the created name, or null if it was empty or already taken.
+function createColorSet(name) {
+    name = (name || '').trim();
+    var store = loadColorSets();
+    if (!name || store.sets[name]) { return null; }
+    store.sets[name] = {};
+    store.active = name;
+    saveColorSets();
+    return name;
+}
+
+function renameColorSet(oldName, newName) {
+    newName = (newName || '').trim();
+    var store = loadColorSets();
+    if (oldName === BLANK_SET_NAME || newName === BLANK_SET_NAME) { return false; }
+    if (!newName || !store.sets[oldName] || store.sets[newName]) { return false; }
+    store.sets[newName] = store.sets[oldName];
+    delete store.sets[oldName];
+    if (store.active === oldName) { store.active = newName; }
+    saveColorSets();
+    return true;
+}
+
+function deleteColorSet(name) {
+    var store = loadColorSets();
+    if (name === BLANK_SET_NAME || !store.sets[name]) { return false; }
+    delete store.sets[name];
+    if (Object.keys(store.sets).length === 0) {
+        store.sets[DEFAULT_SET_NAME] = {};
+        store.active = DEFAULT_SET_NAME;
+    } else if (store.active === name) {
+        store.active = Object.keys(store.sets)[0];
+    }
+    saveColorSets();
+    return true;
+}
+
+// Rebuild the top-bar <select> from the current sets, marking the active one.
+function refreshColorSetSelect() {
+    var select = document.getElementById('colorSetSelect');
+    if (!select) { return; }
+    var store = loadColorSets();
+    select.innerHTML = '';
+    colorSetNames().forEach(function (name) {
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        if (name === store.active) { opt.selected = true; }
+        select.appendChild(opt);
     });
+}
+
+// ----- Color Sets menu-tab handlers (prompt/confirm/alert match file style) --
+
+function promptCreateColorSet() {
+    var name = prompt('Name for the new color set:');
+    if (name === null) { return; }
+    if (!createColorSet(name)) {
+        alert('Please enter a unique, non-empty name.');
+        return;
+    }
+    switchColorSet(getActiveSetName());
+}
+
+function promptRenameColorSet() {
+    var current = getActiveSetName();
+    if (current === BLANK_SET_NAME) {
+        alert('The "' + BLANK_SET_NAME + '" set can\'t be renamed.');
+        return;
+    }
+    var name = prompt('Rename "' + current + '" to:', current);
+    if (name === null) { return; }
+    if (!renameColorSet(current, name)) {
+        alert('Please enter a unique, non-empty name.');
+        return;
+    }
+    refreshColorSetSelect();
+}
+
+function promptDeleteColorSet() {
+    var current = getActiveSetName();
+    if (current === BLANK_SET_NAME) {
+        alert('The "' + BLANK_SET_NAME + '" set can\'t be deleted.');
+        return;
+    }
+    if (!confirm('Delete color set "' + current + '"? This cannot be undone.')) { return; }
+    deleteColorSet(current);
+    switchColorSet(getActiveSetName());
+}
+
+function exportUserData() {
+    // Download the active color set as { name, colors } JSON.
+    var store = loadColorSets();
+    var dataObject = { name: store.active, colors: getActiveColors() };
 
     var jsonString = JSON.stringify(dataObject, null, 2);
     var blob = new Blob([jsonString], { type: 'application/json' });
     var link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
 
-    link.download = 'Hanzi_Colourings.json'; // TODO: Set the download attribute with a user pickedfile name
+    link.download = (store.active || 'Hanzi_Colourings').replace(/[^\w\-]+/g, '_') + '.json';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1113,25 +1305,43 @@ function readJSONFile(file, callback) {
     reader.readAsText(file);
 }
 
-// Function to add data from JSON file to localStorage
+// Import a color set from a JSON file as a NEW set (never clobbering existing
+// ones). Accepts both the current { name, colors } shape and legacy flat files
+// ({ "<codepoint>": "<hex>", ... }).
 function addToLocalStorage(jsonFile) {
     readJSONFile(jsonFile, function (error, data) {
         if (error) {
             console.error('Error reading JSON file:', error);
-        } else {
-            // Importing colourings must not wipe the user's menu preferences.
-            var savedOptions = localStorage.getItem('infoOptions');
-            localStorage.clear();
-            if (savedOptions !== null) {
-                localStorage.setItem('infoOptions', savedOptions);
-            }
-            // Add each imported key-value pair (colour keys) to localStorage
-            Object.keys(data).forEach(function (key) {
-                localStorage.setItem(key, data[key]);
-            });
-            console.log('Data added to localStorage successfully!');
-            generateMacroGrid(currentInputString);
+            alert('Could not read that file.');
+            return;
         }
+
+        var name, colors;
+        if (data && data.colors && typeof data.colors === 'object') {
+            name = (data.name || 'Imported').toString();
+            colors = data.colors;
+        } else if (data && typeof data === 'object') {
+            // Legacy flat format: keep only hex-codepoint colour keys.
+            name = 'Imported';
+            colors = {};
+            Object.keys(data).forEach(function (key) {
+                if (/^[0-9a-f]+$/i.test(key)) { colors[key] = data[key]; }
+            });
+        } else {
+            alert('That file is not a valid color set.');
+            return;
+        }
+
+        // De-duplicate the name so existing sets survive, then activate it.
+        var store = loadColorSets();
+        var unique = name;
+        var n = 2;
+        while (store.sets[unique]) { unique = name + ' (' + (n++) + ')'; }
+        store.sets[unique] = colors;
+        saveColorSets();
+
+        switchColorSet(unique);
+        console.log('Imported color set "' + unique + '".');
     });
 }
 
@@ -1246,7 +1456,6 @@ var colors = [
 
 // Call the functions to create UI elements when the page loads
 initScriptToggle();
-applyColoringsVisibility(localStorage.getItem('coloringsHidden') === 'true');
 fetchCharacterSetNames();
 createColorButtons();
 createMenu();

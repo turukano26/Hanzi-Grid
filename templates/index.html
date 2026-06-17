@@ -25,11 +25,13 @@
             <input type="color" id="colorPicker" value="#000000">
         </div>
         <div id="colorButtons"></div>
-        <div>
-            <button id="togglePaintBtn" onclick="toggleCursor()">Enable Paint Mode</button>
+        <div class="color-set-switcher">
+            <label for="colorSetSelect">Set:</label>
+            <select id="colorSetSelect" class="character-set-dropdown"></select>
+            <button id="newColorSetBtn" type="button">+ New</button>
         </div>
         <div>
-            <button id="toggleColoringsBtn" onclick="toggleColorings()">Hide Colors</button>
+            <button id="togglePaintBtn" onclick="toggleCursor()">Enable Paint Mode</button>
         </div>
         <div>
             <button id="open-popup-menu-btn" class="popup-menu-btn">Menu</button>
@@ -50,18 +52,27 @@
 
                 <div class="submenu" id="importexportmenu">
 
-                    <h2>Import/Export Colorings</h2>
-                    <h3>Use this to save your current colorings as a .json file</h3>
+                    <h2>Color Sets</h2>
+                    <h3>Create, rename, or delete the active color set. Switch
+                        sets from the "Set" dropdown in the top bar.</h3>
+                    <div>
+                        <button id="newColorSet">New</button>
+                        <button id="renameColorSet">Rename</button>
+                        <button id="deleteColorSet">Delete</button>
+                    </div>
+                    <br>
+
+                    <h3>Use this to save the active color set as a .json file</h3>
                     <div><button id="export">Export</button></div>
                     <br>
 
-                    <h3>Use this to upload a .json file with your saved colorings. <br>
-                        Be careful! This will overwrite all your current colorings!</h3>
+                    <h3>Use this to upload a .json file. <br>
+                        It is imported as a new set — your existing sets are kept.</h3>
                     <div><input type="file" id="fileInput" accept=".json"></div>
                     <br>
 
-                    <h3>Use this to reset all your current colorings. Be careful!</h3>
-                    <div><button id="clear">Clear All</button></div>
+                    <h3>Use this to clear all colorings in the active set. Be careful!</h3>
+                    <div><button id="clear">Clear This Set</button></div>
                     <br>
 
 

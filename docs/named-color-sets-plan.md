@@ -18,6 +18,12 @@ touched. All state stays in `localStorage`.
 - **Export/Import:** per-set. Export writes the active set (`{name, colors}`);
   import adds it as a **new** set without clobbering others. Old flat `.json`
   files still import (as a new set).
+- **Blank set (replaces "Hide Colors"):** a permanent, uneditable, always-empty
+  set named `"Blank"`. Switching to it shows the grid with no colourings — the
+  replacement for the old Hide Colors toggle, which is removed. It can't be
+  painted into, renamed, or deleted; `loadColorSets` guarantees it always exists
+  alongside at least one editable set. `isColoringEditable()` gates every paint
+  path (`setCellColor`, the paint-mode click branches, and `changeColor`).
 
 ## Storage model
 

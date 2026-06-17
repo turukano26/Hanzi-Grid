@@ -172,12 +172,6 @@ body {
     background-color: white;
 }
 
-/* When colourings are toggled off, override the inline per-cell background
-   (still stored, just hidden) back to the default white. */
-body.colorings-hidden span[data-unicode] {
-    background-color: white !important;
-}
-
 /* Character-set typed-block documents (v2) ------------------------------- */
 
 /* Section headings: a neutral element (not real <h1>-<h5>) so the heading
@@ -299,10 +293,9 @@ body.colorings-hidden span[data-unicode] {
     margin-right: 10px;
 }
 
-/* Active-state highlight for the paint-mode / hide-colors toggle buttons,
+/* Active-state highlight for the paint-mode toggle button,
    matching the selected state of the 繁/简/日 script toggle. */
-#togglePaintBtn[aria-pressed="true"],
-#toggleColoringsBtn[aria-pressed="true"] {
+#togglePaintBtn[aria-pressed="true"] {
     background: #333;
     color: #fff;
 }
@@ -484,6 +477,17 @@ body {
 
 .character-set-dropdown {
     padding: 5px;
+}
+
+/* Top-bar color-set switcher: label + dropdown + New button, inline. */
+.color-set-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.color-set-switcher label {
+    font-size: 14px;
 }
 
 .top-menu .script-toggle {
