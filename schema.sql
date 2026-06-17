@@ -162,6 +162,10 @@ UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_ipa
 -- pinyin_wade_giles transform, so every Mandarin reading with a Pinyin shows a
 -- Wade-Giles spelling (with a superscript Chao tone number per syllable).
 UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_wade_giles' WHERE id = 3;
+-- Zhùyīn / Bopomofo (4) is likewise not stored; derive it from Pīnyīn (1) via the
+-- pinyin_zhuyin transform, so every Mandarin reading with a Pinyin shows a
+-- Bopomofo spelling (with the standard tone marks, neutral tone dot prepended).
+UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_zhuyin' WHERE id = 4;
 -- Cantonese IPA, likewise derived from Jyutping (10): 'IPA' (12) phonemes only,
 -- 'IPA (with tones)' (13) with a Chao tone letter per syllable.
 UPDATE transcription_systems SET derived_from_ts_id = 10, transform = 'jyutping_ipa' WHERE id = 12;
