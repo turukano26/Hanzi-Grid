@@ -133,6 +133,14 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
 -- old COALESCE(kana, hepburn) + _kana_to_romaji path exactly, because kana_romaji
 -- only lowercases an already-romaji (orphan Unihan) value.
 UPDATE transcription_systems SET derived_from_ts_id = 32, transform = 'kana_romaji' WHERE id = 30;
+-- Kana (32) is the mirror image: most readings store kana (Kanjidic), but orphan
+-- Unihan readings store only romaji under Hepburn (30). For those, derive the
+-- Kana back from Hepburn via romaji_kana, so every Japanese reading offers both
+-- kana and Hepburn (and, in turn, IPA). romaji_kana is dual-mode — a value that
+-- already has kana is passed through — so this is a no-op on stored kana. This is
+-- the reverse of derivation 30→32 above; the two never form an actual cycle
+-- because exactly one of Hepburn/Kana is stored per reading (see _resolve_ts_value).
+UPDATE transcription_systems SET derived_from_ts_id = 30, transform = 'romaji_kana' WHERE id = 32;
 -- Korean Revised Romanization (40) is not stored; derive it from Hangul (41) via
 -- hangul_revised at render time, so every Hangul reading shows a romanization
 -- even where Unihan supplied no Yale (e.g. 두음법칙 forms like 女's 여).

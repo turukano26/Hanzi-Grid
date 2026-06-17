@@ -26,6 +26,20 @@ DEFAULT_DB = ROOT / "omnihanzi.db"
 CACHE_DIR = ROOT / "data" / "unihan"
 UNIHAN_URL = "https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip"
 
+sys.path.insert(0, str(ROOT))
+from transcriptions.romaji import _kana_to_romaji  # noqa: E402
+from transcriptions.romaji_kana import romaji_to_kana  # noqa: E402
+
+
+def _romaji_to_hepburn(val: str) -> str:
+    """Canonicalize an orphan Unihan kJapaneseOn/Kun romaji reading to true
+    Hepburn. The old format is mostly Hepburn but spells ふ as 'HU' (not 'FU') and
+    has a few redundant-y palatals ('CHYU'); round-tripping through kana normalizes
+    those (HU→ふ→fu, CHYU→ちゅ→chu) and lowercases, so an orphan reading stores the
+    same Hepburn a Kanjidic kana reading would derive. Already-Hepburn values are
+    unchanged (idempotent)."""
+    return _kana_to_romaji(romaji_to_kana(val))
+
 # ---------------------------------------------------------------------------
 # IDs from schema.sql seed data
 # ---------------------------------------------------------------------------
@@ -438,6 +452,10 @@ def import_japanese(
             # Detect if kana (contains CJK/kana codepoints) or romaji
             is_kana = any("\u3040" <= c <= "\u30FF" for c in val)
             ts_id = TS_KANA if is_kana else TS_HEPBURN
+            # Store kana verbatim; canonicalize orphan romaji to true Hepburn so it
+            # matches (and the dedup romaji bridge can collapse it onto) a Kanjidic
+            # kana twin.
+            store_val = val if is_kana else _romaji_to_hepburn(val)
 
             cur.execute(
                 "INSERT INTO readings (etymology_id, kind, category, sort_order) "
@@ -452,7 +470,7 @@ def import_japanese(
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
-                (reading_id, ts_id, val),
+                (reading_id, ts_id, store_val),
             )
             if cp not in primary_readings:
                 primary_readings[cp] = reading_id
@@ -463,6 +481,7 @@ def import_japanese(
             sort_idx += 1
             is_kana = any("\u3040" <= c <= "\u30FF" for c in val)
             ts_id = TS_KANA if is_kana else TS_HEPBURN
+            store_val = val if is_kana else _romaji_to_hepburn(val)
             has_okurigana = "." in val
 
             features = '{"okurigana": true}' if has_okurigana else None
@@ -480,7 +499,7 @@ def import_japanese(
             cur.execute(
                 "INSERT INTO reading_transcriptions (reading_id, transcription_system_id, value) "
                 "VALUES (?, ?, ?)",
-                (reading_id, ts_id, val),
+                (reading_id, ts_id, store_val),
             )
             if cp not in primary_readings:
                 primary_readings[cp] = reading_id

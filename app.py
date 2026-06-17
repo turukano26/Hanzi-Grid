@@ -11,6 +11,7 @@ from transcriptions.hangul_roman import hangul_to_revised, hangul_to_ipa
 from transcriptions.pinyin_ipa import pinyin_to_ipa, pinyin_to_ipa_tones
 from transcriptions.jyutping_ipa import jyutping_to_ipa, jyutping_to_ipa_tones
 from transcriptions.kana_ipa import kana_to_ipa
+from transcriptions.romaji_kana import romaji_to_kana
 
 
 
@@ -111,6 +112,11 @@ TRANSFORMS = {
     'jyutping_ipa_tones': jyutping_to_ipa_tones,
     'hangul_ipa': hangul_to_ipa,
     'kana_ipa': kana_to_ipa,
+    # romaji_kana is category-sensitive (on'yomi → katakana, kun'yomi →
+    # hiragana), so _resolve_ts_value calls romaji_to_kana directly with the
+    # script flag rather than through this single-arg registry; the hiragana
+    # default is registered for completeness/standalone use.
+    'romaji_kana': romaji_to_kana,
     'lower': str.lower,
 }
 
@@ -245,6 +251,45 @@ def _build_info_tree():
 
 
 TREE = _build_info_tree()
+
+# Full derivation metadata for *every* transcription system (not just the enabled
+# leaves), keyed by id → (derived_from_ts_id, transform). _resolve_ts_value chains
+# through this, so an enabled system can derive from a disabled intermediate one
+# (e.g. IPA → Kana → Hepburn for an orphan reading that stores only romaji).
+TS_META = {
+    row[0]: (row[1], row[2]) for row in db.execute(
+        "SELECT id, derived_from_ts_id, transform FROM transcription_systems")
+}
+
+
+def _resolve_ts_value(ts_id, stored, category, _seen=None):
+    """One transcription system's value for a reading: its stored value, else the
+    value derived from its source system — chaining through `derived_from`, with
+    each level applying its own transform. `category` ('on'/'kun') picks the kana
+    script for the romaji_kana transform. Returns None when nothing in the chain
+    is stored. The `_seen` guard breaks the Hepburn⇄Kana derivation cycle (each is
+    the other's source, but only one is ever stored for a given reading)."""
+    if _seen is None:
+        _seen = set()
+    if ts_id in _seen:
+        return None
+    _seen.add(ts_id)
+
+    value = stored.get(ts_id)
+    derived_from, transform = TS_META.get(ts_id, (None, None))
+    if value is None:
+        if derived_from is None:
+            return None
+        value = _resolve_ts_value(derived_from, stored, category, _seen)
+        if value is None:
+            return None
+
+    if transform == 'romaji_kana':
+        return romaji_to_kana(value, katakana=(category == 'on'))
+    if transform:
+        return TRANSFORMS[transform](value)
+    return value
+
 
 # ---------------------------------------------------------------------------
 # Search (Pinyin / Romaji) — queried straight from SQLite.
@@ -489,13 +534,9 @@ def _fetch_reading_rows(codepoint, language_id, *, transcriptions, category=None
 
         trs = []
         for ts in inline_ts:
-            value = stored.get(ts['ts_id'])
-            if value is None and ts['derived_from_ts_id'] is not None:
-                value = stored.get(ts['derived_from_ts_id'])
+            value = _resolve_ts_value(ts['ts_id'], stored, category)
             if value is None:
                 continue
-            if ts['transform']:
-                value = TRANSFORMS[ts['transform']](value)
             trs.append({'code': ts['code'], 'label': ts['label'], 'value': value})
 
         # Eumhun (raw libhangul string) is shown on its own line, appended to the
