@@ -313,9 +313,25 @@ body {
     flex-direction: column;
 }
 
-.paintbrush-cursor {
-    cursor: crosshair;
-    /* Set the paintbrush cursor style */
+/* The paint-mode cursor is set inline by updatePaintColorUI() (a colour-aware
+   data-URI bucket); `.paintbrush-cursor` is just the JS state flag, no styles. */
+
+/* Square icon-only buttons (e.g. the paint-mode toggle). */
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.icon-btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .search-column {

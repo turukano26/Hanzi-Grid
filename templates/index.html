@@ -25,13 +25,24 @@
             <input type="color" id="colorPicker" value="#000000">
         </div>
         <div id="colorButtons"></div>
+        <div>
+            <button id="togglePaintBtn" type="button" class="icon-btn" onclick="toggleCursor()"
+                title="Enable paint mode" aria-label="Toggle paint mode" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <g transform="translate(24,0) scale(-1,1)">
+                        <path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" />
+                        <path d="m5 2 5 5" />
+                        <path d="M2 13h15" />
+                        <path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z" />
+                    </g>
+                </svg>
+            </button>
+        </div>
         <div class="color-set-switcher">
             <label for="colorSetSelect">Set:</label>
             <select id="colorSetSelect" class="character-set-dropdown"></select>
             <button id="newColorSetBtn" type="button">+ New</button>
-        </div>
-        <div>
-            <button id="togglePaintBtn" onclick="toggleCursor()">Enable Paint Mode</button>
         </div>
         <div>
             <button id="open-popup-menu-btn" class="popup-menu-btn">Menu</button>

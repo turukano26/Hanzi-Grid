@@ -875,6 +875,8 @@ function createMenu() {
         const selectedColor = colorPicker.value;
         changeColor(selectedColor);
     });
+    // Live-tint the paint-bucket icon/cursor while the picker is being dragged.
+    colorPicker.addEventListener('input', updatePaintColorUI);
 
     // Event listener for the Export Button
     const exportButton = document.getElementById('export')
@@ -980,6 +982,9 @@ function changeColor(color) {
     // Set the value to the selected color
     colorPicker.value = color;
 
+    // Reflect the new selection in the paint-bucket icon and cursor.
+    updatePaintColorUI();
+
     // The Blank set is read-only — picking a colour does nothing.
     if (!isColoringEditable()) { return; }
 
@@ -1000,15 +1005,62 @@ function changeColor(color) {
     });
 }
 
+// ----- Paint-bucket cursor tinting -----------------------------------------
+// While painting, the cursor is a paint bucket whose bottom half + drop are
+// filled with the selected colour. The four icon paths (mirrored to pour left)
+// are kept in sync with the plain, uncoloured outline inline SVG in index.html.
+var BUCKET_PATHS = {
+    body: 'm19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z',
+    handle: 'm5 2 5 5',
+    rim: 'M2 13h15',
+    drop: 'M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z'
+};
+
+function currentPaintColor() {
+    var picker = document.getElementById('colorPicker');
+    return (picker && picker.value) || '#000000';
+}
+
+// Build a paint-bucket cursor (32px): the bucket's upper half is white, its
+// bottom half + drop are filled with `color`, and a black outline sits on top
+// (no halo). Returned as a `cursor` value with the pour-tip hotspot and a
+// crosshair fallback.
+function paintBucketCursorCss(color) {
+    var P = BUCKET_PATHS;
+    var allPaths = '<path d="' + P.body + '"/><path d="' + P.handle + '"/>'
+        + '<path d="' + P.rim + '"/><path d="' + P.drop + '"/>';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">'
+        + '<defs><clipPath id="b"><rect x="0" y="13" width="24" height="12"/></clipPath></defs>'
+        + '<g transform="translate(24,0) scale(-1,1)">'
+        + '<path fill="#ffffff" stroke="none" d="' + P.body + '"/>'  // white bucket (upper half)
+        + '<g stroke="none" fill="' + color + '">'                  // paint: bottom half + drop
+        + '<path clip-path="url(#b)" d="' + P.body + '"/><path d="' + P.drop + '"/></g>'
+        + '<g fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+        + allPaths + '</g>'                                         // black outline on top
+        + '</g></svg>';
+    return "url('data:image/svg+xml," + encodeURIComponent(svg) + "') 4 28, crosshair";
+}
+
+// While paint mode is active, set the cursor to a paint bucket filled with the
+// currently selected colour. The toolbar button stays a plain outline.
+function updatePaintColorUI() {
+    // Set the colour-aware bucket cursor while painting; cleared when paint
+    // mode is off so the default cursor returns.
+    document.body.style.cursor = document.body.classList.contains('paintbrush-cursor')
+        ? paintBucketCursorCss(currentPaintColor())
+        : '';
+}
+
 // Function to toggle the paintbrush mode (cursor + click-to-colour behaviour).
 // The `paintbrush-cursor` body class is the single source of truth.
 function toggleCursor() {
     const on = document.body.classList.toggle('paintbrush-cursor');
     const btn = document.getElementById('togglePaintBtn');
     if (btn) {
-        btn.textContent = on ? 'Disable Paint Mode' : 'Enable Paint Mode';
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.title = on ? 'Disable paint mode' : 'Enable paint mode';
     }
+    updatePaintColorUI();
 }
 
 function intializeInfoColumn() {
@@ -1459,6 +1511,7 @@ initScriptToggle();
 fetchCharacterSetNames();
 createColorButtons();
 createMenu();
+updatePaintColorUI();  // tint the paint-bucket icon with the initial colour
 initializeSearchBar();
 // Load the DB-derived menu tree + enabled options first, then seed the info column.
 fetchInfoOptions(intializeInfoColumn);
