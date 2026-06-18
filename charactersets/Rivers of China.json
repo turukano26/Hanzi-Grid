@@ -5,7 +5,7 @@
     {
       "type": "text",
       "size": 4,
-      "text": "Single hanzi that are the name of a particular Chinese river. Most carry the “three-drops-of-water” radical 氵; click any character to see its readings and the river it names.\nUse the 繁 / 简 / 日 switch by the set dropdown to toggle script — the two headline words and the major rivers carry their Traditional/Simplified forms; the rest are shown simplified."
+      "text": "Single hanzi that are the name of a particular Chinese river. Most carry the “three-drops-of-water” radical 氵; click any character to see its readings and the river it names.\nUse the 繁 / 简 / 日 switch by the set dropdown to toggle script — every character with distinct Traditional and Simplified forms carries both, so the switch shows the right glyph; characters identical in both scripts appear once."
     },
     {
       "type": "section",
@@ -47,11 +47,11 @@
         {
           "type": "text",
           "size": 5,
-          "text": "Smaller but real, identifiable rivers — mostly tributaries scattered across the provinces (the Yi and Si of Shandong, the Yuan and Li of Hunan, the Tuo and Fu of Sichuan, and so on). Shown simplified."
+          "text": "Smaller but real, identifiable rivers — mostly tributaries scattered across the provinces (the Yi and Si of Shandong, the Yuan and Li of Hunan, the Tuo and Fu of Sichuan, and so on)."
         },
         {
           "type": "grid",
-          "cells": "沂泗汶淄潍洙沭漯漳淇洹溱汝汴颍涡淠濉滁溧沅澧沩涟浏沱涪滦滏洨湟洮涑沁浔浈溠滹沔"
+          "cells": "沂泗汶淄(濰TJ潍S)洙沭漯漳淇洹溱汝汴(潁TJ颍S)(渦TJ涡S)淠濉滁溧沅澧(潙TJ沩S)(漣TJ涟S)(瀏TJ浏S)沱涪(灤TJ滦S)滏洨湟洮涑沁(潯TJ浔S)(湞TJ浈S)溠滹沔"
         }
       ]
     },
@@ -67,7 +67,7 @@
         },
         {
           "type": "grid",
-          "cells": "㕣㞴㞶㞿㟚㟩㟭㲼㲽㳀㳊㳋㳏㳖㳙㳝㳡㳥㳦㳪㳵㳶㳸㳹㳾㴧㴪㴬㴰㴲㴴㵂㵄㵅㵋㵏㵐㵑㵧㵨㵲𫞛㶏㶚㶛㶞㶟䣢䦊䦠䧤剡妫汧汳汷沘沣沪沬泃泇泌泒泖泜泲泶泷泸泺洢洣洧洭洺洽浉浍浐浕浠浭浯涐涔涖涞涢淓淝淞淦淯渑渝渮渶𣲗湑湓湔涌湨溆溇溍溎溤溵滈滊滍滘滠𬇹漖漨漷漹潆潈𣲘潘潞潵沄澨澴澽濂𣸣濋濑濠濮濲瀍瀑瀔瀞瀵瀼灈灉甬磻祊绛菏邕邗郪𤁳𩶉𰜢𰝋"
+          "cells": "㕣㞴㞶㞿㟚㟩㟭㲼㲽㳀㳊㳋㳏㳖㳙㳝(濄TJ㳡S)㳥㳦㳪㳵㳶㳸㳹㳾㴧㴪㴬㴰㴲㴴㵂㵄㵅㵋㵏㵐㵑㵧㵨㵲(㶆TJ𫞛S)㶏㶚㶛㶞㶟䣢䦊䦠䧤剡(嬀TJ妫S)汧汳汷沘(灃TJ沣S)(滬TJ沪S)沬泃泇泌泒泖泜泲(澩TJ泶S)(瀧TJ泷S)(瀘TJ泸S)(濼TJ泺S)洢洣洧洭洺洽(溮TJ浉S)(澮TJ浍S)(滻TJ浐S)(濜TJ浕S)浠浭浯涐涔涖(淶TJ涞S)(溳TJ涢S)淓淝淞淦淯(澠TJ渑S)渝渮渶(湋TJ𣲗S)湑湓湔涌湨(漵TJ溆S)(漊TJ溇S)溍溎溤溵滈滊滍滘(灄TJ滠S)(漍TJ𬇹S)漖漨漷漹(瀠TJ潆S)潈(潕TJ𣲘S)潘潞潵(澐TJ沄S)澨澴澽濂(濆TJ𣸣S)濋(瀨TJ濑S)濠濮濲瀍瀑瀔瀞瀵瀼灈灉甬磻祊(絳TJ绛S)菏邕邗郪𤁳𩶉𰜢𰝋"
         }
       ]
     }
