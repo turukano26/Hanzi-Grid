@@ -92,7 +92,7 @@ templates/index.html   # Single-page HTML shell (Jinja2)
 static/script.js       # All frontend logic (vanilla JS, no build step)
 static/styles.css      # Styles
 transcriptions/        # Pure-Python romanization/IPA transforms (romaji, IPA, Wade-Giles…)
-charactersets/*.json   # Character-set documents (v2 typed-block format), rendered client-side
+charactersets/*.yaml   # Character-set documents (v2 typed-block format), rendered client-side
 schema.sql             # Full DB schema + seed data (languages, transcription systems, sources)
 omnihanzi.db           # SQLite database — the single data store (gitignored)
 scripts/               # DB build pipeline (importers + rebuild orchestrator)
@@ -146,7 +146,7 @@ docker run -p 8081:8081 omni-hanzi
 ```
 
 ### Requirements
-Python 3.11+, Flask, gunicorn, and `regex` (see `requirements.txt`).
+Python 3.11+, Flask, gunicorn, `regex`, and PyYAML (see `requirements.txt`).
 
 ---
 
@@ -161,10 +161,12 @@ python scripts/rebuild_db.py --skip-downloads # reuse cached data/ dumps
 
 The pipeline runs, in order: `create_db.py` (apply `schema.sql`) → `import_unihan.py` →
 `import_kanjidic2.py` → `import_cedict.py` → `import_cccanto.py` → `import_libhangul.py` →
-`import_character_sets.py` → `dedup_readings.py`. Each importer can also be run standalone with
+`dedup_readings.py`. Each importer can also be run standalone with
 `--db` / `--skip-download`. `dedup_readings.py` is an idempotent post-pass that merges duplicate
 readings inserted independently by each importer (including cross-system "bridge" merges for
-Japanese romaji↔kana and Korean Yale↔Hangul).
+Japanese romaji↔kana and Korean Yale↔Hangul). Character sets are not part of this pipeline —
+they are hand-authored YAML files in `charactersets/` (HSK 3.0 is generated from a CSV by
+`scripts/generate_hsk30_charset.py`).
 
 ### Data sources
 - **Unihan** (Unicode) — pan-CJK readings, definitions, attributes.

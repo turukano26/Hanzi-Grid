@@ -5,6 +5,7 @@ import sqlite3
 import threading
 import functools
 import regex
+import yaml
 
 from transcriptions.romaji import _kana_to_romaji
 from transcriptions.hangul_roman import hangul_to_revised, hangul_to_ipa
@@ -22,11 +23,12 @@ app = Flask(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Character sets (v2 typed-block JSON documents) — lazy loaded.
+# Character sets (v2 typed-block YAML documents) — lazy loaded.
 # Startup builds only a `label -> filepath` index (parsing each file solely for
 # its `label`); each document is read + parsed on demand in /get_character_set
-# (LRU-cached). The document body is opaque to the server — it is returned
-# verbatim and rendered entirely client-side. See docs/flexible_character_sets_plan.md.
+# (LRU-cached). The document body is opaque to the server — it is parsed from
+# YAML, returned verbatim as JSON and rendered entirely client-side.
+# See docs/flexible_character_sets_plan.md.
 # ---------------------------------------------------------------------------
 CHARSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'charactersets')
 
@@ -34,12 +36,12 @@ CHARSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'characte
 def _build_charset_index():
     index = {}
     for fname in os.listdir(CHARSET_DIR):
-        if not fname.endswith('.json'):
+        if not fname.endswith(('.yaml', '.yml')):
             continue
         path = os.path.join(CHARSET_DIR, fname)
         try:
             with open(path, 'r', encoding='utf-8') as file:
-                label = json.load(file).get('label')
+                label = yaml.safe_load(file).get('label')
             if label:
                 index[label] = path
         except Exception as e:
@@ -53,7 +55,7 @@ character_set_index = _build_charset_index()
 @functools.lru_cache(maxsize=None)
 def _load_character_set(path):
     with open(path, 'r', encoding='utf-8') as file:
-        return json.load(file)
+        return yaml.safe_load(file)
 
 # ---------------------------------------------------------------------------
 # SQLite database (used by character info sheet)

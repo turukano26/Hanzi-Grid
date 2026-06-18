@@ -32,7 +32,7 @@ already covered by every system CJK font (Source Han / Noto / YaHei / PingFang)
 — so Ext A is left to the system font and is not subset here.
 
 Re-run this whenever a character set gains a new supplementary-plane character;
-it scans every charactersets/*.json, so the subsets always match the corpus.
+it scans every charactersets/*.yaml, so the subsets always match the corpus.
 
 Usage:
     python scripts/build_ext_font_subset.py                 # download Plangothic fresh
@@ -44,11 +44,12 @@ Requires fonttools[woff2] (fontTools + brotli), already used elsewhere in dev.
 import argparse
 import glob
 import io
-import json
 import sys
 import urllib.request
 import zipfile
 from pathlib import Path
+
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 CHARSET_DIR = ROOT / "charactersets"
@@ -78,7 +79,7 @@ OUTPUTS = [
 
 def collect_sip_codepoints():
     """Every supplementary-plane (>= U+20000) codepoint used anywhere in the
-    character-set JSON files."""
+    character-set YAML files."""
     cps = set()
 
     def walk(o):
@@ -93,9 +94,9 @@ def collect_sip_codepoints():
             for v in o:
                 walk(v)
 
-    for fn in sorted(glob.glob(str(CHARSET_DIR / "*.json"))):
+    for fn in sorted(glob.glob(str(CHARSET_DIR / "*.yaml"))):
         with open(fn, encoding="utf-8") as fh:
-            walk(json.load(fh))
+            walk(yaml.safe_load(fh))
     return cps
 
 

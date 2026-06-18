@@ -47,7 +47,7 @@ app.py                          # Flask backend — all routes, SQLite + parquet
 templates/index.html            # Single-page HTML shell (Jinja2)
 static/script.js                # All frontend logic (vanilla JS, no build step)
 static/styles.css               # Styles
-charactersets/*.json            # Character set definitions, generated from the DB
+charactersets/*.yaml            # Character set definitions (hand-authored v2 YAML; not in the DB)
 omnihanzi.db                    # SQLite database — the primary data store (gitignored)
 schema.sql                      # Full DB schema + seed data (languages, transcription systems, sources)
 data/                           # Raw source dumps: unihan/, cedict/, kanjidic2/ (gitignored)
@@ -80,8 +80,9 @@ Normalized around characters → etymologies → readings → transcriptions/sen
   IDs are resolved dynamically from the DB while building the info-box menu tree (`_build_info_tree`);
   the search helpers use a few hard-coded constants (`LANG_MANDARIN`, `LANG_JAPANESE`,
   `TS_PINYIN_NUM`, `TS_HEPBURN`, `TS_KANA`) that must match the seed data in `schema.sql`.
-- Character sets live in `character_set_nodes` (self-referential tree via `parent_id`) +
-  `character_set_members`. The JSON files in `charactersets/` are *generated* from these tables.
+- Character sets are **not** in the DB: they are file-based v2 YAML documents in `charactersets/`,
+  loaded directly by `app.py` (see "Character set YAML format" below). Most are hand-authored; the
+  HSK 3.0 set is generated from a CSV by `scripts/generate_hsk30_charset.py`.
 
 ### Building the database
 
@@ -94,10 +95,11 @@ python scripts/rebuild_db.py --skip-downloads  # reuse cached data/ dumps instea
 
 It runs, in order: `create_db.py` (apply `schema.sql`) → `import_unihan.py` →
 `import_kanjidic2.py` → `import_cedict.py` → `import_cccanto.py` → `import_libhangul.py` →
-`import_character_sets.py` → `dedup_readings.py`. Each importer can be run standalone with `--db`
+`dedup_readings.py`. Each importer can be run standalone with `--db`
 and `--skip-download`. Raw
 sources live under `data/` (Unihan, CC-CEDICT, CC-Canto, KANJIDIC2, libhangul), which is gitignored along with
-the `.db`.
+the `.db`. (Character sets are not part of this pipeline — they are hand-authored YAML files in
+`charactersets/`, with HSK 3.0 generated separately by `scripts/generate_hsk30_charset.py`.)
 
 `dedup_readings.py` is a post-import pass: each importer inserts readings independently, so the same
 pronunciation under one etymology starts as several reading rows (one per source). The pass merges
@@ -203,18 +205,34 @@ search sorted on), so the available `frequency_rank` / `grade_level` attributes 
   (e.g. `"4e00"` → `"#ff6060"`). Export/import serializes this as JSON.
 - Language toggles (checkboxes in the popup menu) are also persisted to `localStorage` by checkbox `id`.
 
-### Character set JSON format
+### Character set YAML format
 
-```json
-{
-  "label": "Jōyō Kanji",
-  "value": [
-    { "label": "First Grade", "value": "一二三四五六七八九十…" },
-    ...
-  ]
-}
+Each file in `charactersets/` is a v2 typed-block document, stored as **YAML** (parsed with
+`yaml.safe_load`; the body is opaque to the server, returned to the client as JSON and rendered
+entirely by `static/script.js`):
+
+```yaml
+version: 2
+label: Jōyō Kanji
+blocks:
+- type: text          # free-text block; `size` is a heading level (smaller = bigger)
+  text: |-
+    Intro paragraph. Multi-line text uses a literal block scalar.
+  size: 4
+- type: section       # collapsible group; nests via its own `blocks`
+  id: first-grade
+  title: First Grade
+  size: 3
+  blocks:
+  - type: grid        # the character grid; `cells` is the raw cell string
+    cells: 一二三四五六七八九十…
 ```
 
-Each file in `charactersets/` follows this shape (one level of `{label, value:string}` nodes;
-`generateMacroGrid` renders exactly one level). The DB models a deeper tree, but the exported JSON is
-flattened to this shape. `character_sets.json` at the root is an older/alternate copy of the same data.
+Block `type`s are `text`, `section` (recursive), and `grid`. `cells` may use the
+Traditional/Simplified/Japanese variant syntax (e.g. `(萬T万SJ)`) parsed by `parseCells` in
+`static/script.js`. These files are authored directly (not exported from the DB).
+
+When generating these files programmatically (see `scripts/generate_hsk30_charset.py`), dump with
+`allow_unicode=True, sort_keys=False, width=10**9` and a custom `str` representer that uses a literal
+block scalar (`|`) for multi-line strings — this keeps CJK readable and long `cells` strings on one
+line.

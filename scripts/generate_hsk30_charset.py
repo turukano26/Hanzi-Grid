@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate charactersets/HSK 3.0.json from data/hsk30/hsk30-chars.csv.
+"""Generate charactersets/HSK 3.0.yaml from data/hsk30/hsk30-chars.csv.
 
 Source: ivankra/hsk30 `hsk30-chars.csv` (3000 chars; columns Hanzi, Level,
 WritingLevel, Traditional, Freq, Examples). `Hanzi` is the simplified form,
@@ -22,13 +22,28 @@ The remaining `/`-separated variants are dropped: a cell shows one trad glyph.
 """
 
 import csv
-import json
 import os
+
+import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 CSV_PATH = os.path.join(ROOT, 'data', 'hsk30', 'hsk30-chars.csv')
-OUT_PATH = os.path.join(ROOT, 'charactersets', 'HSK 3.0.json')
+OUT_PATH = os.path.join(ROOT, 'charactersets', 'HSK 3.0.yaml')
+
+
+# Render multi-line strings (e.g. the intro paragraph) as literal block scalars
+# (|) for readability; never line-wrap so long `cells` strings stay on one line.
+def _str_representer(dumper, data):
+    style = '|' if '\n' in data else None
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style=style)
+
+
+class _YamlDumper(yaml.SafeDumper):
+    pass
+
+
+_YamlDumper.add_representer(str, _str_representer)
 
 # The first-listed variant is a rare/bound form; use a representative one instead.
 # (恶/佛/卜/铲 high-confidence; 迹/伙 borderline, included per request.)
@@ -110,8 +125,8 @@ def build():
 def main():
     doc = build()
     with open(OUT_PATH, 'w', encoding='utf-8') as f:
-        json.dump(doc, f, ensure_ascii=False, indent=2)
-        f.write('\n')
+        yaml.dump(doc, f, Dumper=_YamlDumper, allow_unicode=True,
+                  sort_keys=False, width=10**9, indent=2)
     counts = {b['id']: len(b['blocks'][0]['cells']) for b in doc['blocks'] if b['type'] == 'section'}
     print('wrote', OUT_PATH)
     for k, v in counts.items():

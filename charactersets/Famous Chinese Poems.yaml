@@ -1,0 +1,191 @@
+version: 2
+label: Famous Chinese Poems
+blocks:
+- type: text
+  text: |-
+    Ten of the best-loved poems in the Chinese canon. These are the verses nearly every schoolchild memorises.
+    Click any character in a poem to see its readings and meaning. Texts are in Traditional characters.
+  size: 4
+- type: section
+  id: p01-jingyesi
+  title: 1 · 靜夜思 - Quiet Night Thoughts
+  size: 2
+  blocks:
+  - type: text
+    text: 李白 Lǐ Bái · 唐 Tang · c. 726 CE
+  - type: text
+    interactive: true
+    text: |-
+      床前明月光，
+      疑是地上霜。
+      舉頭望明月，
+      低頭思故鄉。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p02-chunxiao
+  title: 2 · 春曉 - Spring Dawn
+  size: 2
+  blocks:
+  - type: text
+    text: 孟浩然 Mèng Hàorán · 唐 Tang · c. 730 CE
+  - type: text
+    interactive: true
+    text: |-
+      春眠不覺曉，
+      處處聞啼鳥。
+      夜來風雨聲，
+      花落知多少。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p03-dengguanquelou
+  title: 3 · 登鸛雀樓 - Climbing Stork Tower
+  size: 2
+  blocks:
+  - type: text
+    text: 王之渙 Wáng Zhīhuàn · 唐 Tang · c. 704 CE
+  - type: text
+    interactive: true
+    text: |-
+      白日依山盡，
+      黃河入海流。
+      欲窮千里目，
+      更上一層樓。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p04-wanglushanpubu
+  title: 4 · 望廬山瀑布 - Viewing Lushan Waterfall
+  size: 2
+  blocks:
+  - type: text
+    text: 李白 Lǐ Bái · 唐 Tang · c. 725 CE
+  - type: text
+    interactive: true
+    text: |-
+      日照香爐生紫煙，
+      遙看瀑布掛前川。
+      飛流直下三千尺，
+      疑是銀河落九天。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p05-chunwang
+  title: 5 · 春望 - Spring View
+  size: 2
+  blocks:
+  - type: text
+    text: 杜甫 Dù Fǔ · 唐 Tang · 757 CE
+  - type: text
+    interactive: true
+    text: |-
+      國破山河在，
+      城春草木深。
+      感時花濺淚，
+      恨別鳥驚心。
+      烽火連三月，
+      家書抵萬金。
+      白頭搔更短，
+      渾欲不勝簪。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p06-minnong
+  title: 6 · 憫農 - Pity the Farmer
+  size: 2
+  blocks:
+  - type: text
+    text: 李紳 Lǐ Shēn · 唐 Tang · c. 799 CE
+  - type: text
+    interactive: true
+    text: |-
+      鋤禾日當午，
+      汗滴禾下土。
+      誰知盤中飧，
+      粒粒皆辛苦。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p07-fengqiaoyebo
+  title: 7 · 楓橋夜泊 - Mooring by Maple Bridge at Night
+  size: 2
+  blocks:
+  - type: text
+    text: 張繼 Zhāng Jì · 唐 Tang · c. 756 CE
+  - type: text
+    interactive: true
+    text: |-
+      月落烏啼霜滿天，
+      江楓漁火對愁眠。
+      姑蘇城外寒山寺，
+      夜半鐘聲到客船。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p08-jiangxue
+  title: 8 · 江雪 - River Snow
+  size: 2
+  blocks:
+  - type: text
+    text: 柳宗元 Liǔ Zōngyuán · 唐 Tang · c. 807 CE
+  - type: text
+    interactive: true
+    text: |-
+      千山鳥飛絕，
+      萬徑人蹤滅。
+      孤舟蓑笠翁，
+      獨釣寒江雪。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p09-shuidiaogetou
+  title: 9 · 水調歌頭·明月幾時有 - Prelude to Water Melody
+  size: 2
+  blocks:
+  - type: text
+    text: 蘇軾 Sū Shì · 宋 Song · 1076 CE
+  - type: text
+    interactive: true
+    text: |-
+      明月幾時有？把酒問青天。
+      不知天上宮闕，今夕是何年。
+      我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。
+      起舞弄清影，何似在人間。
+      轉朱閣，低綺戶，照無眠。
+      不應有恨，何事長向別時圓？
+      人有悲歡離合，月有陰晴圓缺，此事古難全。
+      但願人長久，千里共嬋娟。
+  - type: text
+    text: |2+
+
+- type: section
+  id: p10-niannujiao
+  title: 10 · 念奴嬌·赤壁懷古 - Memories of Red Cliff
+  size: 2
+  blocks:
+  - type: text
+    text: 蘇軾 Sū Shì · 宋 Song · 1082 CE
+  - type: text
+    interactive: true
+    text: |-
+      大江東去，浪淘盡，千古風流人物。
+      故壘西邊，人道是，三國周郎赤壁。
+      亂石穿空，驚濤拍岸，捲起千堆雪。
+      江山如畫，一時多少豪傑。
+      遙想公瑾當年，小喬初嫁了，雄姿英發。
+      羽扇綸巾，談笑間，檣櫓灰飛煙滅。
+      故國神遊，多情應笑我，早生華髮。
+      人生如夢，一尊還酹江月。
+  - type: text
+    text: |2+
+
+...
