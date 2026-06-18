@@ -3,7 +3,8 @@ label: Oku no Hosomichi (Bashō)
 blocks:
 - type: text
   text: |-
-    Every hokku Matsuo Bashō (松尾芭蕉) composed in Oku no Hosomichi (奥の細道, “The Narrow Road to the Deep North”, 1689) — fifty haiku in the order of the journey, from his departure at Fukagawa (深川) to its end at Ōgaki (大垣).
+    Every hokku Matsuo Bashō (松尾芭蕉) composed in Oku no Hosomichi (奥の細道, “The Narrow Road to the Deep North”, 1689).
+    This includes fifty haiku in the order of the journey, from his departure at Fukagawa (深川) to its end at Ōgaki (大垣).
     Click any character in a verse to see its readings and meaning. The place name, season word (季語), and an English rendering accompany each haiku.
   size: 4
 - type: section
