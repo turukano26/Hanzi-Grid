@@ -423,6 +423,9 @@ body {
     text-align: center;
     display: flex;
     flex-direction: row;
+    max-width: 92vw;
+    max-height: 90vh;
+    overflow: auto;
 }
 
 #tabs {
@@ -464,7 +467,20 @@ body {
     display: block;
 }
 
-/* Dynamic info-options menu tree (built by renderLanguageTree) */
+/* Dynamic info-options menu tree (built by renderLanguageTree).
+   Laid out in multiple balanced columns so the (always-expanded) tree fits on
+   screen: up to 3 columns ~14em wide, the count shrinking on narrow viewports.
+   Each whole language family (depth-0) stays together within a single column. */
+#languageTree {
+    columns: 14em 3;
+    column-gap: 14px;
+}
+
+#languageTree .menu-depth-0 {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;   /* Safari */
+}
+
 #languageTree .menu-row {
     display: flex;
     align-items: center;

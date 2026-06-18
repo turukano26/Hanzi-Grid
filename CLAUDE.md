@@ -182,6 +182,19 @@ Cantonese has the same pair, derived from Jyutping (ts 10) via `transcriptions/j
 final against a closed rime table (so vowel-length and i/u→ɪ/ʊ-before-velar allophony is tabulated,
 not computed) and uses Jyutping's trailing tone digit.
 
+Vietnamese IPA is also derived (from Quốc Ngữ, ts 50) via `transcriptions/quocngu_ipa.py`, but
+additionally **split by dialect region** — the dialect being the interesting axis (Northern *tr* [tɕ]
+vs C/S [ʈ], the Northern diphthongs /iə ɨə uə/ that surface as long monophthongs in the South, the
+differing tone systems). Each dialect gets the same phonemes-only / with-tones pair the other tonal
+languages have, for **six** systems: **IPA (Northern)** (`ipa_northern`, ts 51, transform
+`quocngu_ipa_northern`) + **IPA (Northern, with tones)** (`ipa_northern_tones`, ts 54,
+`quocngu_ipa_northern_tones`), and likewise Central (ts 52/55) and Southern (ts 53/56). Tones are Chao
+tone letters (ˀ marks glottalisation). The module is a direct port of James Kirby's *vPhon* (GPL): it
+segments a syllable into onset/glide/nucleus/coda/tone, looks each up against vPhon's rule tables,
+then applies the dialect's surface transforms; the `_tones` variants only differ by appending the
+syllable's tone. Verified syllable-for-syllable against vPhon over its full sample wordlist
+(`tests/test_quocngu_ipa.py`).
+
 ### Search (`/get_search_results`)
 
 `searchType` selects one of three branches, all returning `{"search": "<chars>"}`:

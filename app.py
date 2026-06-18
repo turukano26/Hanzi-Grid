@@ -15,6 +15,11 @@ from transcriptions.zhuyin import pinyin_to_zhuyin
 from transcriptions.jyutping_ipa import jyutping_to_ipa, jyutping_to_ipa_tones
 from transcriptions.kana_ipa import kana_to_ipa
 from transcriptions.romaji_kana import romaji_to_kana
+from transcriptions.quocngu_ipa import (
+    quocngu_to_ipa_northern, quocngu_to_ipa_central, quocngu_to_ipa_southern,
+    quocngu_to_ipa_northern_tones, quocngu_to_ipa_central_tones,
+    quocngu_to_ipa_southern_tones,
+)
 
 
 
@@ -118,6 +123,12 @@ TRANSFORMS = {
     'jyutping_ipa_tones': jyutping_to_ipa_tones,
     'hangul_ipa': hangul_to_ipa,
     'kana_ipa': kana_to_ipa,
+    'quocngu_ipa_northern': quocngu_to_ipa_northern,
+    'quocngu_ipa_central': quocngu_to_ipa_central,
+    'quocngu_ipa_southern': quocngu_to_ipa_southern,
+    'quocngu_ipa_northern_tones': quocngu_to_ipa_northern_tones,
+    'quocngu_ipa_central_tones': quocngu_to_ipa_central_tones,
+    'quocngu_ipa_southern_tones': quocngu_to_ipa_southern_tones,
     # romaji_kana is category-sensitive (on'yomi → katakana, kun'yomi →
     # hiragana), so _resolve_ts_value calls romaji_to_kana directly with the
     # script flag rather than through this single-arg registry; the hiragana

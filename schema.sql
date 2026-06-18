@@ -125,8 +125,13 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     (43, 20, 'IPA',                 'ipa',             4),
     (44, 20, 'Eumhun',              'eumhun',          5),
     -- Northern Vietnamese
-    (50, 30, 'Quốc Ngữ',           'quoc_ngu',        1),
-    (51, 30, 'IPA',                 'ipa',             2);
+    (50, 30, 'Quốc Ngữ',                    'quoc_ngu',           1),
+    (51, 30, 'IPA (Northern)',               'ipa_northern',       2),
+    (54, 30, 'IPA (Northern, with tones)',   'ipa_northern_tones', 3),
+    (52, 30, 'IPA (Central)',                'ipa_central',        4),
+    (55, 30, 'IPA (Central, with tones)',    'ipa_central_tones',  5),
+    (53, 30, 'IPA (Southern)',               'ipa_southern',       6),
+    (56, 30, 'IPA (Southern, with tones)',   'ipa_southern_tones', 7);
 
 -- Per-system value derivations (see `derived_from_ts_id` / `transform` above).
 -- Hepburn (30) falls back to Kana (32) then romanizes it; this reproduces the
@@ -170,6 +175,17 @@ UPDATE transcription_systems SET derived_from_ts_id = 1, transform = 'pinyin_zhu
 -- 'IPA (with tones)' (13) with a Chao tone letter per syllable.
 UPDATE transcription_systems SET derived_from_ts_id = 10, transform = 'jyutping_ipa' WHERE id = 12;
 UPDATE transcription_systems SET derived_from_ts_id = 10, transform = 'jyutping_ipa_tones' WHERE id = 13;
+-- Vietnamese IPA is not stored; derive it from Quốc Ngữ (50) at render time, so
+-- every Vietnamese reading shows a broad IPA. Like the other tonal languages it
+-- comes in a phonemes-only / with-tones pair, but additionally split by dialect
+-- region — Northern (51/54), Central (52/55), Southern (53/56) — for six systems
+-- in all; ported from vPhon (see transcriptions/quocngu_ipa.py).
+UPDATE transcription_systems SET derived_from_ts_id = 50, transform = 'quocngu_ipa_northern'        WHERE id = 51;
+UPDATE transcription_systems SET derived_from_ts_id = 50, transform = 'quocngu_ipa_northern_tones'  WHERE id = 54;
+UPDATE transcription_systems SET derived_from_ts_id = 50, transform = 'quocngu_ipa_central'         WHERE id = 52;
+UPDATE transcription_systems SET derived_from_ts_id = 50, transform = 'quocngu_ipa_central_tones'   WHERE id = 55;
+UPDATE transcription_systems SET derived_from_ts_id = 50, transform = 'quocngu_ipa_southern'        WHERE id = 53;
+UPDATE transcription_systems SET derived_from_ts_id = 50, transform = 'quocngu_ipa_southern_tones'  WHERE id = 56;
 -- Middle Chinese Stimson / kTang (ts 60) is created by import_unihan.py, which
 -- seeds its transform = 'lower' there (this schema seed does not define ts 60).
 
