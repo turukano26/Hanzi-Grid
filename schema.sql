@@ -72,7 +72,7 @@ INSERT INTO languages (id, family_id, name, code, sort_order) VALUES
     (20, 3, 'Standard Korean',        'ko',  1),
     (21, 3, 'Jeju Dialect',            NULL,  2),
     -- Vietic
-    (30, 4, 'Northern Vietnamese',    'vi',  1),
+    (30, 4, 'Vietnamese',             'vi',  1),
     (31, 4, 'Southern Vietnamese',     NULL,  2),
     -- Other
     (40, 5, 'Sino-Xenic (General)',    NULL,  1);
@@ -124,7 +124,7 @@ INSERT INTO transcription_systems (id, language_id, name, code, sort_order) VALU
     (41, 20, 'Hangul',              'hangul',          3),
     (43, 20, 'IPA',                 'ipa',             4),
     (44, 20, 'Eumhun',              'eumhun',          5),
-    -- Northern Vietnamese
+    -- Vietnamese
     (50, 30, 'Quốc Ngữ',                    'quoc_ngu',           1),
     (51, 30, 'IPA (Northern)',               'ipa_northern',       2),
     (54, 30, 'IPA (Northern, with tones)',   'ipa_northern_tones', 3),
