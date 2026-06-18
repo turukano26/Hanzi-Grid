@@ -1,6 +1,5 @@
 # For Release TODOs
 
-- add IPA vietnamese, plus fix dialect situation
 - move japanese defs so theyre not under kun or on
 - add four character idioms
 - pop on open explaining how to use
@@ -19,3 +18,4 @@
 - add IPA japanese
 - add wade-giles
 - fix saving color sets
+- add IPA vietnamese, plus fix dialect situation

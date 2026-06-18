@@ -1,0 +1,462 @@
+version: 2
+label: Shared CJK Idioms
+defaultScript: T
+blocks:
+- type: text
+  text: |-
+    Four-character idioms that live in all three languages: Chinese 成語 chéngyǔ, Japanese 四字熟語 yojijukugo, and Korean 四字成語 sajaseong-eo. Most descend from a shared classical source (the Analects, Zhuangzi, the Records of the Grand Historian), so a literate reader in Beijing, Tokyo, or Seoul recognises them all.
+
+    Each entry gives the reading in all three languages: 中 Mandarin pīnyīn · 日 Japanese (rōmaji + kana) · 韓 Korean (Hangul + romanisation). 
+    
+    Click any character to see its full per-language readings, and use the 繁 / 简 / 日 switch by the set dropdown to show Traditional, Simplified, or Japanese character forms.
+  size: 4
+- type: section
+  id: idioms-strategy
+  title: Strategy & Conflict　兵
+  size: 2
+  blocks:
+  - type: section
+    id: idiom-simianchuge
+    title: Besieged on All Sides
+    size: 4
+    blocks:
+    - type: grid
+      cells: 四面楚歌
+    - type: text
+      text: |-
+        中 sì miàn chǔ gē　　日 shimen soka (しめんそか)　　韓 사면초가 samyeon-choga
+        Enemy songs rising on every side - surrounded and utterly isolated. (Xiang Yu trapped at Gaixia, 史記)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-woxinchangdan
+    title: Sleep on Brushwood, Taste Gall
+    size: 4
+    blocks:
+    - type: grid
+      cells: (臥TJ卧S)薪(嘗TJ尝S)(膽T胆SJ)
+    - type: text
+      text: |-
+        中 wò xīn cháng dǎn　　日 gashin shōtan (がしんしょうたん)　　韓 와신상담 wasin-sangdam
+        Endure deliberate hardship to steel yourself for a long-held goal or revenge. (King Goujian of Yue, 史記)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-yiwangdajin
+    title: Caught in One Net
+    size: 4
+    blocks:
+    - type: grid
+      cells: 一(網TJ网S)打(盡T尽SJ)
+    - type: text
+      text: |-
+        中 yī wǎng dǎ jìn　　日 ichimō dajin (いちもうだじん)　　韓 일망타진 ilmang-tajin
+        Round up the whole lot in a single stroke.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-baifabaizhong
+    title: A Hundred Shots, a Hundred Hits
+    size: 4
+    blocks:
+    - type: grid
+      cells: 百(發T発J发S)百中
+    - type: text
+      text: |-
+        中 bǎi fā bǎi zhòng　　日 hyappatsu hyakuchū (ひゃっぱつひゃくちゅう)　　韓 백발백중 baekbal-baekjung
+        Every shot finds its mark, unerringly accurate. (The archer Yang Youji, 戰國策)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-qianjunwanma
+    title: A Thousand Armies, Ten Thousand Horses
+    size: 4
+    blocks:
+    - type: grid
+      cells: 千(軍TJ军S)(萬T万SJ)(馬TJ马S)
+    - type: text
+      text: |-
+        中 qiān jūn wàn mǎ　　日 sengun banba (せんぐんばんば)　　韓 천군만마 cheongun-manma
+        An overwhelming military force, great power on the march.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-yichujifa
+    title: One Touch and It Erupts
+    size: 4
+    blocks:
+    - type: grid
+      cells: 一(觸T触SJ)即(發T発J发S)
+    - type: text
+      text: |-
+        中 yī chù jí fā　　日 isshoku sokuhatsu (いっしょくそくはつ)　　韓 일촉즉발 ilchok-jeukbal
+        So tense that the slightest touch could set it off.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-ruorouqiangshi
+    title: The Weak Are Meat the Strong Eat
+    size: 4
+    blocks:
+    - type: grid
+      cells: 弱肉(強TJ强S)食
+    - type: text
+      text: |-
+        中 ruò ròu qiáng shí　　日 jakuniku kyōshoku (じゃくにくきょうしょく)　　韓 약육강식 yagyuk-gangsik
+        The law of the jungle, where the strong prey on the weak. (Han Yu)
+    - type: text
+      text: |2+
+    
+- type: section
+  id: idioms-decision
+  title: Decision & Directness　断
+  size: 2
+  blocks:
+  - type: section
+    id: idiom-dandaozhiru
+    title: Straight in with a Single Blade
+    size: 4
+    blocks:
+    - type: grid
+      cells: (單TJ单S)刀直入
+    - type: text
+      text: |-
+        中 dān dāo zhí rù　　日 tantō chokunyū (たんとうちょくにゅう)　　韓 단도직입 dandojikip
+        Skip the preamble and get straight to the point. (Zen, 景德傳燈錄)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-yidaoliangduan
+    title: Cut in Two with One Stroke
+    size: 4
+    blocks:
+    - type: grid
+      cells: 一刀(兩T両J两S)(斷T断SJ)
+    - type: text
+      text: |-
+        中 yī dāo liǎng duàn　　日 ittō ryōdan (いっとうりょうだん)　　韓 일도양단 ildo-yangdan
+        Make a clean, decisive break. Sever ties once and for all.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-jintuiliangnan
+    title: Hard to Advance or Retreat
+    size: 4
+    blocks:
+    - type: grid
+      cells: (進TJ进S)退(兩T両J两S)(難TJ难S)
+    - type: text
+      text: |-
+        中 jìn tuì liǎng nán　　日 shintai ryōnan (しんたいりょうなん)　　韓 진퇴양난 jintoe-yangnan
+        Stuck in a dilemma, with no good way forward or back.
+    - type: text
+      text: |2+
+    
+- type: section
+  id: idioms-learning
+  title: Learning, Character & Integrity　学
+  size: 2
+  blocks:
+  - type: section
+    id: idiom-daqiwancheng
+    title: Great Vessels Take Long to Finish
+    size: 4
+    blocks:
+    - type: grid
+      cells: 大器(晚TS晩J)成
+    - type: text
+      text: |-
+        中 dà qì wǎn chéng　　日 taiki bansei (たいきばんせい)　　韓 대기만성 daegi-manseong
+        Great talent matures late, the finest minds bloom slowly. (老子)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-wenguzhixin
+    title: Review the Old, Learn the New
+    size: 4
+    blocks:
+    - type: grid
+      cells: (溫T温SJ)故知新
+    - type: text
+      text: |-
+        中 wēn gù zhī xīn　　日 onko chishin (おんこちしん)　　韓 온고지신 ongo-jisin
+        Revisit what is old and you will discover something new. (Confucius, 論語)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-yanxingyizhi
+    title: Word and Deed in Accord
+    size: 4
+    blocks:
+    - type: grid
+      cells: 言行一致
+    - type: text
+      text: |-
+        中 yán xíng yī zhì　　日 genkō itchi (げんこういっち)　　韓 언행일치 eonhaeng-ilchi
+        What one says and what one does are perfectly aligned.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-zibaoziqi
+    title: Give Up on Oneself
+    size: 4
+    blocks:
+    - type: grid
+      cells: 自暴自(棄TJ弃S)
+    - type: text
+      text: |-
+        中 zì bào zì qì　　日 jibō jiki (じぼうじき)　　韓 자포자기 japo-jagi
+        To abuse and abandon oneself, to sink into self-destructive despair. (孟子)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-houyanwuchi
+    title: Thick-Faced and Shameless
+    size: 4
+    blocks:
+    - type: grid
+      cells: 厚(顏T顔J颜S)(無TJ无S)(恥TJ耻S)
+    - type: text
+      text: |-
+        中 hòu yán wú chǐ　　日 kōgan muchi (こうがんむち)　　韓 후안무치 huan-muchi
+        Utterly brazen, without a trace of shame.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-zijizizu
+    title: Self-Sufficient
+    size: 4
+    blocks:
+    - type: grid
+      cells: 自(給TJ给S)自足
+    - type: text
+      text: |-
+        中 zì jǐ zì zú　　日 jikyū jisoku (じきゅうじそく)　　韓 자급자족 jageup-jajok
+        Meeting all of one's own needs without outside help.
+    - type: text
+      text: |2+
+    
+- type: section
+  id: idioms-change
+  title: Change & Fortune　変
+  size: 2
+  blocks:
+  - type: section
+    id: idiom-qisihuisheng
+    title: Raise the Dead Back to Life
+    size: 4
+    blocks:
+    - type: grid
+      cells: 起死回生
+    - type: text
+      text: |-
+        中 qǐ sǐ huí shēng　　日 kishi kaisei (きしかいせい)　　韓 기사회생 gisa-hoesaeng
+        A miraculous recovery. Snatching success from the jaws of defeat.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-qianbianwanhua
+    title: A Thousand Changes, Ten Thousand Transformations
+    size: 4
+    blocks:
+    - type: grid
+      cells: 千(變T変J变S)(萬T万SJ)化
+    - type: text
+      text: |-
+        中 qiān biàn wàn huà　　日 senpen banka (せんぺんばんか)　　韓 천변만화 cheonbyeon-manhwa
+        Endlessly shifting and varied. Never the same twice.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-sifenwulie
+    title: Torn to Pieces
+    size: 4
+    blocks:
+    - type: grid
+      cells: 四分五裂
+    - type: text
+      text: |-
+        中 sì fēn wǔ liè　　日 shibun goretsu (しぶんごれつ)　　韓 사분오열 sabun-oyeol
+        Split apart in every direction, fragmented and falling to pieces. (戰國策)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-bukesiyi
+    title: Beyond Comprehension
+    size: 4
+    blocks:
+    - type: grid
+      cells: 不可思(議TJ议S)
+    - type: text
+      text: |-
+        中 bù kě sī yì　　日 fukashigi (ふかしぎ)　　韓 불가사의 bulgasaui
+        Inconceivable; beyond what thought can grasp. (Buddhist, 維摩經)
+    - type: text
+      text: |2+
+    
+- type: section
+  id: idioms-mind
+  title: Mind, Emotion & Human Nature　心
+  size: 2
+  blocks:
+  - type: section
+    id: idiom-xinuaile
+    title: Joy, Anger, Sorrow, Pleasure
+    size: 4
+    blocks:
+    - type: grid
+      cells: 喜怒哀(樂T楽J乐S)
+    - type: text
+      text: |-
+        中 xǐ nù āi lè　　日 kido airaku (きどあいらく)　　韓 희로애락 huiro-aerak
+        The full range of human feeling. (中庸)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-tongbingxianglian
+    title: Fellow Sufferers Pity One Another
+    size: 4
+    blocks:
+    - type: grid
+      cells: 同病相(憐TJ怜S)
+    - type: text
+      text: |-
+        中 tóng bìng xiāng lián　　日 dōbyō sōren (どうびょうそうれん)　　韓 동병상련 dongbyeong-sangnyeon
+        Those who share the same affliction feel for each other. (吳越春秋)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-banxinbanyi
+    title: Half Believing, Half Doubting
+    size: 4
+    blocks:
+    - type: grid
+      cells: 半信半疑
+    - type: text
+      text: |-
+        中 bàn xìn bàn yí　　日 hanshin hangi (はんしんはんぎ)　　韓 반신반의 bansin-banui
+        Caught between belief and doubt.
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-zhaosanmusi
+    title: Three at Dawn, Four at Dusk
+    size: 4
+    blocks:
+    - type: grid
+      cells: 朝三暮四
+    - type: text
+      text: |-
+        中 zhāo sān mù sì　　日 chōsan boshi (ちょうさんぼし)　　韓 조삼모사 josammosa
+        Petty trickery that fools with appearances; also blowing hot and cold. (the monkey-keeper, 莊子)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-maerdongfeng
+    title: East Wind in a Horse's Ear
+    size: 4
+    blocks:
+    - type: grid
+      cells: (馬TJ马S)耳(東TJ东S)(風TJ风S)
+    - type: text
+      text: |-
+        中 mǎ ěr dōng fēng　　日 baji tōfū (ばじとうふう)　　韓 마이동풍 ma-i-dongpung
+        Good advice that goes in one ear and out the other. (Li Bai)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-ziyouzizai
+    title: Free and Unfettered
+    size: 4
+    blocks:
+    - type: grid
+      cells: 自由自在
+    - type: text
+      text: |-
+        中 zì yóu zì zài　　日 jiyū jizai (じゆうじざい)　　韓 자유자재 jayu-jajae
+        Doing exactly as one pleases, without constraint.
+    - type: text
+      text: |2+
+    
+- type: section
+  id: idioms-gain
+  title: Effort & Gain　功
+  size: 2
+  blocks:
+  - type: section
+    id: idiom-yijuliangde
+    title: One Move, Two Gains
+    size: 4
+    blocks:
+    - type: grid
+      cells: 一(舉T挙J举S)(兩T両J两S)得
+    - type: text
+      text: |-
+        中 yī jǔ liǎng dé　　日 ikkyo ryōtoku (いっきょりょうとく)　　韓 일거양득 ilgeo-yangdeuk
+        Accomplishing two things with a single action. (晉書)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-yishierniao
+    title: One Stone, Two Birds
+    size: 4
+    blocks:
+    - type: grid
+      cells: 一石二(鳥TJ鸟S)
+    - type: text
+      text: |-
+        中 yī shí èr niǎo　　日 isseki nichō (いっせきにちょう)　　韓 일석이조 ilseok-ijo
+        Kill two birds with one stone. (A modern phrase shared by all three, calqued from the English proverb.)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-yizhaoyixi
+    title: In a Single Morning or Evening
+    size: 4
+    blocks:
+    - type: grid
+      cells: 一朝一夕
+    - type: text
+      text: |-
+        中 yī zhāo yī xī　　日 itchō isseki (いっちょういっせき)　　韓 일조일석 iljo-ilseok
+        In a very short span of time. Usually said of what can NOT be done so quickly. (易經)
+    - type: text
+      text: |2+
+    
+  - type: section
+    id: idiom-dongbenxizou
+    title: Running East and West
+    size: 4
+    blocks:
+    - type: grid
+      cells: (東TJ东S)奔西走
+    - type: text
+      text: |-
+        中 dōng bēn xī zǒu　　日 tōhon seisō (とうほんせいそう)　　韓 동분서주 dongbun-seoju
+        Dashing about busily in every direction.
+    - type: text
+      text: |2+
+    
