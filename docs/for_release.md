@@ -19,3 +19,4 @@
 - fix saving color sets
 - add IPA vietnamese, plus fix dialect situation
 - add four character idioms
+- add favicon
