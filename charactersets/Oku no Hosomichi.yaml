@@ -14,12 +14,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 旅立ち — leaving Edo · 季語 雛（春）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      草の戸も
-      住替る代ぞ
-      雛の家
+      {草|くさ}の {戸|と}も
+      {住替|すみかわ}る {代|よ}ぞ
+      {雛|ひな}の {家|いえ}
   - type: text
     text: “Even this grass-thatched hut / will know a change of dwellers— / a house of dolls.”
   - type: text

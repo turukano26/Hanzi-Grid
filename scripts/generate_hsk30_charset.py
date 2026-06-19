@@ -7,7 +7,7 @@ WritingLevel, Traditional, Freq, Examples). `Hanzi` is the simplified form,
 
 Output is a v2 character set in the same shape as the hand-authored sets in
 charactersets/: one `section` per HSK level (1-6 and a combined 7-9), each with a
-single `grid`. Cells use the Traditional/Simplified variant syntax `(<trad>T<simp>S)`
+single `grid`. Cells use the Traditional/Simplified variant syntax `{<trad>T<simp>S}`
 read by static/script.js's parseCells; characters identical across scripts are
 written bare. No Japanese (J) variant is emitted -- simp/trad only.
 
@@ -88,10 +88,10 @@ def traditional_for(simp, trad_field):
 
 
 def cell_for(simp, trad):
-    """Bare char when identical across scripts, else a (trad T simp S) group."""
+    """Bare char when identical across scripts, else a {trad T simp S} group."""
     if trad == simp:
         return simp
-    return '(%sT%sS)' % (trad, simp)
+    return '{%sT%sS}' % (trad, simp)
 
 
 def build():

@@ -289,6 +289,74 @@ body {
     background-color: white;
 }
 
+/* Japanese poem: kana-sized base text with kanji cells rendered larger; ruby
+   furigana and a romaji line are revealed by the .show-furigana/.show-romaji
+   classes (toggled globally from the top bar). */
+.cs-poem {
+    font-size: 22px;
+    line-height: 2;
+    margin: 0.4em 0;
+}
+
+.cs-poem .poem-line {
+    line-height: 2;
+}
+
+.cs-poem span[data-unicode] {
+    display: inline-block;
+    font-size: 1.5em;
+    padding: 1px 3px;
+    margin: 1px;
+    text-align: center;
+    cursor: pointer;
+    background-color: white;
+    /* Between `baseline` (kana sit low) and `middle` (kana ride high): a small
+       positive length lifts the kanji off the baseline toward the line middle.
+       Increase toward `middle`, decrease toward `baseline`. */
+    vertical-align: -0.08em;
+}
+
+.cs-poem ruby {
+    position: relative;
+    display: inline-block;
+}
+
+.cs-poem rt {
+    display: none;
+}
+
+/* Furigana renders as an absolutely-positioned overlay in the empty space the
+   line-height already leaves above each glyph, so toggling it never reserves
+   space, changes the line spacing, or moves the kanji — it just appears on top.
+   `translateY` is the single knob for vertical placement: increase to move the
+   reading down toward the kanji, decrease (or go negative) to lift it away. */
+.cs-poem.show-furigana rt {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, 0.2em);
+    margin: 0;
+    font-size: 0.62em;
+    line-height: 1;
+    color: #555;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Romaji line beneath each verse line, shown only when enabled. */
+.cs-poem .poem-romaji {
+    font-size: 0.85em;
+    color: #777;
+    line-height: 1.3;
+    margin-bottom: 0.3em;
+    display: none;
+}
+
+.cs-poem.show-romaji .poem-romaji {
+    display: block;
+}
+
 /* Han characters made clickable inside non-interactive character-set text.
    Intentionally no padding/margin/background so the surrounding text keeps its
    exact spacing and the character is never coloured — only a transient hover. */
@@ -593,6 +661,39 @@ body {
 }
 
 .script-btn.active {
+    background: #333;
+    color: #fff;
+}
+
+/* Poem reading-aid toggles — same pill styling as the script toggle, but each
+   button toggles independently (furigana / romaji). */
+.top-menu .poem-toggle {
+    display: inline-flex;
+    border: 1px solid #999;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 50px;
+}
+
+.top-menu .poem-toggle[hidden] {
+    display: none;
+}
+
+.poem-btn {
+    padding: 4px 10px;
+    border: none;
+    border-left: 1px solid #999;
+    background: #f2f2f2;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.poem-btn:first-child {
+    border-left: none;
+}
+
+.poem-btn.active {
     background: #333;
     color: #fff;
 }

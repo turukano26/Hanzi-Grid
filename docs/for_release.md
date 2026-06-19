@@ -7,6 +7,7 @@
 - add basic radical support
 - fix search
 - add history
+- add better japanese rendering
 
 ## DONE
 

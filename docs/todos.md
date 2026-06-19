@@ -61,7 +61,7 @@ add back pronouns?
           { "type": "grid", "cells": "他她它" }
         ] },
         { "type": "section", "id": "pronouns-plural", "title": "Plural marker", "size": 3, "blocks": [
-          { "type": "grid", "cells": "(們TJ们S)" }
+          { "type": "grid", "cells": "{們TJ们S}" }
         ] }
       ]
     },

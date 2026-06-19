@@ -26,14 +26,14 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 百千(萬T万SJ)(億TJ亿S)兆
+      cells: 百千{萬T万SJ}{億TJ亿S}兆
   - type: section
     id: numbers-counting
     title: Counting words
     size: 3
     blocks:
     - type: grid
-      cells: (兩T两S両J)(幾TJ几S)半(雙T双SJ)(個TJ个S)
+      cells: '{兩T两S両J}{幾TJ几S}半{雙T双SJ}{個TJ个S}'
 - type: section
   id: elements
   title: The Elements
@@ -54,7 +54,7 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 水土火(氣T气S気J)
+      cells: 水土火{氣T气S気J}
 - type: section
   id: sky-weather
   title: Sky & Weather
@@ -68,14 +68,14 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 日月星天光(陰TJ阴S)(陽TJ阳S)
+      cells: 日月星天光{陰TJ阴S}{陽TJ阳S}
   - type: section
     id: sky-weather-w
     title: Weather
     size: 3
     blocks:
     - type: grid
-      cells: (風TJ风S)冰雨雪(雲TJ云S)(電TJ电S)雷
+      cells: '{風TJ风S}冰雨雪{雲TJ云S}{電TJ电S}雷'
 - type: section
   id: landscape
   title: Earth & Landscape
@@ -89,7 +89,7 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 土地田山石岩木林森沙(島TJ岛S)谷野
+      cells: 土地田山石岩木林森沙{島TJ岛S}谷野
   - type: section
     id: landscape-water
     title: Water & waterways
@@ -110,7 +110,7 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 父母兄弟(姐TS姉J)妹子(兒T儿S児J)
+      cells: 父母兄弟{姐TS姉J}妹子{兒T儿S児J}
   - type: section
     id: people-roles
     title: People & roles
@@ -131,7 +131,7 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 祖(孫TJ孙S)(爺TJ爷S)婆奶伯叔舅姑姨
+      cells: 祖{孫TJ孙S}{爺TJ爷S}婆奶伯叔舅姑姨
 - type: section
   id: body
   title: The Body
@@ -145,14 +145,14 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 首(頭TJ头S)面目耳口牙舌鼻毛
+      cells: 首{頭TJ头S}面目耳口牙舌鼻毛
   - type: section
     id: body-limbs
     title: Body & limbs
     size: 3
     blocks:
     - type: grid
-      cells: 身手足心胸(腦T脑S脳J)腰肩力
+      cells: 身手足心胸{腦T脑S脳J}腰肩力
   - type: section
     id: body-substance
     title: Made of
@@ -173,21 +173,21 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: (東TJ东S)南西北中
+      cells: '{東TJ东S}南西北中'
   - type: section
     id: directions-relative
     title: Relative position
     size: 3
     blocks:
     - type: grid
-      cells: 上下左右前(後TJ后S)(內T内SJ)外
+      cells: 上下左右前{後TJ后S}{內T内SJ}外
   - type: section
     id: directions-bounds
     title: Bearing & bounds
     size: 3
     blocks:
     - type: grid
-      cells: 方向(間TJ间S)(邊T边S辺J)(裡T里S裏J)(奧T奥SJ)
+      cells: 方向{間TJ间S}{邊T边S辺J}{裡T里S裏J}{奧T奥SJ}
 - type: section
   id: size-quantity
   title: Size & Quantity
@@ -201,21 +201,21 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 小中大巨太高(長TJ长S)短(寬T宽S寛J)(細TJ细S)(廣T广S広J)
+      cells: 小中大巨太高{長TJ长S}短{寬T宽S寛J}{細TJ细S}{廣T广S広J}
   - type: section
     id: size-distance
     title: Distance
     size: 3
     blocks:
     - type: grid
-      cells: (遠TJ远S)近
+      cells: '{遠TJ远S}近'
   - type: section
     id: size-amount
     title: Amount & weight
     size: 3
     blocks:
     - type: grid
-      cells: 多少全分空(滿T满S満J)重(輕T轻S軽J)
+      cells: 多少全分空{滿T满S満J}重{輕T轻S軽J}
 - type: section
   id: time-seasons
   title: Time & Seasons
@@ -236,14 +236,14 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 旦早朝午(晝T昼SJ)夕(晚TS晩J)夜昨明
+      cells: 旦早朝午{晝T昼SJ}夕{晚TS晩J}夜昨明
   - type: section
     id: time-age
     title: Span & age
     size: 3
     blocks:
     - type: grid
-      cells: 年今(時TJ时S)久古新(舊T旧SJ)
+      cells: 年今{時TJ时S}久古新{舊T旧SJ}
 - type: section
   id: colors
   title: Colors
@@ -252,7 +252,7 @@ blocks:
     text: The basic palette.
     size: 5
   - type: grid
-    cells: 色白(黑TS黒J)灰赤(紅TJ红S)青(黃T黄SJ)(綠T绿S緑J)(藍TJ蓝S)紫橙金(銀TJ银S)
+    cells: 色白{黑TS黒J}灰赤{紅TJ红S}青{黃T黄SJ}{綠T绿S緑J}{藍TJ蓝S}紫橙金{銀TJ银S}
 - type: section
   id: animals
   title: Animals
@@ -266,21 +266,21 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 虎象鹿(兔TS兎J)鼠(龍T龙S竜J)
+      cells: 虎象鹿{兔TS兎J}鼠{龍T龙S竜J}
   - type: section
     id: animals-farm
     title: Farm animals
     size: 3
     blocks:
     - type: grid
-      cells: 牛羊(馬TJ马S)犬(豬T猪SJ)(雞T鸡S鶏J)
+      cells: 牛羊{馬TJ马S}犬{豬T猪SJ}{雞T鸡S鶏J}
   - type: section
     id: animals-birds
     title: Birds & water creatures
     size: 3
     blocks:
     - type: grid
-      cells: (鳥TJ鸟S)羽(魚TJ鱼S)(龜T龟S亀J)(貝TJ贝S)(蟲T虫SJ)
+      cells: '{鳥TJ鸟S}羽{魚TJ鱼S}{龜T龟S亀J}{貝TJ贝S}{蟲T虫SJ}'
 - type: section
   id: plants
   title: Plants
@@ -294,14 +294,14 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 木竹草禾米(麥T麦SJ)豆瓜
+      cells: 木竹草禾米{麥T麦SJ}豆瓜
   - type: section
     id: plants-parts
     title: Parts
     size: 3
     blocks:
     - type: grid
-      cells: 本末根枝(葉TJ叶S)苗花果
+      cells: 本末根枝{葉TJ叶S}苗花果
 - type: section
   id: utensils
   title: Tools & Household
@@ -315,14 +315,14 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 刀勺叉(筷TS箸J)碗皿
+      cells: 刀勺叉{筷TS箸J}碗皿
   - type: section
     id: utensils-household
     title: Household objects
     size: 3
     blocks:
     - type: grid
-      cells: 弓矢巾(門TJ门S)(戶T户S戸J)(書TJ书S)玉
+      cells: 弓矢巾{門TJ门S}{戶T户S戸J}{書TJ书S}玉
 - type: section
   id: verbs
   title: Basic Verbs & States
@@ -336,21 +336,21 @@ blocks:
     size: 3
     blocks:
     - type: grid
-      cells: 行走(來T来SJ)去入出(飛TJ飞S)
+      cells: 行走{來T来SJ}去入出{飛TJ飞S}
   - type: section
     id: verbs-posture
     title: Posture
     size: 3
     blocks:
     - type: grid
-      cells: 立(坐TS座J)休
+      cells: 立{坐TS座J}休
   - type: section
     id: verbs-senses
     title: Senses & speech
     size: 3
     blocks:
     - type: grid
-      cells: (見TJ见S)看(聽T听S聴J)(聞TJ闻S)(說T说S説J)叫言食
+      cells: '{見TJ见S}看{聽T听S聴J}{聞TJ闻S}{說T说S説J}叫言食'
   - type: section
     id: verbs-life
     title: Life & living
@@ -366,7 +366,7 @@ blocks:
     text: Lines and forms.
     size: 5
   - type: grid
-    cells: 形方丸(圓T圆S円J)(點T点SJ)(線TJ线S)角凹凸
+    cells: 形方丸{圓T圆S円J}{點T点SJ}{線TJ线S}角凹凸
 - type: section
   id: opposites
   title: Opposites & Judgments
@@ -375,7 +375,7 @@ blocks:
     text: Yes and no, good and bad.
     size: 5
   - type: grid
-    cells: 是不有(無TJ无S)反正好(壞T坏S壊J)
+    cells: 是不有{無TJ无S}反正好{壞T坏S壊J}
 - type: section
   id: spirits
   title: Gods & Spirits
@@ -384,7 +384,7 @@ blocks:
     text: The unseen world.
     size: 5
   - type: grid
-    cells: 神(夢TJ梦S)鬼魂(靈T灵S霊J)仙(鳳TJ凤S)凰(龍T龙S竜J)
+    cells: 神{夢TJ梦S}鬼魂{靈T灵S霊J}仙{鳳TJ凤S}凰{龍T龙S竜J}
 - type: section
   id: sensation
   title: Temperature & Sensation
@@ -393,4 +393,4 @@ blocks:
     text: How things feel.
     size: 5
   - type: grid
-    cells: 冷寒(熱TJ热S)暑(乾TJ干S)(濕T湿SJ)
+    cells: 冷寒{熱TJ热S}暑{乾TJ干S}{濕T湿SJ}

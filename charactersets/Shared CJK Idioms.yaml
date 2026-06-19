@@ -35,7 +35,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: (臥TJ卧S)薪(嘗TJ尝S)(膽T胆SJ)
+      cells: '{臥TJ卧S}薪{嘗TJ尝S}{膽T胆SJ}'
     - type: text
       text: |-
         中 wò xīn cháng dǎn　　日 gashin shōtan (がしんしょうたん)　　韓 wasin-sangdam (와신상담)
@@ -49,7 +49,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 一(網TJ网S)打(盡T尽SJ)
+      cells: 一{網TJ网S}打{盡T尽SJ}
     - type: text
       text: |-
         中 yī wǎng dǎ jìn　　日 ichimō dajin (いちもうだじん)　　韓 ilmang-tajin (일망타진)
@@ -63,7 +63,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 百(發T発J发S)百中
+      cells: 百{發T発J发S}百中
     - type: text
       text: |-
         中 bǎi fā bǎi zhòng　　日 hyappatsu hyakuchū (ひゃっぱつひゃくちゅう)　　韓 baekbal-baekjung (백발백중)
@@ -77,7 +77,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 千(軍TJ军S)(萬T万SJ)(馬TJ马S)
+      cells: 千{軍TJ军S}{萬T万SJ}{馬TJ马S}
     - type: text
       text: |-
         中 qiān jūn wàn mǎ　　日 sengun banba (せんぐんばんば)　　韓 cheongun-manma (천군만마)
@@ -91,7 +91,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 一(觸T触SJ)即(發T発J发S)
+      cells: 一{觸T触SJ}即{發T発J发S}
     - type: text
       text: |-
         中 yī chù jí fā　　日 isshoku sokuhatsu (いっしょくそくはつ)　　韓 ilchok-jeukbal (일촉즉발)
@@ -105,7 +105,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 弱肉(強TJ强S)食
+      cells: 弱肉{強TJ强S}食
     - type: text
       text: |-
         中 ruò ròu qiáng shí　　日 jakuniku kyōshoku (じゃくにくきょうしょく)　　韓 yagyuk-gangsik (약육강식)
@@ -124,7 +124,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: (單TJ单S)刀直入
+      cells: '{單TJ单S}刀直入'
     - type: text
       text: |-
         中 dān dāo zhí rù　　日 tantō chokunyū (たんとうちょくにゅう)　　韓 dandojikip (단도직입)
@@ -138,7 +138,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 一刀(兩T両J两S)(斷T断SJ)
+      cells: 一刀{兩T両J两S}{斷T断SJ}
     - type: text
       text: |-
         中 yī dāo liǎng duàn　　日 ittō ryōdan (いっとうりょうだん)　　韓 ildo-yangdan (일도양단)
@@ -152,7 +152,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: (進TJ进S)退(兩T両J两S)(難TJ难S)
+      cells: '{進TJ进S}退{兩T両J两S}{難TJ难S}'
     - type: text
       text: |-
         中 jìn tuì liǎng nán　　日 shintai ryōnan (しんたいりょうなん)　　韓 jintoe-yangnan (진퇴양난)
@@ -171,7 +171,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 大器(晚TS晩J)成
+      cells: 大器{晚TS晩J}成
     - type: text
       text: |-
         中 dà qì wǎn chéng　　日 taiki bansei (たいきばんせい)　　韓 daegi-manseong (대기만성)
@@ -185,7 +185,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: (溫T温SJ)故知新
+      cells: '{溫T温SJ}故知新'
     - type: text
       text: |-
         中 wēn gù zhī xīn　　日 onko chishin (おんこちしん)　　韓 ongo-jisin (온고지신)
@@ -213,7 +213,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 自暴自(棄TJ弃S)
+      cells: 自暴自{棄TJ弃S}
     - type: text
       text: |-
         中 zì bào zì qì　　日 jibō jiki (じぼうじき)　　韓 japo-jagi (자포자기)
@@ -227,7 +227,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 厚(顏T顔J颜S)(無TJ无S)(恥TJ耻S)
+      cells: 厚{顏T顔J颜S}{無TJ无S}{恥TJ耻S}
     - type: text
       text: |-
         中 hòu yán wú chǐ　　日 kōgan muchi (こうがんむち)　　韓 huan-muchi (후안무치)
@@ -241,7 +241,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 自(給TJ给S)自足
+      cells: 自{給TJ给S}自足
     - type: text
       text: |-
         中 zì jǐ zì zú　　日 jikyū jisoku (じきゅうじそく)　　韓 jageup-jajok (자급자족)
@@ -274,7 +274,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 千(變T変J变S)(萬T万SJ)化
+      cells: 千{變T変J变S}{萬T万SJ}化
     - type: text
       text: |-
         中 qiān biàn wàn huà　　日 senpen banka (せんぺんばんか)　　韓 cheonbyeon-manhwa (천변만화)
@@ -302,7 +302,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 不可思(議TJ议S)
+      cells: 不可思{議TJ议S}
     - type: text
       text: |-
         中 bù kě sī yì　　日 fukashigi (ふかしぎ)　　韓 bulgasaui (불가사의)
@@ -321,7 +321,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 喜怒哀(樂T楽J乐S)
+      cells: 喜怒哀{樂T楽J乐S}
     - type: text
       text: |-
         中 xǐ nù āi lè　　日 kido airaku (きどあいらく)　　韓 huiro-aerak (희로애락)
@@ -335,7 +335,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 同病相(憐TJ怜S)
+      cells: 同病相{憐TJ怜S}
     - type: text
       text: |-
         中 tóng bìng xiāng lián　　日 dōbyō sōren (どうびょうそうれん)　　韓 dongbyeong-sangnyeon (동병상련)
@@ -377,7 +377,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: (馬TJ马S)耳(東TJ东S)(風TJ风S)
+      cells: '{馬TJ马S}耳{東TJ东S}{風TJ风S}'
     - type: text
       text: |-
         中 mǎ ěr dōng fēng　　日 baji tōfū (ばじとうふう)　　韓 ma-i-dongpung (마이동풍)
@@ -410,7 +410,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 一(舉T挙J举S)(兩T両J两S)得
+      cells: 一{舉T挙J举S}{兩T両J两S}得
     - type: text
       text: |-
         中 yī jǔ liǎng dé　　日 ikkyo ryōtoku (いっきょりょうとく)　　韓 ilgeo-yangdeuk (일거양득)
@@ -424,7 +424,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: 一石二(鳥TJ鸟S)
+      cells: 一石二{鳥TJ鸟S}
     - type: text
       text: |-
         中 yī shí èr niǎo　　日 isseki nichō (いっせきにちょう)　　韓 ilseok-ijo (일석이조)
@@ -452,7 +452,7 @@ blocks:
     size: 4
     blocks:
     - type: grid
-      cells: (東TJ东S)奔西走
+      cells: '{東TJ东S}奔西走'
     - type: text
       text: |-
         中 dōng bēn xī zǒu　　日 tōhon seisō (とうほんせいそう)　　韓 dongbun-seoju (동분서주)

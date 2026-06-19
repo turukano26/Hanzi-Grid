@@ -3,7 +3,7 @@
 var currentInputString;
 
 // ---- Script variants (Traditional / Simplified / Japanese) ----------------
-// A grid's `cells` string may contain variant groups like "(東TJ东S)": one
+// A grid's `cells` string may contain variant groups like "{東TJ东S}": one
 // glyph per group, each tagged with the scripts (T/S/J) it belongs to. Bare
 // characters are identical across all three. `currentScript` selects which
 // glyph is displayed; every cell still records all of its variants' codepoints
@@ -19,9 +19,9 @@ function parseCells(str) {
     var tokens = [];
     var i = 0;
     while (i < str.length) {
-        if (str[i] === '(') {
-            var end = str.indexOf(')', i);
-            if (end === -1) { tokens.push('('); i++; continue; } // malformed: literal '('
+        if (str[i] === '{') {
+            var end = str.indexOf('}', i);
+            if (end === -1) { tokens.push('{'); i++; continue; } // malformed: literal '{'
             tokens.push(parseVariantGroup(str.slice(i + 1, end)));
             i = end + 1;
         } else {
@@ -92,6 +92,184 @@ function initScriptToggle() {
         generateMacroGrid(currentInputString); // re-render with the new forms
     });
     applyScript(currentScript, false); // reflect the initial state
+}
+
+// ---- Japanese poem reading aids -------------------------------------------
+// A `poem` block is interactive reading flow (clickable Han cells) with kanji
+// rendered larger than kana, plus two optional, top-bar-toggled aids: furigana
+// (the kana reading shown as ruby above its kanji) and romaji (a Hepburn line
+// beneath each verse line). Furigana is authored inline as {base|reading}
+// groups, e.g. "{夏|なつ}{山|やま}に"; that same reading feeds the romaji line.
+// Both toggles are global (apply to every poem) and persisted to localStorage.
+
+// Kana → Hepburn. Direct port of transcriptions/romaji.py — keep in sync.
+function kataToHira(text) {
+    var out = '';
+    for (var ch of text) {
+        var cp = ch.codePointAt(0);
+        out += (cp >= 0x30A1 && cp <= 0x30F6) ? String.fromCodePoint(cp - 0x60) : ch;
+    }
+    return out;
+}
+
+var ROMAJI = {
+    'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
+    'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
+    'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho',
+    'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
+    'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo',
+    'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
+    'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo',
+    'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo',
+    'じゃ': 'ja',  'じゅ': 'ju',  'じょ': 'jo',
+    'ぢゃ': 'ja',  'ぢゅ': 'ju',  'ぢょ': 'jo',
+    'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo',
+    'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo',
+    'ふぁ': 'fa',  'ふぃ': 'fi',  'ふぇ': 'fe',  'ふぉ': 'fo',
+    'てぃ': 'ti',  'でぃ': 'di',  'でゅ': 'dyu',
+    'あ': 'a',  'い': 'i',  'う': 'u',  'え': 'e',  'お': 'o',
+    'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
+    'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so',
+    'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
+    'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no',
+    'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
+    'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo',
+    'や': 'ya', 'ゆ': 'yu', 'よ': 'yo',
+    'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro',
+    'わ': 'wa', 'ゐ': 'i',  'ゑ': 'e',  'を': 'o',
+    'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge', 'ご': 'go',
+    'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo',
+    'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de', 'ど': 'do',
+    'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo',
+    'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
+    'ぁ': 'a',  'ぃ': 'i',  'ぅ': 'u',  'ぇ': 'e',  'ぉ': 'o',
+    'ゃ': 'ya', 'ゅ': 'yu', 'ょ': 'yo', 'ゎ': 'wa'
+};
+
+// Convert kana to lowercase Hepburn. Unmapped characters (kanji, punctuation,
+// spaces) pass through unchanged, mirroring the Python converter.
+function kanaToRomaji(kana) {
+    var hira = kataToHira(kana || '');
+    if (!hira) { return ''; }
+    var out = [];
+    var i = 0;
+    while (i < hira.length) {
+        var ch = hira[i];
+        if (ch === '.' || ch === '-' || ch === 'ー') {  // markers; drop long-vowel mark
+            if (ch !== 'ー') { out.push(ch); }
+            i += 1;
+            continue;
+        }
+        if (ch === 'っ') {  // sokuon: double the next consonant
+            if (i + 1 < hira.length) {
+                var nxt = ROMAJI[hira.slice(i + 1, i + 3)] || ROMAJI[hira[i + 1]] || '';
+                if (nxt) { out.push(nxt[0]); }
+            }
+            i += 1;
+            continue;
+        }
+        if (ch === 'ん') {
+            var after = i + 1 < hira.length ? hira[i + 1] : '';
+            out.push(after && 'あいうえおやゆよぁぃぅぇぉゃゅょん'.indexOf(after) !== -1 ? "n'" : 'n');
+            i += 1;
+            continue;
+        }
+        var pair = hira.slice(i, i + 2);
+        if (pair.length === 2 && ROMAJI[pair]) {
+            out.push(ROMAJI[pair]);
+            i += 2;
+            continue;
+        }
+        var rom = ROMAJI[ch];
+        out.push(rom !== undefined ? rom : ch);
+        i += 1;
+    }
+    return out.join('');
+}
+
+// Split one poem line into tokens: {base, reading} furigana groups and plain
+// text runs. "{夏|なつ}に" -> [{base:'夏', reading:'なつ'}, {text:'に'}]. A '{'
+// without a matching '|'…'}' is treated as literal text.
+function parsePoemLine(line) {
+    var tokens = [];
+    var i = 0;
+    while (i < line.length) {
+        if (line[i] === '{') {
+            var end = line.indexOf('}', i);
+            var bar = end === -1 ? -1 : line.indexOf('|', i);
+            if (end !== -1 && bar !== -1 && bar < end) {
+                tokens.push({ base: line.slice(i + 1, bar), reading: line.slice(bar + 1, end) });
+                i = end + 1;
+                continue;
+            }
+        }
+        var next = line.indexOf('{', i + 1);
+        if (next === -1) { next = line.length; }
+        tokens.push({ text: line.slice(i, next) });
+        i = next;
+    }
+    return tokens;
+}
+
+// Append text to `parent`, Han characters as clickable study cells and the rest
+// (kana, punctuation) as inert text — the poem counterpart of the interactive
+// text renderer. Spaces are romaji word separators only (see poemLineRomaji) and
+// are not shown in the verse, so authored word breaks don't disturb the kanji.
+function appendPoemText(parent, text) {
+    for (var ch of text) {
+        if (ch === ' ' || ch === '　') {
+            continue;
+        }
+        if (HAN_RE.test(ch)) {
+            parent.appendChild(makeCharCell(ch));
+        } else {
+            parent.appendChild(document.createTextNode(ch));
+        }
+    }
+}
+
+// Romaji for a parsed line: furigana groups contribute their reading, plain
+// runs their own kana (unannotated kanji pass through as-is). Spaces in the
+// authored source mark word boundaries — collapsed to single spaces here and
+// trimmed — so the author controls romaji spacing without affecting the verse.
+function poemLineRomaji(tokens) {
+    var raw = tokens.map(function (t) {
+        return kanaToRomaji(t.reading != null ? t.reading : t.text);
+    }).join('');
+    return raw.replace(/[\s　]+/g, ' ').trim();
+}
+
+var poemFurigana = localStorage.getItem('poemFurigana') !== '0';  // default on
+var poemRomaji = localStorage.getItem('poemRomaji') === '1';      // default off
+
+// Reflect the current furigana/romaji state on every rendered poem and the
+// top-bar buttons; optionally persist the choice.
+function applyPoemToggles(persist) {
+    if (persist) {
+        localStorage.setItem('poemFurigana', poemFurigana ? '1' : '0');
+        localStorage.setItem('poemRomaji', poemRomaji ? '1' : '0');
+    }
+    document.querySelectorAll('.cs-poem').forEach(function (p) {
+        p.classList.toggle('show-furigana', poemFurigana);
+        p.classList.toggle('show-romaji', poemRomaji);
+    });
+    var fb = document.querySelector('#poemToggle [data-aid="furigana"]');
+    var rb = document.querySelector('#poemToggle [data-aid="romaji"]');
+    if (fb) { fb.classList.toggle('active', poemFurigana); fb.setAttribute('aria-pressed', poemFurigana); }
+    if (rb) { rb.classList.toggle('active', poemRomaji); rb.setAttribute('aria-pressed', poemRomaji); }
+}
+
+function initPoemToggle() {
+    var toggle = document.getElementById('poemToggle');
+    if (!toggle) { return; }
+    toggle.addEventListener('click', function (e) {
+        var btn = e.target.closest('.poem-btn');
+        if (!btn) { return; }
+        var aid = btn.getAttribute('data-aid');
+        if (aid === 'furigana') { poemFurigana = !poemFurigana; }
+        else if (aid === 'romaji') { poemRomaji = !poemRomaji; }
+        applyPoemToggles(true);
+    });
 }
 
 function fetchCharacterSetNames() {
@@ -685,6 +863,9 @@ function fetchSearchResults(searchString, searchType) {
 // ---------------------------------------------------------------------------
 var COLLAPSE_PREFIX = 'csCollapse:';
 var HAN_RE = /\p{Script=Han}/u;
+// Set true while rendering a set that contains a `poem` block, so the top-bar
+// furigana/romaji toggles are shown only when relevant.
+var hasPoemBlock = false;
 
 // Build one <span data-unicode> study cell, applying any saved colour. No
 // per-cell listener — click handling is delegated at the container level.
@@ -827,6 +1008,48 @@ var BLOCK_RENDERERS = {
             el.textContent = text;
         }
         container.appendChild(el);
+    },
+
+    // Japanese poem: one verse line per source line, kanji larger than kana and
+    // clickable, with toggled furigana (ruby) + romaji (line beneath) aids. The
+    // {base|reading} furigana groups are authored inline (see parsePoemLine).
+    poem: function (block, container) {
+        hasPoemBlock = true;
+        var poem = document.createElement('div');
+        poem.className = 'cs-poem';
+        var poemClass = sizeClass(block.size);
+        if (poemClass) { poem.classList.add(poemClass); }
+
+        (block.text || '').split('\n').forEach(function (line) {
+            var tokens = parsePoemLine(line);
+            var lineEl = document.createElement('div');
+            lineEl.className = 'poem-line';
+            tokens.forEach(function (t) {
+                if (t.reading != null) {
+                    var ruby = document.createElement('ruby');
+                    appendPoemText(ruby, t.base);
+                    var rt = document.createElement('rt');
+                    rt.textContent = t.reading;
+                    ruby.appendChild(rt);
+                    lineEl.appendChild(ruby);
+                } else {
+                    appendPoemText(lineEl, t.text);
+                }
+            });
+            poem.appendChild(lineEl);
+
+            if (line.trim() !== '') {
+                var rom = document.createElement('div');
+                rom.className = 'poem-romaji';
+                rom.textContent = poemLineRomaji(tokens);
+                poem.appendChild(rom);
+            }
+        });
+
+        attachCellDelegation(poem);
+        poem.classList.toggle('show-furigana', poemFurigana);
+        poem.classList.toggle('show-romaji', poemRomaji);
+        container.appendChild(poem);
     }
 };
 
@@ -853,10 +1076,14 @@ function generateMacroGrid(characterSet) {
     if (!localStorage.getItem('csScript') && characterSet.defaultScript) {
         applyScript(characterSet.defaultScript, false);
     }
+    hasPoemBlock = false;
     (characterSet.blocks || []).forEach(function (block) {
         renderBlock(block, macroGrid);
     });
     wrapMacroGridCjk();
+    var poemToggle = document.getElementById('poemToggle');
+    if (poemToggle) { poemToggle.hidden = !hasPoemBlock; }
+    applyPoemToggles(false); // sync newly rendered poems to the current state
 }
 
 // Used by the search grid: append bare study cells to a (reused) container,
@@ -1508,6 +1735,7 @@ var colors = [
 
 // Call the functions to create UI elements when the page loads
 initScriptToggle();
+initPoemToggle();
 fetchCharacterSetNames();
 createColorButtons();
 createMenu();

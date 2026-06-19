@@ -239,11 +239,31 @@ blocks:
   blocks:
   - type: grid        # the character grid; `cells` is the raw cell string
     cells: 一二三四五六七八九十…
+  - type: poem        # Japanese poem; one verse line per source line
+    text: |-
+      {草|くさ}の{戸|と}も
+      {住替|すみかわ}る{代|よ}ぞ
 ```
 
-Block `type`s are `text`, `section` (recursive), and `grid`. `cells` may use the
-Traditional/Simplified/Japanese variant syntax (e.g. `(萬T万SJ)`) parsed by `parseCells` in
+Block `type`s are `text`, `section` (recursive), `grid`, and `poem`. `cells` may use the
+Traditional/Simplified/Japanese variant syntax (e.g. `{萬T万SJ}`) parsed by `parseCells` in
 `static/script.js`. These files are authored directly (not exported from the DB).
+
+A `text` block with `interactive: true` makes its Han characters clickable study cells (the rest of
+the text is inert). A `poem` block is the Japanese-poem variant of that: kanji render larger than
+kana and stay clickable, and it supports two optional reading aids toggled from the top bar
+(`#poemToggle`, shown only while a set contains a poem) — **furigana** (the kana reading shown as
+ruby above its kanji) and **romaji** (a Hepburn line beneath each verse line). Furigana is authored
+inline as `{base|reading}` groups, e.g. `{夏|なつ}{山|やま}に`; that same kana reading also feeds the
+romaji line (`parsePoemLine` / `poemLineRomaji` in `static/script.js`). Romaji is produced by
+`kanaToRomaji`, a JS port of `transcriptions/romaji.py` that must be kept in sync with it (verified
+against the Python output). The toggles are global and persisted to `localStorage`
+(`poemFurigana`/`poemRomaji`, furigana default-on); unannotated kanji simply contribute no romaji.
+
+Romaji word spacing is **author-controlled**: a literal space in the poem source is a romaji word
+boundary but is *not* rendered in the verse, so `{草|くさ}の {戸|と}も` shows as 草の戸も yet romanizes
+as `kusano tomo` (and `{草|くさ} の {戸|と} も` → `kusa no to mo`). With no spaces the romaji runs
+together (`kusanotomo`) — spacing is never auto-inserted, since that would mis-split okurigana.
 
 When generating these files programmatically (see `scripts/generate_hsk30_charset.py`), dump with
 `allow_unicode=True, sort_keys=False, width=10**9` and a custom `str` representer that uses a literal
