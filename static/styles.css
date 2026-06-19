@@ -300,11 +300,15 @@ body {
 
 .cs-poem .poem-line {
     line-height: 2;
+    /* A little headroom so each line's furigana isn't crammed against the line
+       above it. */
+    margin-top: 0.25em;
 }
 
 .cs-poem span[data-unicode] {
     display: inline-block;
     font-size: 1.5em;
+    line-height: 1.5;
     padding: 1px 3px;
     margin: 1px;
     text-align: center;
@@ -317,31 +321,22 @@ body {
 }
 
 .cs-poem ruby {
-    position: relative;
-    display: inline-block;
+    ruby-position: over;
 }
 
+/* Native ruby reserves the annotation row whether or not furigana is shown:
+   when it's off we keep the <rt> in place but hidden (visibility, not display),
+   so the row above the kanji stays the same height and toggling furigana never
+   shifts the line. */
 .cs-poem rt {
-    display: none;
+    font-size: 0.62em;
+    color: #555;
+    line-height: 1.5;
+    visibility: hidden;
 }
 
-/* Furigana renders as an absolutely-positioned overlay in the empty space the
-   line-height already leaves above each glyph, so toggling it never reserves
-   space, changes the line spacing, or moves the kanji — it just appears on top.
-   `translateY` is the single knob for vertical placement: increase to move the
-   reading down toward the kanji, decrease (or go negative) to lift it away. */
 .cs-poem.show-furigana rt {
-    display: block;
-    position: absolute;
-    left: 50%;
-    top: 0;
-    transform: translate(-50%, 0.2em);
-    margin: 0;
-    font-size: 0.62em;
-    line-height: 1;
-    color: #555;
-    white-space: nowrap;
-    pointer-events: none;
+    visibility: visible;
 }
 
 /* Romaji line beneath each verse line, shown only when enabled. */
