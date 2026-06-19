@@ -18,6 +18,29 @@ def _kata_to_hira(text: str) -> str:
     return ''.join(result)
 
 
+# Voicing (dakuten) of a base kana, used to expand the voiced iteration mark ゞ.
+_ITER_VOICE = {
+    'か': 'が', 'き': 'ぎ', 'く': 'ぐ', 'け': 'げ', 'こ': 'ご',
+    'さ': 'ざ', 'し': 'じ', 'す': 'ず', 'せ': 'ぜ', 'そ': 'ぞ',
+    'た': 'だ', 'ち': 'ぢ', 'つ': 'づ', 'て': 'で', 'と': 'ど',
+    'は': 'ば', 'ひ': 'び', 'ふ': 'ぶ', 'へ': 'べ', 'ほ': 'ぼ',
+    'う': 'ゔ',
+}
+
+
+def _expand_iteration(hira: str) -> str:
+    """Expand hiragana iteration marks ゝ/ゞ to the (voiced, for ゞ) preceding kana,
+    e.g. ほとゝぎす → ほととぎす, すゝき → すすき."""
+    out: list[str] = []
+    for ch in hira:
+        if ch in ('ゝ', 'ゞ') and out:
+            prev = out[-1]
+            out.append(_ITER_VOICE.get(prev, prev) if ch == 'ゞ' else prev)
+        else:
+            out.append(ch)
+    return ''.join(out)
+
+
 _ROMAJI: dict[str, str] = {
     'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
     'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
@@ -55,7 +78,7 @@ _ROMAJI: dict[str, str] = {
 
 def _kana_to_romaji(kana: str) -> str:
     """Convert kana to lowercase Hepburn, preserving okurigana '.' and affix '-' markers."""
-    hira = _kata_to_hira(kana)
+    hira = _expand_iteration(_kata_to_hira(kana))
     if not hira:
         return ''
     out: list[str] = []
@@ -67,6 +90,13 @@ def _kana_to_romaji(kana: str) -> str:
                 out.append(ch)
             i += 1
             continue
+        if ch in ('は', 'へ'):   # bound particles: は→wa, へ→e when standing alone
+            prev_boundary = i == 0 or hira[i - 1] in ' 　'
+            next_boundary = i + 1 >= len(hira) or hira[i + 1] in ' 　'
+            if prev_boundary and next_boundary:
+                out.append('wa' if ch == 'は' else 'e')
+                i += 1
+                continue
         if ch == 'っ':
             if i + 1 < len(hira):
                 nxt = _ROMAJI.get(hira[i + 1: i + 3]) or _ROMAJI.get(hira[i + 1], '')

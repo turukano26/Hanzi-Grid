@@ -112,6 +112,30 @@ function kataToHira(text) {
     return out;
 }
 
+// Voicing (dakuten) of a base kana, for expanding the voiced iteration mark ゞ.
+var ITER_VOICE = {
+    'か': 'が', 'き': 'ぎ', 'く': 'ぐ', 'け': 'げ', 'こ': 'ご',
+    'さ': 'ざ', 'し': 'じ', 'す': 'ず', 'せ': 'ぜ', 'そ': 'ぞ',
+    'た': 'だ', 'ち': 'ぢ', 'つ': 'づ', 'て': 'で', 'と': 'ど',
+    'は': 'ば', 'ひ': 'び', 'ふ': 'ぶ', 'へ': 'べ', 'ほ': 'ぼ',
+    'う': 'ゔ'
+};
+
+// Expand hiragana iteration marks ゝ/ゞ to the (voiced, for ゞ) preceding kana,
+// e.g. ほとゝぎす → ほととぎす, すゝき → すすき.
+function expandIteration(hira) {
+    var out = [];
+    for (var ch of hira) {
+        if ((ch === 'ゝ' || ch === 'ゞ') && out.length) {
+            var prev = out[out.length - 1];
+            out.push(ch === 'ゞ' ? (ITER_VOICE[prev] || prev) : prev);
+        } else {
+            out.push(ch);
+        }
+    }
+    return out.join('');
+}
+
 var ROMAJI = {
     'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
     'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
@@ -149,7 +173,7 @@ var ROMAJI = {
 // Convert kana to lowercase Hepburn. Unmapped characters (kanji, punctuation,
 // spaces) pass through unchanged, mirroring the Python converter.
 function kanaToRomaji(kana) {
-    var hira = kataToHira(kana || '');
+    var hira = expandIteration(kataToHira(kana || ''));
     if (!hira) { return ''; }
     var out = [];
     var i = 0;
@@ -159,6 +183,15 @@ function kanaToRomaji(kana) {
             if (ch !== 'ー') { out.push(ch); }
             i += 1;
             continue;
+        }
+        if (ch === 'は' || ch === 'へ') {  // bound particles: は→wa, へ→e when standing alone
+            var prevBoundary = i === 0 || hira[i - 1] === ' ' || hira[i - 1] === '　';
+            var nextBoundary = i + 1 >= hira.length || hira[i + 1] === ' ' || hira[i + 1] === '　';
+            if (prevBoundary && nextBoundary) {
+                out.push(ch === 'は' ? 'wa' : 'e');
+                i += 1;
+                continue;
+            }
         }
         if (ch === 'っ') {  // sokuon: double the next consonant
             if (i + 1 < hira.length) {

@@ -19,6 +19,13 @@ TO_ROMAJI = {
     'まな.ぶ': 'mana.bu',
     'こ-': 'ko-',                # affix marker preserved
     '-づ.ける': '-zu.keru',
+    'ほとゝぎす': 'hototogisu',    # iteration mark ゝ repeats the preceding kana
+    'すゝき': 'susuki',
+    'みすゞ': 'misuzu',           # voiced iteration mark ゞ
+    'はる': 'haru',              # は inside a word stays 'ha'
+    'め は': 'me wa',            # standalone particle は → wa
+    'よ に は': 'yo ni wa',
+    'いへ へ': 'ihe e',          # standalone particle へ → e
 }
 
 # Hepburn romaji → kana (hiragana, katakana)

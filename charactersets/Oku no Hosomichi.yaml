@@ -16,9 +16,9 @@ blocks:
     text: 松尾芭蕉 Matsuo Bashō · 旅立ち — leaving Edo · 季語 雛（春）
   - type: poem
     text: |-
-      {草|くさ}の {戸|と}も
-      {住替|すみかわ}る {代|よ}ぞ
-      {雛|ひな}の {家|いえ}
+      {草|くさ} の {戸|と} も
+      {住替|すみかわ}る {代|よ} ぞ
+      {雛|ひな} の {家|いえ}
   - type: text
     text: “Even this grass-thatched hut / will know a change of dwellers— / a house of dolls.”
   - type: text
@@ -31,12 +31,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 別離 — the parting · 季語 行春（春）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      行春や
-      鳥啼魚の
-      目は泪
+      {行春|ゆくはる} や
+      {鳥|とり} {啼|なき} {魚|うお} の
+      {目|め} は {泪|なみだ}
   - type: text
     text: “Spring is passing— / the birds cry, and in the eyes / of the fish are tears.”
   - type: text
@@ -49,12 +48,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 東照宮 — the shrine · 季語 若葉（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
       あらたふと
-      青葉若葉の
-      日の光
+      {青葉|あおば} {若葉|わかば} の
+      {日|ひ} の {光|ひかり}
   - type: text
     text: “How holy it is!— / over green leaves and young leaves, / the light of the sun.”
   - type: text
@@ -67,12 +65,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 裏見の滝 — Urami Falls · 季語 夏の初（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      暫時は
-      滝に籠るや
-      夏の初
+      {暫時|しばらく} は
+      {滝|たき} に {籠|こも}る や
+      {夏|げ} の {初|はじめ}
   - type: text
     text: “For a little while / I shut myself behind the falls— / the start of summer.”
   - type: text
@@ -85,12 +82,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 光明寺行者堂 — the ascetics' hall · 季語 夏山（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      夏山に
-      足駄を拝む
-      首途哉
+      {夏山|なつやま} に
+      {足駄|あしだ} を {拝|おが}む
+      {首途|かどで} {哉|かな}
   - type: text
     text: “Toward the summer hills / I bow before En-no-Gyōja's clogs— / setting out at last.”
   - type: text
@@ -103,12 +99,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 仏頂和尚の旧庵 — Butchō's hermitage · 季語 夏木立（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      木啄も
-      庵は破らず
-      夏木立
+      {木啄|きつつき} も
+      {庵|いお} は {破|やぶ}らず
+      {夏木立|なつこだち}
   - type: text
     text: “Even the woodpeckers / leave this hermitage unharmed— / a grove in summer.”
   - type: text
@@ -121,11 +116,10 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 殺生石への道 — the moor · 季語 ほととぎす（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      野を横に
-      馬牽向よ
+      {野|の} を {横|よこ} に
+      {馬|うま} {牽|ひき}{向|むけ} よ
       ほとゝぎす
   - type: text
     text: “Across the open field / turn the horse's head this way!— / a cuckoo is calling.”
@@ -139,12 +133,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 遊行柳 — the Yūgyō willow · 季語 田植（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      田一枚
-      植て立去る
-      柳かな
+      {田|た} {一枚|いちまい}
+      {植|うえ}て {立去|たちさ}る
+      {柳|やなぎ} かな
   - type: text
     text: “A whole rice paddy / planted, and I take my leave— / the willow tree.”
   - type: text
@@ -157,12 +150,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 等窮宅 — at Tōkyū's · 季語 田植歌（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      風流の
-      初やおくの
-      田植歌
+      {風流|ふうりゅう} の
+      {初|はじめ} や おく の
+      {田植歌|たうえうた}
   - type: text
     text: “My first taste of elegance / in the far north of the land— / a rice-planting song.”
   - type: text
@@ -175,12 +167,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 可伸庵の栗 — the chestnut hermit · 季語 栗の花（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      世の人の
-      見付ぬ花や
-      軒の栗
+      {世|よ} の {人|ひと} の
+      {見付|みつけ}ぬ {花|はな} や
+      {軒|のき} の {栗|くり}
   - type: text
     text: “A blossom unnoticed / by the people of the world— / chestnut by the eaves.”
   - type: text
@@ -193,12 +184,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 文知摺石 — the Mojizuri stone · 季語 早苗（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      早苗とる
-      手もとや昔
-      しのぶ摺
+      {早苗|さなえ}とる
+      {手|て}もと や {昔|むかし}
+      しのぶ{摺|ずり}
   - type: text
     text: “Hands plucking rice seedlings— / they bring back the olden days / of Shinobu cloth-prints.”
   - type: text
@@ -211,12 +201,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 佐藤庄司旧跡 — the Satō warriors · 季語 帋幟（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      笈も太刀も
-      五月にかざれ
-      帋幟
+      {笈|おい} も {太刀|たち} も
+      {五月|さつき} に かざれ
+      {帋幟|かみのぼり}
   - type: text
     text: “Pannier and sword too— / display them this Fifth Month, / with the paper banners.”
   - type: text
@@ -229,12 +218,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 藤中将実方の墓 — Sanekata's grave · 季語 五月（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      笠島は
-      いづこ五月の
-      ぬかり道
+      {笠島|かさじま} は
+      いづこ {五月|さつき} の
+      ぬかり{道|みち}
   - type: text
     text: “Where is Kasajima?— / lost somewhere on this muddy road / of the rainy month.”
   - type: text
@@ -247,12 +235,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 武隈の松 — the twin pine · 季語 桜・松（春夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      桜より
-      松は二木を
-      三月越し
+      {桜|さくら} より
+      {松|まつ} は {二木|ふたき} を
+      {三月|みつき}{越|ご}し
   - type: text
     text: “Since the cherry blossoms, / three months to the twin-trunked pine— / a long road indeed.”
   - type: text
@@ -265,12 +252,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 宮城野 — Miyagino · 季語 あやめ草（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      あやめ草
-      足に結ばん
-      草鞋の緒
+      あやめ{草|ぐさ}
+      {足|あし} に {結|むす}ばん
+      {草鞋|わらじ} の {緒|お}
   - type: text
     text: “Sweet-flag iris blades / I will bind upon my feet— / as straw-sandal cords.”
   - type: text
@@ -283,12 +269,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 高館 — Yoshitsune's fort · 季語 夏草（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      夏草や
-      兵どもが
-      夢の跡
+      {夏草|なつくさ} や
+      {兵|つわもの}ども が
+      {夢|ゆめ} の {跡|あと}
   - type: text
     text: “Summer grasses— / all that now remains / of the warriors' dreams.”
   - type: text
@@ -301,12 +286,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 金色堂 — the Golden Hall · 季語 五月雨（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      五月雨の
-      降残してや
-      光堂
+      {五月雨|さみだれ} の
+      {降残|ふりのこ}して や
+      {光堂|ひかりどう}
   - type: text
     text: “Have the summer rains / spared this one alone?— / the Hall of Light.”
   - type: text
@@ -319,12 +303,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 国境の番所 — the barrier · 季語 蚤（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      蚤虱
-      馬の尿する
-      枕もと
+      {蚤|のみ} {虱|しらみ}
+      {馬|うま} の {尿|しと}する
+      {枕|まくら}もと
   - type: text
     text: “Fleas and lice— / and a horse pissing / right by my pillow.”
   - type: text
@@ -337,12 +320,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 清風宅 — at Seifū's · 季語 涼しさ（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      涼しさを
-      我宿にして
-      ねまる也
+      {涼|すず}しさ を
+      {我|わが}{宿|やど} に して
+      ねまる{也|なり}
   - type: text
     text: “Making this coolness / into a dwelling of my own, / I settle right in.”
   - type: text
@@ -355,12 +337,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 養蚕の里 — the silkworm village · 季語 蟾（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      這出よ
-      飼屋が下の
-      蟾の声
+      {這|はい}{出|いで} よ
+      {飼屋|かいや} が {下|した} の
+      {蟾|ひき} の {声|こえ}
   - type: text
     text: “Come crawling out!— / from beneath the silkworm shed, / the voice of a toad.”
   - type: text
@@ -373,12 +354,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 紅花 — the safflower · 季語 紅粉の花（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      眉掃を
-      俤にして
-      紅粉の花
+      {眉|まゆ}{掃|はき} を
+      {俤|おもかげ} に して
+      {紅粉|べに} の {花|はな}
   - type: text
     text: “Calling to mind / the shape of an eyebrow-brush— / the safflower blooms.”
   - type: text
@@ -391,12 +371,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 山寺 — Yamadera · 季語 蝉の声（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      閑さや
-      岩にしみ入
-      蝉の声
+      {閑|しずか}さ や
+      {岩|いわ} に しみ{入|いる}
+      {蝉|せみ} の {声|こえ}
   - type: text
     text: “Such stillness— / sinking into the rocks, / the cry of the cicadas.”
   - type: text
@@ -409,12 +388,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 舟下り — the river run · 季語 五月雨（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      五月雨を
-      あつめて早し
-      最上川
+      {五月雨|さみだれ} を
+      あつめて {早|はや}し
+      {最上川|もがみがわ}
   - type: text
     text: “Gathering up / all the summer rains, and swift— / the Mogami River.”
   - type: text
@@ -427,12 +405,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 南谷 — the South Valley · 季語 南薫（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      有難や
-      雪をかをらす
-      南谷
+      {有難|ありがた} や
+      {雪|ゆき} を かをらす
+      {南谷|みなみだに}
   - type: text
     text: “How blessed it is!— / it makes the very snow smell sweet, / this South Valley.”
   - type: text
@@ -445,12 +422,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 出羽三山 — the Three Mountains · 季語 涼しさ（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      涼しさや
-      ほの三日月の
-      羽黒山
+      {涼|すず}しさ や
+      ほの {三日月|みかづき} の
+      {羽黒山|はぐろやま}
   - type: text
     text: “Such coolness— / a faint crescent moon above / Mount Haguro.”
   - type: text
@@ -463,12 +439,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 月山登拝 — the Moon Mountain · 季語 雲の峰（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      雲の峰
-      幾つ崩て
-      月の山
+      {雲|くも} の {峰|みね}
+      {幾|いく}つ {崩|くずれ}て
+      {月|つき} の {山|やま}
   - type: text
     text: “How many peaks of cloud / have crumbled and dissolved away— / into the Moon Mountain.”
   - type: text
@@ -481,12 +456,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 語るを禁ず — the unspoken shrine · 季語 湯殿詣（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      語られぬ
-      湯殿にぬらす
-      袂かな
+      {語|かた}られぬ
+      {湯殿|ゆどの} に ぬらす
+      {袂|たもと} かな
   - type: text
     text: “Of Yudono none may speak— / and so I only wet / my sleeves with tears.”
   - type: text
@@ -499,12 +473,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 温海山と吹浦 — sea and mountain · 季語 夕涼み（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      あつみ山や
-      吹浦かけて
-      夕涼み
+      あつみ{山|やま} や
+      {吹浦|ふくうら} かけて
+      {夕|ゆう}{涼|すず}み
   - type: text
     text: “From Mount Atsumi / all the way to Fukuura— / the cool of evening.”
   - type: text
@@ -517,12 +490,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 河口の港 — the river mouth · 季語 暑き日（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      暑き日を
-      海にいれたり
-      最上川
+      {暑|あつ}き {日|ひ} を
+      {海|うみ} に いれたり
+      {最上川|もがみがわ}
   - type: text
     text: “It has poured the blazing sun / down into the sea— / the Mogami River.”
   - type: text
@@ -535,12 +507,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 雨の潟 — the lagoon · 季語 合歓の花（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      象潟や
-      雨に西施が
-      合歓の花
+      {象潟|きさかた} や
+      {雨|あめ} に {西施|せいし} が
+      {合歓|ねぶ} の {花|はな}
   - type: text
     text: '“Kisakata— / Xishi in the rain, asleep: / the silk-tree blossoms.”'
   - type: text
@@ -553,12 +524,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 汐越 — the tideflats · 季語 涼し（夏）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      汐越や
-      鶴脛ぬれて
-      海涼し
+      {汐越|しおごし} や
+      {鶴|つる}{脛|はぎ} ぬれて
+      {海|うみ} {涼|すず}し
   - type: text
     text: “At Shiogoshi / the cranes wet their slender legs— / cool over the sea.”
   - type: text
@@ -571,12 +541,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 七夕の前夜 — eve of Tanabata · 季語 文月（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      文月や
-      六日も常の
-      夜には似ず
+      {文月|ふみづき} や
+      {六日|むいか} も {常|つね} の
+      {夜|よ} に は {似|に}ず
   - type: text
     text: “The Seventh Month— / even its sixth night is unlike / the ordinary nights.”
   - type: text
@@ -589,12 +558,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 佐渡を望む — facing Sado · 季語 天河（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      荒海や
-      佐渡によこたふ
-      天河
+      {荒海|あらうみ} や
+      {佐渡|さど} に よこたふ
+      {天河|あまのがわ}
   - type: text
     text: “A wild and stormy sea— / and stretching out toward Sado, / the River of Heaven.”
   - type: text
@@ -607,12 +575,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 遊女との宿 — the courtesans' inn · 季語 萩（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      一家に
-      遊女もねたり
-      萩と月
+      {一家|ひとつや} に
+      {遊女|ゆうじょ} も ねたり
+      {萩|はぎ} と {月|つき}
   - type: text
     text: “Beneath one roof / even courtesans lay asleep— / bush clover and moon.”
   - type: text
@@ -625,12 +592,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 有磯海 — the rugged shore · 季語 早稲（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      早稲の香や
-      分入右は
-      有磯海
+      {早稲|わせ} の {香|か} や
+      {分入|わけいる} {右|みぎ} は
+      {有磯海|ありそうみ}
   - type: text
     text: “The scent of early rice— / pushing through, off to my right / the Ariso Sea.”
   - type: text
@@ -643,12 +609,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 一笑の追悼 — mourning Isshō · 季語 秋の風（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      塚も動け
-      我泣声は
-      秋の風
+      {塚|つか} も {動|うご}け
+      {我|わが} {泣|なく}{声|こえ} は
+      {秋|あき} の {風|かぜ}
   - type: text
     text: “Tremble, O grave-mound!— / the sound of my own weeping / is the autumn wind.”
   - type: text
@@ -661,12 +626,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 草庵の会 — a gathering · 季語 秋涼し（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      秋涼し
-      手毎にむけや
-      瓜茄子
+      {秋|あき} {涼|すず}し
+      {手毎|てごと} に むけ や
+      {瓜|うり} {茄子|なすび}
   - type: text
     text: “Cool of autumn— / let every hand peel its own / melon and eggplant.”
   - type: text
@@ -679,12 +643,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 小松への道 — the road on · 季語 秋の風（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
       あかあかと
-      日は難面も
-      あきの風
+      {日|ひ} は {難面|つれなく} も
+      あき の {風|かぜ}
   - type: text
     text: “Red and burning red / the sun shines on, pitiless— / yet the wind is autumn's.”
   - type: text
@@ -697,12 +660,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 小松の地名 — the town's name · 季語 萩すすき（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
       しほらしき
-      名や小松吹
-      萩すゝき
+      {名|な} や {小松|こまつ} {吹|ふく}
+      {萩|はぎ} すゝき
   - type: text
     text: “What a charming name— / 'Little Pine,' where the wind sways / bush clover and plume grass.”
   - type: text
@@ -715,11 +677,10 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 実盛の甲 — Sanemori's helmet · 季語 きりぎりす（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      むざんやな
-      甲の下の
+      むざん や な
+      {甲|かぶと} の {下|した} の
       きりぎりす
   - type: text
     text: “How pitiful it is!— / from beneath the warrior's helmet / a cricket is chirping.”
@@ -733,12 +694,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 石山の奇岩 — the white rocks · 季語 秋の風（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      石山の
-      石より白し
-      秋の風
+      {石山|いしやま} の
+      {石|いし} より {白|しろ}し
+      {秋|あき} の {風|かぜ}
   - type: text
     text: “Whiter even / than the stones of Stone Mountain— / the autumn wind.”
   - type: text
@@ -751,12 +711,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 霊泉 — the hot spring · 季語 菊（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      山中や
-      菊はたをらぬ
-      湯の匂
+      {山中|やまなか} や
+      {菊|きく} は たをらぬ
+      {湯|ゆ} の {匂|におい}
   - type: text
     text: “Here at Yamanaka / no need to pluck chrysanthemums— / the fragrance of the springs.”
   - type: text
@@ -769,12 +728,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 曾良との別れ — parting with Sora · 季語 露（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      今日よりや
-      書付消さん
-      笠の露
+      {今日|きょう} より や
+      {書付|かきつけ} {消|け}さん
+      {笠|かさ} の {露|つゆ}
   - type: text
     text: “From this day onward / the writing shall be wiped away— / dew upon my hat.”
   - type: text
@@ -787,12 +745,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 宿坊を発つ — leaving the temple · 季語 柳散る（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      庭掃て
-      出ばや寺に
-      散柳
+      {庭|にわ} {掃|はき}て
+      {出|いで}ばや {寺|てら} に
+      {散|ちる} {柳|やなぎ}
   - type: text
     text: “I'll sweep the garden / before I leave the temple— / falling willow leaves.”
   - type: text
@@ -805,12 +762,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 北枝との別れ — parting with Hokushi · 季語 扇（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      物書て
-      扇引さく
-      余波哉
+      {物|もの} {書|かき}て
+      {扇|おうぎ} {引|ひき}さく
+      {余波|なごり} {哉|かな}
   - type: text
     text: “Writing a verse on it, / then tearing the fan in two— / the ache of parting.”
   - type: text
@@ -823,12 +779,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 気比神宮 — Kehi Shrine · 季語 月（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      月清し
-      遊行のもてる
-      砂の上
+      {月|つき} {清|きよ}し
+      {遊行|ゆぎょう} の もてる
+      {砂|すな} の {上|うえ}
   - type: text
     text: “How clear the moon / upon the sand the Pilgrim Saint / once carried to this place.”
   - type: text
@@ -841,12 +796,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 仲秋の名月 — the harvest moon · 季語 名月（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      名月や
-      北国日和
-      定なき
+      {名月|めいげつ} や
+      {北国|ほっこく} {日和|びより}
+      {定|さだめ}なき
   - type: text
     text: “The harvest moon— / but in the northern provinces / the weather will not hold.”
   - type: text
@@ -859,12 +813,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · 侘しき浜辺 — the lonely beach · 季語 秋（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      寂しさや
-      須磨にかちたる
-      浜の秋
+      {寂|さび}しさ や
+      {須磨|すま} に かちたる
+      {浜|はま} の {秋|あき}
   - type: text
     text: “A loneliness / surpassing even Suma's— / autumn on this shore.”
   - type: text
@@ -877,12 +830,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · ますほの小貝 — the little shells · 季語 萩（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      波の間や
-      小貝にまじる
-      萩の塵
+      {波|なみ} の {間|ま} や
+      {小貝|こがい} に まじる
+      {萩|はぎ} の {塵|ちり}
   - type: text
     text: “Between the waves— / mingled in with tiny shells, / dust of bush-clover bloom.”
   - type: text
@@ -895,12 +847,11 @@ blocks:
   blocks:
   - type: text
     text: 松尾芭蕉 Matsuo Bashō · むすびの地 — journey's end · 季語 行く秋（秋）
-  - type: text
-    interactive: true
+  - type: poem
     text: |-
-      蛤の
-      ふたみにわかれ
-      行秋ぞ
+      {蛤|はまぐり} の
+      ふたみ に わかれ
+      {行|ゆく} {秋|あき} ぞ
   - type: text
     text: “Like a clam its shell, / I am torn away toward Futami— / autumn departing.”
   - type: text
