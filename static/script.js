@@ -9,8 +9,8 @@ var currentInputString;
 // glyph is displayed; every cell still records all of its variants' codepoints
 // (data-variants) so search can match a form that isn't currently shown.
 var SCRIPT_KEYS = ['T', 'S', 'J'];
-var SCRIPT_FALLBACK = ['T', 'J', 'S']; // tried in order when the selection is absent
-var currentScript = localStorage.getItem('csScript') || 'T';
+var SCRIPT_FALLBACK = ['S', 'T', 'J']; // tried in order when the selection is absent (Simplified preferred)
+var currentScript = localStorage.getItem('csScript') || 'S';
 
 // Split a cells string into tokens: a plain character string, or a variants
 // object {T,S,J} (absent scripts omitted). Characters outside any group pass

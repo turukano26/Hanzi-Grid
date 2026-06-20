@@ -7,6 +7,11 @@
 - add basic radical support
 - fix search
 - add history
+- add some default color sets
+  - frequency in chinese
+  - frequency in japanese
+  - mandarin tone
+  - middle chinese tone
 
 ## DONE
 
@@ -21,3 +26,4 @@
 - add four character idioms
 - add favicon
 - add better japanese rendering
+- make t/s/j button hidden if not needed

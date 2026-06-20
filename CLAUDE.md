@@ -257,8 +257,9 @@ whole toggle for sets with no variant groups and, within it, hides any button fo
 doesn't use (so a trad/simp-only set like HSK shows just 繁/简, not 日). `resolveActiveScript` picks
 which form is active on open: the user's persisted choice (`csScript`) when this set offers it,
 otherwise the set's optional **`defaultScript`** (a top-level `T`/`S`/`J` key) when present, else the
-first available form (fallback order T→J→S). It is applied without persisting, so the active button
-is always a *visible* one yet the user's global choice is restored on a set that does offer it.
+first available form (fallback order S→T→J, i.e. Simplified preferred). It is applied without
+persisting, so the active button is always a *visible* one yet the user's global choice is restored
+on a set that does offer it.
 
 A `text` block with `interactive: true` makes its Han characters clickable study cells (the rest of
 the text is inert). A `poem` block is the Japanese-poem variant of that: kanji render larger than
