@@ -7,7 +7,6 @@
 - add basic radical support
 - fix search
 - add history
-- add better japanese rendering
 
 ## DONE
 
@@ -21,3 +20,4 @@
 - add IPA vietnamese, plus fix dialect situation
 - add four character idioms
 - add favicon
+- add better japanese rendering

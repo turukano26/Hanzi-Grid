@@ -82,6 +82,20 @@ function applyScript(script, persist) {
     });
 }
 
+// Show the script toggle only for sets that actually distinguish scripts, and
+// within it only the buttons for forms the set uses: a trad/simp-only set shows
+// 繁/简 but not 日, and a set with no variant groups hides the toggle entirely.
+// `scripts` is the {T,S,J} membership collected while rendering (presentScripts).
+function updateScriptToggle(scripts) {
+    var toggle = document.getElementById('scriptToggle');
+    if (!toggle) { return; }
+    var present = SCRIPT_KEYS.filter(function (k) { return scripts[k]; });
+    toggle.hidden = present.length === 0;
+    toggle.querySelectorAll('.script-btn').forEach(function (b) {
+        b.hidden = scripts[b.getAttribute('data-script')] !== true;
+    });
+}
+
 function initScriptToggle() {
     var toggle = document.getElementById('scriptToggle');
     if (!toggle) { return; }
@@ -900,6 +914,11 @@ var HAN_RE = /\p{Script=Han}/u;
 // furigana/romaji toggles are shown only when relevant.
 var hasPoemBlock = false;
 
+// Script tags (T/S/J) seen in variant groups while rendering the current set, so
+// the script toggle only offers the forms a set actually distinguishes (and is
+// hidden entirely for sets with no variant groups). See updateScriptToggle.
+var presentScripts = {};
+
 // Build one <span data-unicode> study cell, applying any saved colour. No
 // per-cell listener — click handling is delegated at the container level.
 // `token` is a plain character (search grid, bare cells) or a variants object
@@ -1010,6 +1029,9 @@ var BLOCK_RENDERERS = {
         var gridDiv = document.createElement('div');
         gridDiv.className = 'grid';
         parseCells(block.cells || '').forEach(function (token) {
+            if (typeof token === 'object') {
+                Object.keys(token).forEach(function (k) { presentScripts[k] = true; });
+            }
             gridDiv.appendChild(makeCharCell(token));
         });
         attachCellDelegation(gridDiv);
@@ -1110,12 +1132,14 @@ function generateMacroGrid(characterSet) {
         applyScript(characterSet.defaultScript, false);
     }
     hasPoemBlock = false;
+    presentScripts = {};
     (characterSet.blocks || []).forEach(function (block) {
         renderBlock(block, macroGrid);
     });
     wrapMacroGridCjk();
     var poemToggle = document.getElementById('poemToggle');
     if (poemToggle) { poemToggle.hidden = !hasPoemBlock; }
+    updateScriptToggle(presentScripts);
     applyPoemToggles(false); // sync newly rendered poems to the current state
 }
 
