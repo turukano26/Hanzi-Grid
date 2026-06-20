@@ -227,6 +227,7 @@ entirely by `static/script.js`):
 ```yaml
 version: 2
 label: Jōyō Kanji
+defaultScript: T     # optional: T/S/J form to show first (see "Script toggle" below)
 blocks:
 - type: text          # free-text block; `size` is a heading level (smaller = bigger)
   text: |-
@@ -248,6 +249,16 @@ blocks:
 Block `type`s are `text`, `section` (recursive), `grid`, and `poem`. `cells` may use the
 Traditional/Simplified/Japanese variant syntax (e.g. `{萬T万SJ}`) parsed by `parseCells` in
 `static/script.js`. These files are authored directly (not exported from the DB).
+
+**Script toggle** (the top-bar 繁/简/日 buttons, `#scriptToggle`): like the poem reading-aid
+toggle, it is shown only when relevant to the current set. While rendering, `collectScripts` gathers
+which script tags (T/S/J) appear in the set's variant groups; `updateScriptToggle` then hides the
+whole toggle for sets with no variant groups and, within it, hides any button for a form the set
+doesn't use (so a trad/simp-only set like HSK shows just 繁/简, not 日). `resolveActiveScript` picks
+which form is active on open: the user's persisted choice (`csScript`) when this set offers it,
+otherwise the set's optional **`defaultScript`** (a top-level `T`/`S`/`J` key) when present, else the
+first available form (fallback order T→J→S). It is applied without persisting, so the active button
+is always a *visible* one yet the user's global choice is restored on a set that does offer it.
 
 A `text` block with `interactive: true` makes its Han characters clickable study cells (the rest of
 the text is inert). A `poem` block is the Japanese-poem variant of that: kanji render larger than

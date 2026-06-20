@@ -82,10 +82,44 @@ function applyScript(script, persist) {
     });
 }
 
+// Walk a set's blocks (recursing into sections) and record every script tag
+// (T/S/J) that appears in a grid's variant groups into `acc`. Bare characters
+// are identical across scripts and contribute nothing.
+function collectScripts(blocks, acc) {
+    (blocks || []).forEach(function (block) {
+        if (!block || typeof block !== 'object') { return; }
+        if (block.type === 'grid') {
+            parseCells(block.cells || '').forEach(function (token) {
+                if (typeof token === 'object') {
+                    Object.keys(token).forEach(function (k) { acc[k] = true; });
+                }
+            });
+        }
+        if (block.blocks) { collectScripts(block.blocks, acc); }
+    });
+    return acc;
+}
+
+// Choose the active script for a freshly opened set so a *visible* button is
+// always the one highlighted: keep the user's persisted choice when this set
+// offers it, otherwise snap to the set's optional `defaultScript` (if the set
+// uses it) or the first available form. Applied without persisting, so leaving
+// for a set that does offer the user's choice restores it. No-op for sets with
+// no variant groups (the toggle is hidden anyway).
+function resolveActiveScript(characterSet) {
+    if (SCRIPT_KEYS.every(function (k) { return !presentScripts[k]; })) { return; }
+    var saved = localStorage.getItem('csScript');
+    if (saved && presentScripts[saved]) { applyScript(saved, false); return; }
+    var target = (characterSet.defaultScript && presentScripts[characterSet.defaultScript])
+        ? characterSet.defaultScript
+        : SCRIPT_FALLBACK.filter(function (k) { return presentScripts[k]; })[0];
+    applyScript(target, false);
+}
+
 // Show the script toggle only for sets that actually distinguish scripts, and
 // within it only the buttons for forms the set uses: a trad/simp-only set shows
 // 繁/简 but not 日, and a set with no variant groups hides the toggle entirely.
-// `scripts` is the {T,S,J} membership collected while rendering (presentScripts).
+// `scripts` is the {T,S,J} membership from collectScripts (presentScripts).
 function updateScriptToggle(scripts) {
     var toggle = document.getElementById('scriptToggle');
     if (!toggle) { return; }
@@ -914,9 +948,10 @@ var HAN_RE = /\p{Script=Han}/u;
 // furigana/romaji toggles are shown only when relevant.
 var hasPoemBlock = false;
 
-// Script tags (T/S/J) seen in variant groups while rendering the current set, so
-// the script toggle only offers the forms a set actually distinguishes (and is
-// hidden entirely for sets with no variant groups). See updateScriptToggle.
+// Script tags (T/S/J) present in the current set's variant groups, so the script
+// toggle only offers the forms a set actually distinguishes (and is hidden
+// entirely for sets with no variant groups). Computed by collectScripts before
+// rendering. See updateScriptToggle / resolveActiveScript.
 var presentScripts = {};
 
 // Build one <span data-unicode> study cell, applying any saved colour. No
@@ -1029,9 +1064,6 @@ var BLOCK_RENDERERS = {
         var gridDiv = document.createElement('div');
         gridDiv.className = 'grid';
         parseCells(block.cells || '').forEach(function (token) {
-            if (typeof token === 'object') {
-                Object.keys(token).forEach(function (k) { presentScripts[k] = true; });
-            }
             gridDiv.appendChild(makeCharCell(token));
         });
         attachCellDelegation(gridDiv);
@@ -1127,12 +1159,9 @@ function generateMacroGrid(characterSet) {
     if (!characterSet) {
         return;
     }
-    // Honour a set's preferred script, but only until the user picks one.
-    if (!localStorage.getItem('csScript') && characterSet.defaultScript) {
-        applyScript(characterSet.defaultScript, false);
-    }
     hasPoemBlock = false;
-    presentScripts = {};
+    presentScripts = collectScripts(characterSet.blocks, {});
+    resolveActiveScript(characterSet); // snap to a form this set offers, before render
     (characterSet.blocks || []).forEach(function (block) {
         renderBlock(block, macroGrid);
     });
