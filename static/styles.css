@@ -560,6 +560,20 @@ body {
     margin-left: 18px;
 }
 
+/* "IPA" and its "with tones" variant share one row. */
+#languageTree .menu-tones-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+}
+
+/* The base "IPA" box shows a greyed check when it is merely implied by an active
+   "with tones" selection (the tone-bearing form is what actually renders). */
+#languageTree .menu-leaf-implied {
+    opacity: 0.45;
+}
+
 #languageTree .menu-depth-0 > .menu-row > span {
     font-weight: 700;
 }

@@ -602,6 +602,11 @@ function refreshInfoBox() {
     }
 }
 
+// Per-leaf functions that push the current `enabledOptions` state back onto the
+// checkbox visuals. Reset on each render; run together by syncMenuState() after
+// any change so coordinated controls (the IPA tones pair) stay consistent.
+var menuLeafSyncers = [];
+
 // Build the nested checkbox menu. Parents toggle their whole subtree and show an
 // indeterminate state for partial selection; only leaf ids are ever sent.
 function renderLanguageTree() {
@@ -610,10 +615,122 @@ function renderLanguageTree() {
         return;
     }
     container.innerHTML = '';
+    menuLeafSyncers = [];
     INFO_TREE.forEach(function (node) {
         container.appendChild(buildMenuNode(node, 0));
     });
+    syncMenuState();
+}
+
+// Push enabledOptions back onto every checkbox, then recompute parent states.
+function syncMenuState() {
+    menuLeafSyncers.forEach(function (fn) { fn(); });
     refreshParentStates();
+}
+
+// After a menu mutation: persist, re-sync all checkbox visuals, refresh the sheet.
+function commitMenuChange() {
+    saveEnabledOptions();
+    syncMenuState();
+    refreshInfoBox();
+}
+
+// A single leaf checkbox + label, wired to enabledOptions. `labelText` overrides
+// the displayed text (used to shorten a tones variant to just "with tones").
+function buildLeafRow(node, labelText) {
+    var row = document.createElement('label');
+    row.className = 'menu-row';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'menu-leaf';
+    cb.addEventListener('change', function () {
+        if (cb.checked) {
+            enabledOptions.add(node.id);
+        } else {
+            enabledOptions.delete(node.id);
+        }
+        commitMenuChange();
+    });
+    var text = document.createElement('span');
+    text.textContent = labelText != null ? labelText : node.label;
+    row.appendChild(cb);
+    row.appendChild(text);
+    menuLeafSyncers.push(function () { cb.checked = enabledOptions.has(node.id); });
+    return row;
+}
+
+// True when `tones` is the with-tones variant of the preceding `base` leaf — e.g.
+// the leaves `cmn:ipa` / `cmn:ipa_tones` or `vie:ipa_northern` /
+// `vie:ipa_northern_tones`. Such pairs share one menu line (see buildMenuNode).
+function isTonesPair(base, tones) {
+    if (!base || !tones) { return false; }
+    if (base.children || tones.children) { return false; }
+    if (!/_tones$/.test(tones.id)) { return false; }
+    return base.id === tones.id.slice(0, -'_tones'.length);
+}
+
+// One row holding the base "IPA" leaf and its "with tones" variant. Only ever one
+// of the two is rendered: the base box shows toneless IPA, "with tones" switches
+// to the tone-bearing form. When tones is active the base box still shows a check
+// — greyed, to signal it is implied — and clicking that greyed box clears both.
+function buildTonesPairRow(baseNode, tonesNode, depth) {
+    var pair = document.createElement('div');
+    pair.className = 'menu-node menu-tones-pair menu-depth-' + depth;
+
+    function makeRow(labelText) {
+        var row = document.createElement('label');
+        row.className = 'menu-row';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'menu-leaf';
+        var text = document.createElement('span');
+        text.textContent = labelText;
+        row.appendChild(cb);
+        row.appendChild(text);
+        pair.appendChild(row);
+        return cb;
+    }
+
+    var baseCb = makeRow(baseNode.label);
+    var tonesCb = makeRow('with tones');
+
+    baseCb.addEventListener('change', function () {
+        // Any check (toneless or the implied/greyed one) clears both; an empty box
+        // turns on toneless IPA.
+        if (enabledOptions.has(baseNode.id) || enabledOptions.has(tonesNode.id)) {
+            enabledOptions.delete(baseNode.id);
+            enabledOptions.delete(tonesNode.id);
+        } else {
+            enabledOptions.add(baseNode.id);
+        }
+        commitMenuChange();
+    });
+
+    tonesCb.addEventListener('change', function () {
+        if (enabledOptions.has(tonesNode.id)) {
+            // Drop the tones form but keep toneless IPA selected.
+            enabledOptions.delete(tonesNode.id);
+            enabledOptions.add(baseNode.id);
+        } else {
+            enabledOptions.add(tonesNode.id);
+            enabledOptions.delete(baseNode.id);   // never render both forms
+        }
+        commitMenuChange();
+    });
+
+    menuLeafSyncers.push(function () {
+        var baseOn = enabledOptions.has(baseNode.id);
+        var tonesOn = enabledOptions.has(tonesNode.id);
+        baseCb.checked = baseOn || tonesOn;
+        // Greyed when the base check is only implied by the active tones form.
+        baseCb.classList.toggle('menu-leaf-implied', tonesOn && !baseOn);
+        tonesCb.checked = tonesOn;
+    });
+
+    // One selectable unit: on if either form is active; toneless is the canonical
+    // choice a parent "select all" turns on (see refreshParentStates).
+    pair._units = [[baseNode.id, tonesNode.id]];
+    return pair;
 }
 
 function buildMenuNode(node, depth) {
@@ -621,66 +738,72 @@ function buildMenuNode(node, depth) {
     wrapper.className = 'menu-node menu-depth-' + depth;
     var isLeaf = !(node.children && node.children.length);
 
+    if (isLeaf) {
+        wrapper.appendChild(buildLeafRow(node));
+        wrapper._units = [[node.id]];
+        return wrapper;
+    }
+
     var row = document.createElement('label');
     row.className = 'menu-row';
     var cb = document.createElement('input');
     cb.type = 'checkbox';
-    cb.className = isLeaf ? 'menu-leaf' : 'menu-parent';
+    cb.className = 'menu-parent';
     var text = document.createElement('span');
     text.textContent = node.label;
     row.appendChild(cb);
     row.appendChild(text);
     wrapper.appendChild(row);
 
-    if (isLeaf) {
-        cb.checked = enabledOptions.has(node.id);
-        cb.addEventListener('change', function () {
-            if (cb.checked) {
-                enabledOptions.add(node.id);
-            } else {
-                enabledOptions.delete(node.id);
-            }
-            saveEnabledOptions();
-            refreshParentStates();
-            refreshInfoBox();
-        });
-        wrapper._leafIds = [node.id];
-    } else {
-        var childContainer = document.createElement('div');
-        childContainer.className = 'menu-children';
-        var leafIds = [];
-        node.children.forEach(function (child) {
-            var childEl = buildMenuNode(child, depth + 1);
-            childContainer.appendChild(childEl);
-            leafIds = leafIds.concat(childEl._leafIds || []);
-        });
-        wrapper.appendChild(childContainer);
-        wrapper._leafIds = leafIds;
-        cb._leafIds = leafIds;
-        cb.addEventListener('change', function () {
-            var on = cb.checked;
-            leafIds.forEach(function (id) {
-                if (on) { enabledOptions.add(id); } else { enabledOptions.delete(id); }
-            });
-            childContainer.querySelectorAll('input.menu-leaf').forEach(function (b) {
-                b.checked = on;
-            });
-            saveEnabledOptions();
-            refreshParentStates();
-            refreshInfoBox();
-        });
+    var childContainer = document.createElement('div');
+    childContainer.className = 'menu-children';
+    var units = [];
+    var children = node.children;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        var childEl;
+        if (isTonesPair(child, children[i + 1])) {
+            childEl = buildTonesPairRow(child, children[i + 1], depth + 1);
+            i++;   // skip the tones leaf, already consumed
+        } else {
+            childEl = buildMenuNode(child, depth + 1);
+        }
+        childContainer.appendChild(childEl);
+        units = units.concat(childEl._units || []);
     }
+    wrapper.appendChild(childContainer);
+    wrapper._units = units;
+    cb._units = units;
+    cb.addEventListener('change', function () {
+        var on = cb.checked;
+        units.forEach(function (ids) {
+            if (on) {
+                // Enable the canonical (toneless) form, but leave a unit that is
+                // already active by some other form untouched.
+                if (!ids.some(function (id) { return enabledOptions.has(id); })) {
+                    enabledOptions.add(ids[0]);
+                }
+            } else {
+                ids.forEach(function (id) { enabledOptions.delete(id); });
+            }
+        });
+        commitMenuChange();
+    });
     return wrapper;
 }
 
+// A unit (one leaf, or an IPA base/tones pair) is "on" if any of its ids is
+// enabled; a parent is fully checked only when every unit is on.
 function refreshParentStates() {
     var parents = document.querySelectorAll('#languageTree input.menu-parent');
     parents.forEach(function (cb) {
-        var ids = cb._leafIds || [];
+        var units = cb._units || [];
         var on = 0;
-        ids.forEach(function (id) { if (enabledOptions.has(id)) { on++; } });
-        cb.checked = ids.length > 0 && on === ids.length;
-        cb.indeterminate = on > 0 && on < ids.length;
+        units.forEach(function (ids) {
+            if (ids.some(function (id) { return enabledOptions.has(id); })) { on++; }
+        });
+        cb.checked = units.length > 0 && on === units.length;
+        cb.indeterminate = on > 0 && on < units.length;
     });
 }
 

@@ -6,6 +6,7 @@
 - about me page, changelog page
 - fix character attributes
 - add basic radical support
+- add basic character versions
 - fix search
 - add history
 - add some default color sets
@@ -13,6 +14,9 @@
   - frequency in japanese
   - mandarin tone
   - middle chinese tone
+- add old chinese
+- allow menu reorganization
+- add better menu defaults
 
 ## DONE
 
@@ -28,3 +32,4 @@
 - add favicon
 - add better japanese rendering
 - make t/s/j button hidden if not needed
+- move IPA versions w/o tone into the same line in the menu
