@@ -1,6 +1,7 @@
 # For Release TODOs
 
 - move japanese defs so theyre not under kun or on
+- pronounciations audio
 - pop on open explaining how to use
 - about me page, changelog page
 - fix character attributes
