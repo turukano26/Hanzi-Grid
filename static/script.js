@@ -833,7 +833,9 @@ function fetchCharacterInfo(character) {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
             infoBox.innerHTML = renderSections(response.sections || []) + INFO_BOX_MENU_BUTTON;
-            infoBox.scrollTop = 0;
+            // Mobile only: a new character always opens at the top of the sheet.
+            // Desktop keeps its existing scroll behaviour.
+            if (isMobileLayout()) { infoBox.scrollTop = 0; }
             wrapCjkCharactersInInfoBox(infoBox);
             updateInfoBoxFadeState();
             renderSheetSummary(response.sections || []);
