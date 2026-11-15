@@ -237,7 +237,11 @@ on desktop.
 - **Paint tools → bottom dock**, shown only while paint mode is on, replacing the sheet. In the dock a
   swatch only picks the paint colour (see the early return in `changeColor`); the swatches in the
   expanded sheet colour the selected character, as on desktop.
-- **Search column → panel under the top bar**, toggled by the magnifier (`body.search-open`).
+- **Search column → its own view**: the magnifier (`body.search-open`) swaps the character-set grid out
+  for the search controls and results grid; tapping it again returns to the set.
+- The character in the large box is ringed wherever it appears (`markSelectedCells` → `.cell-selected`,
+  styled on mobile only); it is re-applied after any grid or search re-render.
+- The expanded sheet's handle row carries an options button (opens the popup menu) and a close button.
 - The popup menu goes full screen.
 
 ### Character set YAML format

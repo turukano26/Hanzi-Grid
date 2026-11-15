@@ -133,9 +133,26 @@
             <!-- Mobile bottom-sheet chrome (.mobile-only parts are hidden on
                  desktop, where .sheet-head is display:contents). -->
             <div class="mobile-only" id="sheetHandle">
+                <!-- Options / close flank the grip only while the sheet is expanded. -->
+                <button id="sheetOptionsBtn" type="button" class="sheet-corner-btn" onclick="openPopupMenu()"
+                    aria-label="Reading options" title="Reading options">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 6h10" /><path d="M18 6h2" /><circle cx="16" cy="6" r="2" />
+                        <path d="M4 12h2" /><path d="M10 12h10" /><circle cx="8" cy="12" r="2" />
+                        <path d="M4 18h10" /><path d="M18 18h2" /><circle cx="16" cy="18" r="2" />
+                    </svg>
+                </button>
                 <button id="sheetToggleBtn" type="button" aria-label="Show full character info"
                     aria-expanded="false" aria-controls="infoBox">
                     <span class="sheet-grip"></span>
+                </button>
+                <button id="sheetCloseBtn" type="button" class="sheet-corner-btn"
+                    aria-label="Collapse character info" title="Collapse">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 6l12 12" /><path d="M18 6 6 18" />
+                    </svg>
                 </button>
             </div>
             <div class="sheet-head" id="sheetHead">

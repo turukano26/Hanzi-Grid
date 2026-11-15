@@ -934,6 +934,7 @@ function activateCharacterFromInfoBox(character) {
 
     setSheetHidden(false);
     largeBox.textContent = character;
+    markSelectedCells();
 
     var cellColor;
     if (matchingCells.length) {
@@ -1062,6 +1063,7 @@ function fetchSearchResults(searchString, searchType) {
             var response = JSON.parse(xhr.responseText);
             highlightSearchResults(response.search)
             generateCharacterElements(searchGrid, response.search);
+            markSelectedCells();
         }
     };
     xhr.send('searchString=' + searchString + '&searchType=' + searchType);
@@ -1114,15 +1116,11 @@ function handleCellClick(span) {
     var character = span.textContent;
     var unicodeKey = span.getAttribute('data-unicode');
 
-    // Mark the cell as the current selection (styled on mobile only, where the
-    // large box is small and sits in the bottom sheet).
-    var prevSelected = document.querySelector('.cell-selected');
-    if (prevSelected) { prevSelected.classList.remove('cell-selected'); }
-    span.classList.add('cell-selected');
     setSheetHidden(false);
 
     // Single-click: show the character in the large box.
     largeBox.textContent = character;
+    markSelectedCells();
     var cellColor = window.getComputedStyle(span).backgroundColor;
     largeBox.style.backgroundColor = cellColor;
 
@@ -1312,6 +1310,7 @@ function generateMacroGrid(characterSet) {
     if (poemToggle) { poemToggle.hidden = !hasPoemBlock; }
     updateScriptToggle(presentScripts);
     applyPoemToggles(false); // sync newly rendered poems to the current state
+    markSelectedCells();     // re-rendered cells lose the selection marker
 }
 
 // Used by the search grid: append bare study cells to a (reused) container,
@@ -1407,6 +1406,23 @@ function rgbToHex(rgb) {
     return hexValue;
 }
 
+
+// Flag every cell showing the character in the large box as the current
+// selection (`.cell-selected`, styled on mobile only, where the large box is
+// small and sits in the bottom sheet). Matches by codepoint across the main
+// grid, the search grid and interactive text, including a cell whose hidden
+// T/S/J variant is the selected form; re-run after anything re-renders cells.
+function markSelectedCells() {
+    document.querySelectorAll('.cell-selected').forEach(function (cell) {
+        cell.classList.remove('cell-selected');
+    });
+    var largeBox = document.getElementById('largeBox');
+    var character = largeBox && largeBox.textContent;
+    if (!character) { return; }
+    var key = character.codePointAt(0).toString(16);
+    document.querySelectorAll('span[data-unicode="' + key + '"], span[data-variants~="' + key + '"]')
+        .forEach(function (cell) { cell.classList.add('cell-selected'); });
+}
 
 // Function to create color buttons dynamically
 // Two identical swatch groups: the top-bar one (which becomes the paint dock on
@@ -1547,6 +1563,7 @@ function intializeInfoColumn() {
     const largeBox = document.getElementById('largeBox');
 
     largeBox.textContent = '一';
+    markSelectedCells();
     var unicodeKey = '一'.codePointAt(0).toString(16);
 
     fetchCharacterInfo('一');
@@ -1995,7 +2012,8 @@ var colors = [
 //   body.sheet-expanded  — sheet fully raised (scrim shown behind it)
 //   body.sheet-hidden    — sheet slid fully off screen (swipe the peek down);
 //                          it returns to the peek when a character is selected
-//   body.search-open     — search panel shown under the top bar
+//   body.search-open     — search view (input + results grid) shown in place
+//                          of the character-set grid
 //   --peek-h (on <html>) — measured height of the sheet's peek content
 // Desktop never sets any of these, so its behaviour is unchanged.
 var MOBILE_QUERY = window.matchMedia('(max-width: 700px)');
@@ -2186,6 +2204,10 @@ function initMobileSheet() {
     }
     if (scrim) {
         scrim.addEventListener('click', function () { setSheetExpanded(false); });
+    }
+    var closeBtn = document.getElementById('sheetCloseBtn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () { setSheetExpanded(false); });
     }
 
     // Search panel toggle (the top-bar magnifier).

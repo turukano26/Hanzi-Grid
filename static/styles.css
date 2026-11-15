@@ -897,30 +897,34 @@ body {
         cursor: pointer;
     }
 
-    /* Current selection (set by handleCellClick). An inset shadow, so it never
-       fights the inline border/padding the search highlight writes. */
-    .grid span.cell-selected,
-    .cs-interactive span.cell-selected,
-    .cs-poem span.cell-selected {
+    /* Current selection (markSelectedCells): a heavy ring in the main grid, the
+       search grid and interactive text. An inset shadow, so it never fights the
+       inline border/padding the search highlight writes. Dropped while the
+       sheet is swiped away, since nothing is then showing the selection. */
+    body:not(.sheet-hidden) span.cell-selected[data-unicode] {
         box-shadow: inset 0 0 0 2px #1a1a1a;
     }
 
+    /* Search is its own full view: opening it swaps the character-set grid out
+       for the search controls + results grid (the bottom sheet stays on top). */
     .search-column {
         display: none;
-        order: -1;
-        flex: 0 0 auto !important;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: flex-start;
+        flex: 1 1 auto !important;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
         gap: 8px;
         max-width: none;
         min-width: 0;
-        padding: 8px 12px 10px 12px;
-        border-bottom: 1px solid #c4c4c4;
+        padding: 8px 12px 0 12px;
+        background: #fff;
     }
 
     body.search-open .search-column {
-        display: flex;
+        display: grid;
+    }
+
+    body.search-open .grid-column {
+        display: none;
     }
 
     .search-type-dropdown {
@@ -932,7 +936,6 @@ body {
     }
 
     #searchBar {
-        flex: 1 1 120px;
         width: auto;
         min-width: 0;
         height: 44px;
@@ -940,8 +943,27 @@ body {
     }
 
     .search-grid {
-        flex: 1 1 100%;
-        max-height: 30vh;
+        grid-column: 1 / -1;
+        align-content: start;
+        padding-top: 4px;
+        /* Room to scroll the last results clear of the sheet's peek. */
+        padding-bottom: calc(var(--peek-h, 190px) + 24px);
+    }
+
+    body.sheet-hidden .search-grid {
+        padding-bottom: 24px;
+    }
+
+    body.paintbrush-cursor .search-grid {
+        padding-bottom: 260px;
+    }
+
+    .search-grid:empty::before {
+        content: "Type a reading or character, then press Enter.";
+        grid-column: 1 / -1;
+        padding-top: 8px;
+        color: #555;
+        font-size: 15px;
     }
 
     /* ----- Bottom sheet (the info column) ------------------------------------ */
@@ -997,14 +1019,43 @@ body {
     }
 
     #sheetHandle {
-        display: block;
+        display: flex;
+        align-items: center;
         flex: 0 0 auto;
-        margin: 0 -16px;
+        margin: 0 -10px;
         touch-action: none;
     }
 
+    /* Options (left) and close (right): only on the expanded sheet. */
+    .sheet-corner-btn {
+        display: none;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .sheet-corner-btn svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    body.sheet-expanded .sheet-corner-btn {
+        display: inline-flex;
+    }
+
+    body.sheet-expanded #sheetToggleBtn {
+        height: 44px;
+    }
+
     #sheetToggleBtn {
-        width: 100%;
+        flex: 1 1 auto;
         height: 28px;
         padding: 0;
         background: none;
