@@ -725,3 +725,676 @@ body {
 .search-bar {
     margin: 5px 0 8px 0;
 }
+/* Wordmark in the top bar. */
+.app-title {
+    color: #000000;
+    font-size: 42px;
+    margin-right: 60px;
+    font-weight: bold;
+}
+
+/* ===== Mobile layout (bottom sheet) =========================================
+   Desktop defaults first: the mobile-only chrome is hidden, and the wrappers
+   that exist purely so mobile can regroup things (.paint-tools, .sheet-head)
+   are display:contents, so the desktop layout is exactly what it was before
+   they were introduced. */
+.mobile-only {
+    display: none;
+}
+
+.paint-tools,
+.sheet-head {
+    display: contents;
+}
+
+.menu-btn-icon {
+    display: none;
+}
+
+/* Below 700px the three columns collapse to a full-width grid; the info column
+   becomes a bottom sheet (peek / expanded), search a panel under the top bar,
+   and the paint tools a bottom dock shown while paint mode is on. State classes
+   (body.sheet-expanded / body.search-open) and --peek-h are driven by the
+   "Mobile layout" block in script.js. Keep the query in sync with MOBILE_QUERY. */
+@media (max-width: 700px) {
+    /* Dragging the sheet down must never trigger the browser's pull-to-refresh
+       / overscroll effect. */
+    html,
+    body {
+        overscroll-behavior: none;
+    }
+
+    body {
+        height: 100vh;
+        height: 100dvh;
+        /* A sans UI face reads better at phone sizes; the Plangothic faces stay
+           first so rare supplementary-plane ideographs still resolve. */
+        font-family: 'PlangothicP1', 'PlangothicP2', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+
+    /* ----- Top bar ---------------------------------------------------------- */
+    .top-menu {
+        padding: 10px 8px 8px 12px;
+        padding-top: calc(10px + env(safe-area-inset-top));
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .top-menu div {
+        margin-right: 0;
+    }
+
+    .app-title,
+    .charsetmenu label {
+        display: none;
+    }
+
+    .charsetmenu {
+        flex: 1 1 120px;
+        min-width: 0;
+    }
+
+    .charsetmenu select {
+        width: 100%;
+        min-width: 0;
+        height: 44px;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .top-menu .script-toggle,
+    .top-menu .poem-toggle {
+        margin-right: 0;
+        border-radius: 6px;
+    }
+
+    .script-btn,
+    .poem-btn {
+        min-width: 44px;
+        height: 44px;
+        font-size: 17px;
+    }
+
+    #searchToggleWrap {
+        display: block;
+    }
+
+    .top-menu .icon-btn,
+    #open-popup-menu-btn {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin-left: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: inherit;
+    }
+
+    .top-menu .icon-btn svg,
+    .menu-btn-icon {
+        display: block;
+        width: 22px;
+        height: 22px;
+    }
+
+    .menu-btn-label {
+        display: none;
+    }
+
+    #searchToggleBtn[aria-expanded="true"] {
+        background: #333;
+        color: #fff;
+        border-radius: 6px;
+    }
+
+    /* ----- Main area: full-width grid, search panel on top ------------------- */
+    .container {
+        flex-direction: column;
+    }
+
+    .column-resizer {
+        display: none;
+    }
+
+    /* !important: the desktop column resizer writes an inline `flex`. */
+    .grid-column {
+        flex: 1 1 auto !important;
+        min-width: 0;
+        margin: 0 0 0 12px;
+    }
+
+    .macro-grid {
+        padding-top: 0.6em;
+        padding-right: 12px;
+        /* Room to scroll the last rows clear of the sheet's peek. */
+        padding-bottom: calc(var(--peek-h, 190px) + 24px);
+        font-size: 14px;
+    }
+
+    body.paintbrush-cursor .macro-grid {
+        padding-bottom: 260px;
+    }
+
+    .grid,
+    .search-grid {
+        grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+        gap: 8px;
+    }
+
+    .grid span,
+    .search-grid span {
+        width: auto;
+        height: auto;
+        aspect-ratio: 1 / 1;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        cursor: pointer;
+    }
+
+    /* Current selection (set by handleCellClick). An inset shadow, so it never
+       fights the inline border/padding the search highlight writes. */
+    .grid span.cell-selected,
+    .cs-interactive span.cell-selected,
+    .cs-poem span.cell-selected {
+        box-shadow: inset 0 0 0 2px #1a1a1a;
+    }
+
+    .search-column {
+        display: none;
+        order: -1;
+        flex: 0 0 auto !important;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 8px;
+        max-width: none;
+        min-width: 0;
+        padding: 8px 12px 10px 12px;
+        border-bottom: 1px solid #c4c4c4;
+    }
+
+    body.search-open .search-column {
+        display: flex;
+    }
+
+    .search-type-dropdown {
+        flex: 0 0 auto;
+        width: auto;
+        height: 44px;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    #searchBar {
+        flex: 1 1 120px;
+        width: auto;
+        min-width: 0;
+        height: 44px;
+        margin: 0;
+    }
+
+    .search-grid {
+        flex: 1 1 100%;
+        max-height: 30vh;
+    }
+
+    /* ----- Bottom sheet (the info column) ------------------------------------ */
+    .info-column {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        height: calc(100vh - 72px);
+        height: calc(100dvh - 72px);
+        max-width: none;
+        min-width: 0;
+        padding: 0 16px;
+        border-top: 1px solid #c4c4c4;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.14);
+        /* Collapsed: only the top --peek-h of the sheet is on screen. */
+        transform: translateY(calc(100% - var(--peek-h, 190px)));
+        transition: transform 220ms ease;
+    }
+
+    body.sheet-expanded .info-column {
+        transform: none;
+    }
+
+    /* Swiped away: fully off screen (and out of the tab order) until a
+       character is selected again. */
+    body.sheet-hidden .info-column {
+        transform: translateY(100%);
+        visibility: hidden;
+        transition: transform 220ms ease, visibility 0s linear 220ms;
+    }
+
+    body.sheet-hidden .macro-grid {
+        padding-bottom: 24px;
+    }
+
+    /* The paint dock replaces the sheet while painting. */
+    body.paintbrush-cursor .info-column {
+        display: none;
+    }
+
+    #sheetScrim {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(0, 0, 0, 0.38);
+    }
+
+    body.sheet-expanded #sheetScrim {
+        display: block;
+    }
+
+    #sheetHandle {
+        display: block;
+        flex: 0 0 auto;
+        margin: 0 -16px;
+        touch-action: none;
+    }
+
+    #sheetToggleBtn {
+        width: 100%;
+        height: 28px;
+        padding: 0;
+        background: none;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .sheet-grip {
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: #8f8f8f;
+    }
+
+    .sheet-head {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 14px;
+        touch-action: none;
+    }
+
+    .large-box {
+        flex: 0 0 84px;
+        width: 84px;
+        height: 84px;
+        margin: 0;
+        font-size: 56px;
+        line-height: 1;
+        border: 1px solid #1a1a1a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #sheetSummary {
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 0;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .sheet-sum-label {
+        font-size: 12px;
+        color: #555;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sheet-sum-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 26px;
+        line-height: 1.15;
+    }
+
+    .sheet-sum-word {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tone-dot {
+        flex: 0 0 12px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+    }
+
+    .sheet-sum-defs {
+        font-size: 14px;
+        line-height: 1.3;
+        color: #333;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    #sheetPaintBtn {
+        display: inline-flex;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        background: #fff;
+        border: 1px solid #999;
+        border-radius: 6px;
+        color: inherit;
+    }
+
+    #sheetChips {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 6px;
+        margin: 12px -16px 0 -16px;
+        padding: 0 16px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    #sheetChips::-webkit-scrollbar {
+        display: none;
+    }
+
+    #sheetChips:empty {
+        display: none;
+    }
+
+    .sheet-chip {
+        flex: 1 0 auto;
+        min-width: 56px;
+        max-width: 132px;
+        padding: 6px 8px;
+        background: #fff;
+        border: 1px solid #d3d3d3;
+        border-radius: 6px;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .sheet-chip-label {
+        font-size: 11px;
+        color: #555;
+    }
+
+    .sheet-chip-label,
+    .sheet-chip-value {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sheet-chip-value {
+        font-size: 16px;
+    }
+
+    /* Expanded: bigger glyph with the colour swatches beside it; the one-line
+       summary, chips and paint button give way to the full info box. */
+    body.sheet-expanded .sheet-head {
+        align-items: stretch;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #d3d3d3;
+    }
+
+    body.sheet-expanded .large-box {
+        flex-basis: 100px;
+        width: 100px;
+        height: 100px;
+        font-size: 68px;
+    }
+
+    body.sheet-expanded #sheetSummary,
+    body.sheet-expanded #sheetPaintBtn,
+    body.sheet-expanded #sheetChips {
+        display: none;
+    }
+
+    body.sheet-expanded #sheetColorButtons {
+        display: grid;
+        flex: 1 1 auto;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        align-content: space-between;
+    }
+
+    .info-box {
+        background: transparent;
+        padding: 0 0 calc(16px + env(safe-area-inset-bottom)) 0;
+        min-height: 0;
+        overscroll-behavior: contain;
+        font-size: 15px;
+    }
+
+    .info-box::before,
+    .info-box::after {
+        display: none;
+    }
+
+    /* Tap a reading / definition line to show its source (the desktop hover
+       tooltip), toggled by the info-box click handler. */
+    .info-box .info-source[title] {
+        cursor: pointer;
+    }
+
+    .info-box .info-source.show-source::after {
+        content: attr(title);
+        display: inline-block;
+        margin-left: 8px;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background: #e2e2e2;
+        color: #333;
+        font-size: 12px;
+        line-height: 1.5;
+        vertical-align: middle;
+        white-space: normal;
+    }
+
+    /* Section rules: in the column-flex info box a bare <hr> collapses to a dot. */
+    .info-box hr {
+        width: 100%;
+        margin: 14px 0 6px 0;
+        border: 0;
+        border-top: 1px solid #d3d3d3;
+    }
+
+    /* The expanded sheet head already draws a rule above the first section. */
+    .info-box hr:first-child {
+        display: none;
+    }
+
+    #info-popup-menu-btn {
+        height: 44px;
+        font-size: 16px;
+    }
+
+    /* ----- Swatches (sheet + paint dock) ------------------------------------- */
+    .color-defaults {
+        width: auto;
+        height: 44px;
+        margin: 0 !important;   /* createColorButtons sets an inline margin-right */
+        border: 1px solid #8b8b8b;
+        border-radius: 8px;
+    }
+
+    .color-defaults.selected {
+        border: 3px solid #1a1a1a;
+    }
+
+    /* ----- Paint dock --------------------------------------------------------- */
+    .paint-tools {
+        display: none;
+    }
+
+    body.paintbrush-cursor .paint-tools {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 60;
+        box-sizing: border-box;
+        padding: 12px 16px calc(14px + env(safe-area-inset-bottom)) 16px;
+        background: #f5f5f5;
+        border-top: 1px solid #c4c4c4;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.14);
+    }
+
+    .paint-dock-head {
+        display: flex;
+        flex: 1 1 100%;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        color: #333;
+    }
+
+    #paintDockDone {
+        margin-left: auto;
+        height: 44px;
+        padding: 0 18px;
+        background: #333;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    #colorButtons {
+        display: grid;
+        flex: 1 1 100%;
+        order: 1;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    /* The desktop paint toggle is replaced by the sheet's paint button + Done. */
+    .paint-toggle-wrap {
+        display: none;
+    }
+
+    .color-picker-wrap {
+        order: 2;
+        flex: 0 0 auto;
+    }
+
+    #colorPicker {
+        display: block;
+        width: 44px;
+        height: 44px;
+        padding: 2px;
+        box-sizing: border-box;
+    }
+
+    .top-menu .color-set-switcher {
+        order: 3;
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+    }
+
+    .color-set-switcher select {
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 44px;
+        font-size: 16px;
+    }
+
+    .color-set-switcher button {
+        flex: 0 0 auto;
+        height: 44px;
+        padding: 0 12px;
+        font-size: 15px;
+    }
+
+    /* ----- Popup menu: full screen ------------------------------------------- */
+    #popup-menu {
+        position: relative;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        box-sizing: border-box;
+        border-radius: 0;
+        padding: calc(12px + env(safe-area-inset-top)) 16px 24px 16px;
+    }
+
+    #tabs {
+        display: flex;
+        gap: 8px;
+        width: auto;
+        margin: 0 52px 12px 0;
+    }
+
+    #tabs button {
+        flex: 1 1 0;
+        height: 44px;
+        margin: 0;
+        padding: 0 10px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    #close-btn {
+        position: absolute;
+        top: calc(12px + env(safe-area-inset-top));
+        right: 8px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    #languageTree {
+        columns: auto;
+    }
+
+    #languageTree .menu-row {
+        min-height: 40px;
+        font-size: 16px;
+    }
+
+    #languageTree .menu-row input {
+        width: 20px;
+        height: 20px;
+    }
+
+    .submenu button,
+    .submenu input[type="file"] {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .submenu button {
+        padding: 0 14px;
+    }
+}

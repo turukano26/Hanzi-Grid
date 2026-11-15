@@ -218,6 +218,28 @@ search sorted on), so the available `frequency_rank` / `grade_level` attributes 
   (e.g. `"4e00"` → `"#ff6060"`). Export/import serializes this as JSON.
 - Language toggles (checkboxes in the popup menu) are also persisted to `localStorage` by checkbox `id`.
 
+### Mobile layout (bottom sheet)
+
+Below 700px (`MOBILE_QUERY` in `script.js`, mirrored by the `max-width: 700px` media query at the end
+of `styles.css` — keep the two in sync) the three desktop columns collapse to a full-width grid. It is
+the same DOM, restyled; desktop is unaffected because the mobile-only chrome is `.mobile-only`
+(hidden by default) and the regrouping wrappers (`.paint-tools`, `.sheet-head`) are `display: contents`
+on desktop.
+
+- **Info column → bottom sheet** with two states. *Peek* shows the glyph, a one-line summary and reading
+  chips (`renderSheetSummary`, built from the same `sections` the info box renders); *expanded*
+  (`body.sheet-expanded`, `setSheetExpanded`) shows colour swatches beside the glyph and the full info
+  box. The handle/head drag and tap handling is in `initMobileSheet`; the peek height is measured into
+  the `--peek-h` custom property by `updateSheetPeek`. Swiping the peek down hides the sheet entirely
+  (`body.sheet-hidden`, `setSheetHidden`); selecting any character brings it back to the peek.
+- **Source attribution** is a hover `title` tooltip on desktop; on mobile, tapping a reading/definition
+  line in the info box toggles `.show-source`, which prints that `title` inline via CSS `::after`.
+- **Paint tools → bottom dock**, shown only while paint mode is on, replacing the sheet. In the dock a
+  swatch only picks the paint colour (see the early return in `changeColor`); the swatches in the
+  expanded sheet colour the selected character, as on desktop.
+- **Search column → panel under the top bar**, toggled by the magnifier (`body.search-open`).
+- The popup menu goes full screen.
+
 ### Character set YAML format
 
 Each file in `charactersets/` is a v2 typed-block document, stored as **YAML** (parsed with

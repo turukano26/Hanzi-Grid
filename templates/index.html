@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>omni-hanzi</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="32x32">
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
@@ -13,7 +13,7 @@
 
 <body>
     <div class="top-menu">
-        <span style="color:#000000 ;font-size: 42px; margin-right: 60px; font-weight: bold;">omni-hanzi</span>
+        <span class="app-title">omni-hanzi</span>
 
 
         <div class="charsetmenu" id="menu">
@@ -29,11 +29,19 @@
             <button type="button" class="poem-btn" data-aid="furigana" title="Furigana" aria-pressed="false">ふ</button>
             <button type="button" class="poem-btn" data-aid="romaji" title="Romaji" aria-pressed="false">A</button>
         </div>
-        <div>
-            <input type="color" id="colorPicker" value="#000000">
+        <!-- Paint tools: laid out inline in the top bar on desktop (the wrapper is
+             display:contents there); on mobile the wrapper becomes a bottom dock
+             shown only while paint mode is on. -->
+        <div class="paint-tools" id="paintTools">
+        <div class="paint-dock-head mobile-only">
+            <span>Tap characters to color them</span>
+            <button id="paintDockDone" type="button" onclick="toggleCursor()">Done</button>
+        </div>
+        <div class="color-picker-wrap">
+            <input type="color" id="colorPicker" value="#000000" aria-label="Custom color">
         </div>
         <div id="colorButtons"></div>
-        <div>
+        <div class="paint-toggle-wrap">
             <button id="togglePaintBtn" type="button" class="icon-btn" onclick="toggleCursor()"
                 title="Enable paint mode" aria-label="Toggle paint mode" aria-pressed="false">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -52,8 +60,26 @@
             <select id="colorSetSelect" class="character-set-dropdown"></select>
             <button id="newColorSetBtn" type="button">+ New</button>
         </div>
+        </div>
+        <div class="mobile-only" id="searchToggleWrap">
+            <button id="searchToggleBtn" type="button" class="icon-btn" aria-label="Search"
+                aria-expanded="false" aria-controls="searchColumn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.5-3.5" />
+                </svg>
+            </button>
+        </div>
         <div>
-            <button id="open-popup-menu-btn" class="popup-menu-btn">Menu</button>
+            <button id="open-popup-menu-btn" class="popup-menu-btn" aria-label="Menu">
+                <span class="menu-btn-label">Menu</span>
+                <svg class="menu-btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <circle cx="12" cy="5" r="2" />
+                    <circle cx="12" cy="12" r="2" />
+                    <circle cx="12" cy="19" r="2" />
+                </svg>
+            </button>
         </div>
 
         <div id="popup-menu-container">
@@ -101,9 +127,35 @@
             </div>
         </div>
     </div>
+    <div class="mobile-only" id="sheetScrim"></div>
     <div class="container" id="mainContainer">
         <div class="info-column" id="infoColumn">
-            <div class="large-box" id="largeBox"></div>
+            <!-- Mobile bottom-sheet chrome (.mobile-only parts are hidden on
+                 desktop, where .sheet-head is display:contents). -->
+            <div class="mobile-only" id="sheetHandle">
+                <button id="sheetToggleBtn" type="button" aria-label="Show full character info"
+                    aria-expanded="false" aria-controls="infoBox">
+                    <span class="sheet-grip"></span>
+                </button>
+            </div>
+            <div class="sheet-head" id="sheetHead">
+                <div class="large-box" id="largeBox"></div>
+                <div class="mobile-only" id="sheetSummary"></div>
+                <div class="mobile-only" id="sheetColorButtons" role="group" aria-label="Character color"></div>
+                <button id="sheetPaintBtn" type="button" class="icon-btn mobile-only" onclick="toggleCursor()"
+                    aria-label="Paint mode" title="Paint mode">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <g transform="translate(24,0) scale(-1,1)">
+                            <path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" />
+                            <path d="m5 2 5 5" />
+                            <path d="M2 13h15" />
+                            <path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z" />
+                        </g>
+                    </svg>
+                </button>
+            </div>
+            <div class="mobile-only" id="sheetChips"></div>
             <div class="info-box" id="infoBox" tabindex="0" aria-label="Character information"></div>
         </div>
         <div class="column-resizer" id="leftResizer"></div>

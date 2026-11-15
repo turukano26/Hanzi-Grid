@@ -822,6 +822,7 @@ function fetchCharacterInfo(character) {
         infoBox.scrollTop = 0;
         wrapCjkCharactersInInfoBox(infoBox);
         updateInfoBoxFadeState();
+        renderSheetSummary([]);
         return;
     }
 
@@ -832,8 +833,10 @@ function fetchCharacterInfo(character) {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
             infoBox.innerHTML = renderSections(response.sections || []) + INFO_BOX_MENU_BUTTON;
+            infoBox.scrollTop = 0;
             wrapCjkCharactersInInfoBox(infoBox);
             updateInfoBoxFadeState();
+            renderSheetSummary(response.sections || []);
         }
     };
 
@@ -929,6 +932,7 @@ function activateCharacterFromInfoBox(character) {
     var unicodeKey = character.codePointAt(0).toString(16);
     var matchingCells = document.querySelectorAll('span[data-unicode="' + unicodeKey + '"]');
 
+    setSheetHidden(false);
     largeBox.textContent = character;
 
     var cellColor;
@@ -969,6 +973,13 @@ function initializeInfoBoxInteractions() {
     infoBox.addEventListener('click', function (event) {
         var target = event.target.closest('.info-box-cjk');
         if (!target || !infoBox.contains(target)) {
+            // Mobile has no hover, so the `title` source tooltip is unreachable:
+            // tapping a reading / definition line toggles its source inline
+            // instead (rendered from the title by CSS, see .show-source).
+            var sourced = isMobileLayout() && event.target.closest('.info-source[title]');
+            if (sourced && infoBox.contains(sourced)) {
+                sourced.classList.toggle('show-source');
+            }
             return;
         }
         event.preventDefault();
@@ -1103,6 +1114,13 @@ function handleCellClick(span) {
     var character = span.textContent;
     var unicodeKey = span.getAttribute('data-unicode');
 
+    // Mark the cell as the current selection (styled on mobile only, where the
+    // large box is small and sits in the bottom sheet).
+    var prevSelected = document.querySelector('.cell-selected');
+    if (prevSelected) { prevSelected.classList.remove('cell-selected'); }
+    span.classList.add('cell-selected');
+    setSheetHidden(false);
+
     // Single-click: show the character in the large box.
     largeBox.textContent = character;
     var cellColor = window.getComputedStyle(span).backgroundColor;
@@ -1118,6 +1136,7 @@ function handleCellClick(span) {
         span.style.backgroundColor = selectedColor;
     } else {
         colorPicker.value = rgbToHex(cellColor);
+        syncSwatchSelection();
     }
 }
 
@@ -1390,20 +1409,36 @@ function rgbToHex(rgb) {
 
 
 // Function to create color buttons dynamically
+// Two identical swatch groups: the top-bar one (which becomes the paint dock on
+// mobile) and the one beside the glyph in the expanded mobile bottom sheet.
 function createColorButtons() {
-    var colorButtonsContainer = document.getElementById('colorButtons');
+    ['colorButtons', 'sheetColorButtons'].forEach(function (containerId) {
+        var colorButtonsContainer = document.getElementById(containerId);
+        if (!colorButtonsContainer) { return; }
 
-    // Loop through the colors and create buttons
-    colors.forEach(function (color) {
-        var button = document.createElement('button');
-        button.style.backgroundColor = color;
-        button.style.marginRight = '10px';
-        button.className = 'color-defaults'
-        button.onclick = function () {
-            changeColor(color);
-        };
+        // Loop through the colors and create buttons
+        colors.forEach(function (color) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.style.backgroundColor = color;
+            button.style.marginRight = '10px';
+            button.className = 'color-defaults'
+            button.setAttribute('data-color', color.toLowerCase());
+            button.setAttribute('aria-label', 'Color ' + color);
+            button.onclick = function () {
+                changeColor(color);
+            };
 
-        colorButtonsContainer.appendChild(button);
+            colorButtonsContainer.appendChild(button);
+        });
+    });
+}
+
+// Mark the swatch matching the picker's current colour (styled on mobile only).
+function syncSwatchSelection() {
+    var current = currentPaintColor().toLowerCase();
+    document.querySelectorAll('.color-defaults').forEach(function (button) {
+        button.classList.toggle('selected', button.getAttribute('data-color') === current);
     });
 }
 
@@ -1423,6 +1458,11 @@ function changeColor(color) {
 
     // The Blank set is read-only — picking a colour does nothing.
     if (!isColoringEditable()) { return; }
+
+    // On mobile, paint mode hides the selected character's sheet, so choosing a
+    // colour in the paint dock only picks what to paint with — it must not
+    // silently recolour a character the user can no longer see.
+    if (isMobileLayout() && document.body.classList.contains('paintbrush-cursor')) { return; }
 
     // Get the current character from the large box
     const currentCharacter = largeBox.textContent;
@@ -1485,6 +1525,7 @@ function updatePaintColorUI() {
     document.body.style.cursor = document.body.classList.contains('paintbrush-cursor')
         ? paintBucketCursorCss(currentPaintColor())
         : '';
+    syncSwatchSelection();
 }
 
 // Function to toggle the paintbrush mode (cursor + click-to-colour behaviour).
@@ -1497,6 +1538,9 @@ function toggleCursor() {
         btn.title = on ? 'Disable paint mode' : 'Enable paint mode';
     }
     updatePaintColorUI();
+    // Mobile: the paint dock replaces the bottom sheet while painting; when
+    // painting ends the sheet returns collapsed, so re-measure its peek height.
+    setSheetExpanded(false);
 }
 
 function intializeInfoColumn() {
@@ -1942,6 +1986,230 @@ var colors = [
     '#FFFFFF'
 ];
 
+// ===== Mobile layout (bottom sheet) =========================================
+// Below MOBILE_QUERY the three-column desktop layout collapses to a full-width
+// grid, and the info column becomes a bottom sheet with two states: "peek"
+// (glyph + a one-line summary of the enabled readings) and expanded (the full
+// info box). All of the styling lives in the max-width media query at the end
+// of styles.css; this block only drives state:
+//   body.sheet-expanded  — sheet fully raised (scrim shown behind it)
+//   body.sheet-hidden    — sheet slid fully off screen (swipe the peek down);
+//                          it returns to the peek when a character is selected
+//   body.search-open     — search panel shown under the top bar
+//   --peek-h (on <html>) — measured height of the sheet's peek content
+// Desktop never sets any of these, so its behaviour is unchanged.
+var MOBILE_QUERY = window.matchMedia('(max-width: 700px)');
+
+function isMobileLayout() {
+    return MOBILE_QUERY.matches;
+}
+
+// The peek shows everything above the info box, so its height is simply the
+// info box's offset inside the sheet. Only measurable while collapsed and
+// visible (the chips row is hidden when expanded; the sheet when painting).
+function updateSheetPeek() {
+    if (!isMobileLayout() || document.body.classList.contains('sheet-expanded')) { return; }
+    var infoBox = document.getElementById('infoBox');
+    if (!infoBox || infoBox.offsetParent === null) { return; }
+    document.documentElement.style.setProperty('--peek-h', infoBox.offsetTop + 'px');
+}
+
+// Slide the sheet fully off screen (true) or bring it back to the peek (false).
+function setSheetHidden(hidden) {
+    hidden = !!hidden && isMobileLayout();
+    document.body.classList.toggle('sheet-hidden', hidden);
+    if (hidden) { setSheetExpanded(false); }
+}
+
+function setSheetExpanded(expanded) {
+    expanded = !!expanded && isMobileLayout();
+    document.body.classList.toggle('sheet-expanded', expanded);
+    if (expanded) { document.body.classList.remove('sheet-hidden'); }
+    var btn = document.getElementById('sheetToggleBtn');
+    if (btn) {
+        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        btn.setAttribute('aria-label', expanded ? 'Collapse character info' : 'Show full character info');
+    }
+    updateSheetPeek();
+}
+
+// Build the peek summary from the info-sheet sections: the first reading group
+// with a transcription becomes the headline (label, headword, first few
+// definitions); every other reading group becomes a compact chip.
+function renderSheetSummary(sections) {
+    var summary = document.getElementById('sheetSummary');
+    var chips = document.getElementById('sheetChips');
+    if (!summary || !chips) { return; }
+
+    var groups = [];
+    (sections || []).forEach(function (s) {
+        if (s.type !== 'readings') { return; }
+        var readings = ((s.data && s.data.readings) || []).filter(function (r) {
+            return r.transcriptions && r.transcriptions.length;
+        });
+        if (readings.length) { groups.push({ title: s.title, readings: readings }); }
+    });
+
+    if (!groups.length) {
+        summary.innerHTML = '<div class="sheet-sum-defs">Swipe up for character info.</div>';
+        chips.innerHTML = '';
+        updateSheetPeek();
+        return;
+    }
+
+    var first = groups[0];
+    var reading = first.readings[0];
+    var headword = reading.transcriptions.map(function (t) { return t.value; }).join(' / ');
+    var toneColor = INFO_BOX_TONE_COLORS[reading.tone];
+    var defs = (reading.definitions || []).slice(0, 4).map(function (d) { return d.text; }).join('; ');
+    summary.innerHTML =
+        '<div class="sheet-sum-label">' + escapeHtml(first.title) + '</div>' +
+        '<div class="sheet-sum-head">' +
+        (toneColor ? '<span class="tone-dot" style="background:' + toneColor + '"></span>' : '') +
+        '<span class="sheet-sum-word">' + escapeHtml(headword) + '</span></div>' +
+        (defs ? '<div class="sheet-sum-defs">' + escapeHtml(defs) + '</div>' : '');
+
+    chips.innerHTML = groups.slice(1).map(function (g) {
+        var value = g.readings.slice(0, 2).map(function (r) {
+            return r.transcriptions[0].value;
+        }).join(', ');
+        return '<div class="sheet-chip"><div class="sheet-chip-label">' + escapeHtml(g.title) +
+            '</div><div class="sheet-chip-value">' + escapeHtml(value) + '</div></div>';
+    }).join('');
+
+    updateSheetPeek();
+}
+
+function initMobileSheet() {
+    var sheet = document.getElementById('infoColumn');
+    var handle = document.getElementById('sheetHandle');
+    var head = document.getElementById('sheetHead');
+    var chips = document.getElementById('sheetChips');
+    var toggleBtn = document.getElementById('sheetToggleBtn');
+    var scrim = document.getElementById('sheetScrim');
+    if (!sheet || !handle || !head || !toggleBtn) { return; }
+
+    var drag = null;            // {startY, base, max, moved} while a pointer is down
+    var suppressClick = false;  // swallow the click that ends a drag on a button
+
+    function isExpanded() {
+        return document.body.classList.contains('sheet-expanded');
+    }
+
+    function peekOffset() {
+        var peek = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--peek-h')) || 190;
+        return Math.max(0, sheet.offsetHeight - peek);
+    }
+
+    function onDown(event) {
+        if (!isMobileLayout()) { return; }
+        // A drag may start anywhere on the handle or head, including on a
+        // swatch or the paint button (most of the expanded head is swatches);
+        // the click that would follow a drag is swallowed below.
+        // The sheet can follow the finger all the way off screen (hidden).
+        var peek = peekOffset();
+        drag = {
+            startY: event.clientY, base: isExpanded() ? 0 : peek,
+            peek: peek, max: sheet.offsetHeight, moved: false
+        };
+    }
+
+    function onMove(event) {
+        if (!drag) { return; }
+        var dy = event.clientY - drag.startY;
+        if (!drag.moved) {
+            if (Math.abs(dy) < 6) { return; }
+            drag.moved = true;
+            sheet.style.transition = 'none';
+            try { event.currentTarget.setPointerCapture(event.pointerId); } catch (e) { /* not capturable */ }
+        }
+        var offset = Math.min(drag.max, Math.max(0, drag.base + dy));
+        sheet.style.transform = 'translateY(' + offset + 'px)';
+    }
+
+    function onUp(event) {
+        if (!drag) { return; }
+        var finished = drag;
+        drag = null;
+        sheet.style.transition = '';
+        sheet.style.transform = '';
+        if (finished.moved) {
+            var dy = event.clientY - finished.startY;
+            var offset = Math.min(finished.max, Math.max(0, finished.base + dy));
+            if (dy < -40) {
+                setSheetExpanded(true);
+            } else if (dy > 40) {
+                // From the peek a downward swipe hides the sheet; from expanded
+                // it collapses to the peek, or hides if dragged well past it.
+                var pastPeek = offset > finished.peek + 40;
+                if (finished.base > 0 || pastPeek) { setSheetHidden(true); }
+                else { setSheetExpanded(false); }
+            }
+            suppressClick = true;
+            setTimeout(function () { suppressClick = false; }, 0);
+        } else if (!event.target.closest('button') && !isExpanded()) {
+            // A plain tap on the collapsed glyph / summary raises the sheet.
+            setSheetExpanded(true);
+        }
+    }
+
+    function onCancel() {
+        if (!drag) { return; }
+        drag = null;
+        sheet.style.transition = '';
+        sheet.style.transform = '';
+    }
+
+    [handle, head].forEach(function (el) {
+        el.addEventListener('pointerdown', onDown);
+        el.addEventListener('pointermove', onMove);
+        el.addEventListener('pointerup', onUp);
+        el.addEventListener('pointercancel', onCancel);
+    });
+
+    // Capture phase, so a drag that ends on a swatch / the paint button / the
+    // handle never also fires that button's own click.
+    [handle, head].forEach(function (el) {
+        el.addEventListener('click', function (event) {
+            if (suppressClick) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        }, true);
+    });
+
+    toggleBtn.addEventListener('click', function () {
+        setSheetExpanded(!isExpanded());
+    });
+    if (chips) {
+        chips.addEventListener('click', function () { setSheetExpanded(true); });
+    }
+    if (scrim) {
+        scrim.addEventListener('click', function () { setSheetExpanded(false); });
+    }
+
+    // Search panel toggle (the top-bar magnifier).
+    var searchBtn = document.getElementById('searchToggleBtn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function () {
+            var open = document.body.classList.toggle('search-open');
+            searchBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) { document.getElementById('searchBar').focus(); }
+        });
+    }
+
+    // Crossing the breakpoint (rotation, window resize): drop mobile-only state
+    // when leaving, re-measure the peek when entering.
+    MOBILE_QUERY.addEventListener('change', function () {
+        if (!isMobileLayout()) {
+            document.body.classList.remove('sheet-expanded', 'sheet-hidden', 'search-open');
+        }
+        updateSheetPeek();
+    });
+    window.addEventListener('resize', updateSheetPeek);
+    updateSheetPeek();
+}
+
 // Call the functions to create UI elements when the page loads
 initScriptToggle();
 initPoemToggle();
@@ -1955,6 +2223,7 @@ fetchInfoOptions(intializeInfoColumn);
 initializeInfoBoxInteractions();
 initializeMacroGridCjkInteractions();
 initializeColumnResizers();
+initMobileSheet();
 
 
 /* To dos:
