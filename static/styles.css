@@ -764,6 +764,16 @@ body {
         overscroll-behavior: none;
     }
 
+    /* No browser zooming on the mobile layout — neither double-tap (quick
+       repeated taps on the 简/繁/日 toggle, swatches and grid cells must register
+       as taps) nor pinch. Only panning is left, so scrolling is unaffected. Set
+       on the root because an element's effective touch-action is intersected
+       with its ancestors', so this covers the whole page. iOS Safari's pinch is
+       additionally blocked in script (see initMobileSheet). */
+    html {
+        touch-action: pan-x pan-y;
+    }
+
     body {
         height: 100vh;
         height: 100dvh;
@@ -1240,6 +1250,18 @@ body {
     .info-box::before,
     .info-box::after {
         display: none;
+    }
+
+    /* The info box is focusable (keyboard scrolling), so a tap focuses it and
+       would draw the desktop focus outline around the whole sheet body. Keep
+       the outline for keyboard focus only. */
+    .info-box:focus {
+        outline: none;
+    }
+
+    .info-box:focus-visible {
+        outline: 2px solid #7d9fd3;
+        outline-offset: -2px;
     }
 
     /* Tap a reading / definition line to show its source (the desktop hover

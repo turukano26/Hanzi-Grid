@@ -976,10 +976,16 @@ function initializeInfoBoxInteractions() {
         if (!target || !infoBox.contains(target)) {
             // Mobile has no hover, so the `title` source tooltip is unreachable:
             // tapping a reading / definition line toggles its source inline
-            // instead (rendered from the title by CSS, see .show-source).
+            // instead (rendered from the title by CSS, see .show-source). Only
+            // one source shows at a time: tapping a line clears any other, and
+            // tapping the line already showing its source hides it.
             var sourced = isMobileLayout() && event.target.closest('.info-source[title]');
             if (sourced && infoBox.contains(sourced)) {
-                sourced.classList.toggle('show-source');
+                var wasShown = sourced.classList.contains('show-source');
+                infoBox.querySelectorAll('.show-source').forEach(function (el) {
+                    el.classList.remove('show-source');
+                });
+                if (!wasShown) { sourced.classList.add('show-source'); }
             }
             return;
         }
@@ -2219,6 +2225,15 @@ function initMobileSheet() {
             if (open) { document.getElementById('searchBar').focus(); }
         });
     }
+
+    // iOS Safari can still pinch-zoom the page despite the root touch-action,
+    // and ignores user-scalable=no; cancelling its proprietary gesture events
+    // is what stops it. Other browsers never fire these.
+    ['gesturestart', 'gesturechange'].forEach(function (type) {
+        document.addEventListener(type, function (event) {
+            if (isMobileLayout()) { event.preventDefault(); }
+        }, { passive: false });
+    });
 
     // Crossing the breakpoint (rotation, window resize): drop mobile-only state
     // when leaving, re-measure the peek when entering.
