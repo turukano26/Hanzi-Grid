@@ -917,6 +917,48 @@ body {
 
     /* Search is its own full view: opening it swaps the character-set grid out
        for the search controls + results grid (the bottom sheet stays on top). */
+    /* Poem furigana: laid out explicitly instead of with native <ruby>, whose
+       layout differs between browser engines (the desktop rules rely on it).
+       Each ruby is an inline-block that reserves a fixed row above its kanji
+       (the padding); the reading is drawn centred in that row by ::before,
+       from the data-reading attribute the poem renderer sets. The real <rt> is
+       not used here: WebKit (every iOS browser) ignores `position` on <rt>, so
+       it cannot be placed above the kanji and would instead sit below them
+       and drag the kanji off the kana baseline. The geometry matches desktop:
+       the row is always reserved — toggling furigana only flips the reading's
+       visibility and never shifts a line — and the kanji keep the same
+       baseline as the kana beside them. A reading wider than its kanji
+       overhangs evenly on both sides. */
+    .cs-poem ruby {
+        display: inline-block;
+        position: relative;
+        padding-top: 0.56em;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .cs-poem rt {
+        display: none;
+    }
+
+    .cs-poem ruby::before {
+        content: attr(data-reading);
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.62em;
+        line-height: 1.1;
+        color: #555;
+        white-space: nowrap;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .cs-poem.show-furigana ruby::before {
+        visibility: visible;
+    }
+
     .search-column {
         display: none;
         flex: 1 1 auto !important;

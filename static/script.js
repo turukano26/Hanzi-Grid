@@ -1260,6 +1260,10 @@ var BLOCK_RENDERERS = {
             tokens.forEach(function (t) {
                 if (t.reading != null) {
                     var ruby = document.createElement('ruby');
+                    // The mobile layout draws the reading from this attribute
+                    // (ruby::before) instead of the <rt>; see the poem rules in
+                    // the mobile media query in styles.css.
+                    ruby.setAttribute('data-reading', t.reading);
                     appendPoemText(ruby, t.base);
                     var rt = document.createElement('rt');
                     rt.textContent = t.reading;
