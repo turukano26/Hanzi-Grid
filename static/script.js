@@ -349,8 +349,39 @@ function initPoemToggle() {
         var aid = btn.getAttribute('data-aid');
         if (aid === 'furigana') { poemFurigana = !poemFurigana; }
         else if (aid === 'romaji') { poemRomaji = !poemRomaji; }
+        // Showing/hiding the romaji lines changes the height of every poem
+        // above the reader, so keep their place across the toggle (mobile).
+        var restoreScroll = isMobileLayout() ? captureGridScrollAnchor() : null;
         applyPoemToggles(true);
+        if (restoreScroll) { restoreScroll(); }
     });
+}
+
+// Remember what the reader is looking at in the character-set scroller, and
+// return a function that scrolls it back to the same spot once the content
+// above has changed height. The anchor is the first block still on screen at
+// the top of #macroGrid. Desktop browsers do this natively (CSS scroll
+// anchoring); iOS Safari does not, so the mobile layout does it by hand.
+function captureGridScrollAnchor() {
+    var grid = document.getElementById('macroGrid');
+    if (!grid) { return null; }
+    var top = grid.getBoundingClientRect().top;
+    var candidates = grid.querySelectorAll('.poem-line, .cs-text, .cs-heading, summary');
+    var anchor = null;
+    var offset = 0;
+    for (var i = 0; i < candidates.length; i++) {
+        var rect = candidates[i].getBoundingClientRect();
+        // Skip anything hidden (inside a collapsed section) or scrolled past.
+        if (rect.height === 0 || rect.bottom <= top + 1) { continue; }
+        anchor = candidates[i];
+        offset = rect.top - top;
+        break;
+    }
+    if (!anchor) { return null; }
+    return function () {
+        var now = anchor.getBoundingClientRect().top - grid.getBoundingClientRect().top;
+        grid.scrollTop += now - offset;
+    };
 }
 
 function fetchCharacterSetNames() {
